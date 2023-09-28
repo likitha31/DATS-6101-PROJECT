@@ -6,3 +6,5 @@ Intial Project Proposal: [link](https://docs.google.com/document/d/1NMr6O5-lUxrR
 
 Github Rule Book: [link](https://docs.google.com/document/d/1xrUnchpAelWTmf6UCHtuKMgh9LzNVa-E-oRo3V4bX8k/edit?usp=sharing)
 dhfasdfj
+
+Paulina
