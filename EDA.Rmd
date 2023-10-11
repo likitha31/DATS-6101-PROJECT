@@ -27,7 +27,7 @@ library(ggplot2)
 
 ```{r Load the data file }
 
-SVI_Data <- read.csv('C:/Users/lkg31/OneDrive/Desktop/DATS-6101-PROJECT/SVI_2020_US.csv')
+SVI_Data <- read.csv('SVI_2020_US.csv')
 
 ```
 
