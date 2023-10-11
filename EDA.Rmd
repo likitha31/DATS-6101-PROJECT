@@ -5,26 +5,27 @@ date: "2023-10-10"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(scientific=T, digits = 3) 
+library(ezids)
+library(ggplot2)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+**Load the data file**
 
-```{r cars}
-summary(cars)
+```{r Load the data file }
+SVI_Data <- read.csv('C:/Users/lkg31/OneDrive/Desktop/DATS-6101-PROJECT/SVI_2020_US.csv')
 ```
 
-## Including Plots
+**Remove irrelevant columns**
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r select columns}
+#selecting the required columns by subset function
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,E_TOTPOP,	M_TOTPOP
+) )
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
