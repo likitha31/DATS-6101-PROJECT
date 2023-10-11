@@ -12,7 +12,7 @@ output:
 ---
 
 
-```{r init, include=FALSE}
+```{r, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
 options(scientific=T, digits = 3) 
