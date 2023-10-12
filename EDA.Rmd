@@ -18,8 +18,11 @@ knitr::opts_chunk$set(echo = TRUE)
 options(scientific=T, digits = 3) 
 library(ezids)
 library(ggplot2)
-#install.packages(tigirs)
+#install.packages(tigris)
 library(tigris)
+#install.packages("sf")
+library(sf)
+
 ```
 
 
@@ -57,8 +60,19 @@ Ouliers = outlierKD2(Clean_data, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ```
 
+## Making Maps {.tabset}
+```{r}
+#import shapefile of all census tracts
+#tracts <- st_read("/Users/paulinemnev/Desktop/IntroDataScience/DATS-6101-PROJECT/census_tracts_2020/cb_2020_us_bg_500k.shp")
+```
+
 
 ```{r}
-
+#examine on map
+a = ggplot() +
+  geom_sf(data = tracts, fill = "blue") +
+  labs(title = "My Custom Map") +
+  theme_minimal()
+a
 ```
 
