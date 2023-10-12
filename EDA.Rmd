@@ -47,6 +47,7 @@ SVI_Data <- read.csv(here("SVI_2020_US.csv"))
 ```
 
 **** NOTE: -999 is input for missing data, should we remove the tracts that have -999 in the RPL_THEME1,2,3,4,RPL_THEMES columns?*****
+*** FOR MAPPING, I HAVE REMOVED THE MISSING DATA***
 
 **Remove irrelevant columns**
 
@@ -84,15 +85,15 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 ```
 
 ## Making Maps {.tabset}
+### Load, Clean, and Merge 
 ```{r}
 # Load the 2020 Census Tract shapefile for California
 ca_tracts <- tracts(state = "CA", year = 2020)
 ```
 
-
 ```{r}
 
-#add 0 to FIPS in CA_SVI to mergew with ca_tracts
+#add 0 to FIPS in CA_SVI to merge with ca_tracts
 
 CA_SVI$FIPS <- paste0("0", CA_SVI$FIPS)
 
@@ -108,8 +109,36 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 #for mapping, convert CA_SVI to a SF 
 ca_svi_sf <- st_as_sf(CA_SVI)
 ```
+### RPL THEME Overall
+Notice, the tracts are all labeled as high risk. There isn't really anything to observe. 
+```{r}
+#interactive map of RPL_THEMES
+
+# Remove rows with -999 in the RPL_THEMES column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
 
 
+color_pal <- colorNumeric(
+  palette = "OrRd", domain = ca_svi_sf_clean$RPL_THEMES
+)
+
+themes_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(RPL_THEMES),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(RPL_THEMES)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+themes_map
+
+```
+
+### RPL THEME 1
 ```{r}
 #interactive map of RPL_THEME1
 
@@ -122,7 +151,7 @@ color_pal <- colorNumeric(
   palette = "YlOrRd", domain = ca_svi_sf_clean$RPL_THEME1
 )
 
-california_map <- leaflet() %>%
+theme1_map <- leaflet() %>%
   addTiles() %>%
   addPolygons(data = ca_svi_sf_clean,
               fillColor = ~color_pal(RPL_THEME1),
@@ -133,9 +162,95 @@ california_map <- leaflet() %>%
   setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
 
 # Display the map
-california_map
+theme1_map
 
 ```
 
+### RPL THEME 2
 
+```{r}
+#interactive map of RPL_THEME2
+
+# Remove rows with -999 in the RPL_THEME2 column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
+
+
+color_pal <- colorNumeric(
+  palette = "magma", domain = ca_svi_sf_clean$RPL_THEME2
+)
+
+theme2_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(RPL_THEME2),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(RPL_THEME2)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+theme2_map
+
+```
+
+### RPL THEME 3
+
+```{r}
+#interactive map of RPL_THEME3
+
+# Remove rows with -999 in the RPL_THEME3 column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME3 != -999)
+
+
+color_pal <- colorNumeric(
+  palette = "Reds", domain = ca_svi_sf_clean$RPL_THEME3
+)
+
+
+theme3_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(RPL_THEME3),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(RPL_THEME3)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+theme3_map
+
+```
+
+### RPL THEME 4
+
+```{r}
+#interactive map of RPL_THEME4
+
+# Remove rows with -999 in the RPL_THEME4 column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
+
+
+color_pal <- colorNumeric(
+  palette = "RdPu", domain = ca_svi_sf_clean$RPL_THEME4
+)
+
+theme3_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(RPL_THEME4),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(RPL_THEME3)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+theme3_map
+
+```
 
