@@ -18,7 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 options(scientific=T, digits = 3) 
 library(ezids)
 library(ggplot2)
-
+#install.packages(tigirs)
+library(tigris)
 ```
 
 
@@ -53,6 +54,11 @@ Ouliers = outlierKD2(Clean_data, RPL_THEME2, rm = FALSE, qqplt = TRUE)
 Ouliers = outlierKD2(Clean_data, RPL_THEME3, rm = FALSE, qqplt = TRUE)
 Ouliers = outlierKD2(Clean_data, RPL_THEME4, rm = FALSE, qqplt = TRUE)
 Ouliers = outlierKD2(Clean_data, RPL_THEMES, rm = FALSE, qqplt = TRUE)
+
+```
+
+
+```{r}
 
 ```
 
