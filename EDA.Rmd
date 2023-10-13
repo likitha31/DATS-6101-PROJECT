@@ -38,7 +38,7 @@ library(leaflet)
 ```{r Load the data file }
 
 
-=======
+
 #SVI_Data <- read.csv('C:/Users/lkg31/OneDrive/Desktop/DATS-6101-PROJECT/SVI_2020_US.csv')
 
 #We can here() to construct the path relative to the project directory, so we can each read it in each time 
