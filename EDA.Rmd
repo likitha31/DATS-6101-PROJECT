@@ -29,6 +29,7 @@ library(dplyr)
 #install.packages("leaflet")
 library(leaflet)
 
+
 ```
 
 
@@ -43,7 +44,8 @@ library(leaflet)
 
 #We can here() to construct the path relative to the project directory, so we can each read it in each time 
 
-SVI_Data <- read.csv(here("SVI_2020_US.csv"))
+SVI_Data <- read.csv("SVI_2020_US.csv")
+nrow(SVI_Data)
 
 
 
