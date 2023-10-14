@@ -28,6 +28,8 @@ library(here)
 library(dplyr)
 #install.packages("leaflet")
 library(leaflet)
+#install.packages("reshape2")
+library(reshape2)
 
 
 ```
@@ -265,9 +267,6 @@ theme3_map
 
 ```{r}
 
-library(ggplot2)
-library(reshape2)
-
 # creating correlation matrix
 correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
@@ -283,9 +282,6 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 ```
 ```{r}
-
-library(ggplot2)
-
 
 CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
