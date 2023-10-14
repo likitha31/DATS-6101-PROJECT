@@ -45,7 +45,7 @@ library(leaflet)
 #We can here() to construct the path relative to the project directory, so we can each read it in each time 
 
 SVI_Data <- read.csv("SVI_2020_US.csv")
-nrow(SVI_Data)
+head(SVI_Data)
 
 
 
@@ -258,4 +258,67 @@ theme3_map <- leaflet() %>%
 theme3_map
 
 ```
+
+
+**Correlation HeatMp**
+
+
+```{r}
+
+library(ggplot2)
+library(reshape2)
+
+# creating correlation matrix
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+
+correlation_melted <- melt(correlation_matrix)
+
+ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "red", high = "green") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + # Rotate x-axis labels
+  labs(title = "Correlation Heatmap of SVI Variables and Demographics")
+
+
+```
+```{r}
+
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(head(CA_SVI, 8000))
+
+
+
+# Assuming your dataset is named "svi_data"
+ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
+  geom_point() +
+  labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
+  ggtitle("Socioeconomic Scatterplot")
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
