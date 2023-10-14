@@ -260,7 +260,7 @@ theme3_map
 ```
 
 
-**Correlation HeatMp**
+**Correlation HeatMap**
 
 
 ```{r}
