@@ -386,15 +386,7 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 ```
 
 
-```{r}
-library(scatterplot3d)
-attach(trees)
-scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
-+ type = "h", main = "3D Scatterplot of trees dataset")
 
-
-
-```
 
 
 
