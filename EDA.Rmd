@@ -282,6 +282,8 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 ```
+**Scatter Plot of SPL_THEMES(Total SVI) and SPL_THEME4((Housing & Transportation))**
+
 ```{r}
 
 library(ggplot2)
@@ -293,20 +295,62 @@ CA_SVI <- subset(head(CA_SVI, 8000))
 
 
 
-# Assuming your dataset is named "svi_data"
+
 ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
   geom_point() +
   labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
-  ggtitle("Socioeconomic Scatterplot")
+  ggtitle("SPL_THEMES VS SPL_THEME4")
 
 
 
 ```
+**Scatter Plot of SPL_THEMES(Total SVI) and EP_HISP(population of Hispanic)**
+
+```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI<-subset(head(CA_SVI,4000))
 
 
 
 
 
+ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
+  geom_point() +
+  labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
+  ggtitle("Social Vulnerability vs Hispanic Population")
+
+```
+**Scatter Plot of SPL_THEME1(Socioeconomic Status) and EP_NOHSDP (Percent of the population with no high school diploma)**
+
+```{r}
+
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
+  geom_point() +
+  labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
+  ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
+
+
+
+```
+```{r}
+
+
+```
 
 
 
