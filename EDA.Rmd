@@ -332,7 +332,7 @@ library(ggplot2)
 
 
 CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
 
 
 
@@ -347,12 +347,27 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 
 
 ```
+
 ```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+  geom_point() +
+  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  ggtitle("AGE VS Total SVI")
+
 
 
 ```
-
-
 
 
 <<<<<<< Updated upstream
