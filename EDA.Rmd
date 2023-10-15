@@ -287,7 +287,7 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
-CA_SVI <- subset(head(CA_SVI, 8000))
+CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
@@ -328,7 +328,7 @@ library(ggplot2)
 
 
 CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
 
 
 
@@ -343,8 +343,53 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 
 
 ```
-```{r}
 
+```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+  geom_point() +
+  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  ggtitle("AGE VS Total SVI")
+
+
+
+```
+
+**Top 10 Counties with highest SVI**
+
+```{r}
+county_svi <- CA_SVI1 %>%
+  group_by(COUNTY) %>%
+  summarize(mean_SVI = mean(SPL_THEMES)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean SVI
+top_10_counties <- county_svi %>%
+  top_n(10, wt = mean_SVI)
+
+# Create a histogram of the mean SVI for the top 10 counties
+histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
 
 ```
 
@@ -394,7 +439,7 @@ scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
 
 
 
-```
+
 
 
 
