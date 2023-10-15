@@ -355,10 +355,57 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 
 
 
+<<<<<<< Updated upstream
 
 
 
 
+=======
+```{r}
+#Initial Histogram for variables
+ggplot(CA_SVI, aes(x = SPL_THEMES)) +
+  geom_histogram(aes(y=..density..),binwidth=0.09, fill="#00008B", color="#000000", alpha=0.7)+
+geom_density(alpha=.5, fill="yellow") + 
+  labs(x = " SPL_THEMES", y = "density") +
+  ggtitle("Histogram of SPL_THEMES")
+
+ggplot(CA_SVI, aes(x = RPL_THEMES)) +
+  geom_histogram(aes(y=..density..),binwidth=0.025, fill="#00008B", color="#000000", alpha=0.7)+
+  geom_density(alpha=.5, fill="yellow") + 
+  labs(x = " RPL_THEMES", y = "density") +
+  ggtitle("Histogram of RPL_THEMES")
+
+ggplot(CA_SVI, aes(x = RPL_THEME1)) +
+  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
+  geom_density(alpha=.5, fill="yellow") + 
+  labs(x = " RPL_THEME1", y = "density") +
+  ggtitle("Histogram of Socioeconomic status variable i.e RPL_THEME1")
+
+ggplot(CA_SVI, aes(x = RPL_THEME2)) +
+  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
+  geom_density(alpha=.5, fill="yellow") + 
+  labs(x = " RPL_THEME2", y = "density") +
+  ggtitle("Histogram for Household characteristics variable i.e RPL_THEME2")
+
+ggplot(CA_SVI, aes(x = RPL_THEME4)) +
+  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
+  geom_density(alpha=.5, fill="yellow") + 
+  labs(x = " RPL_THEME4", y = "density") +
+  ggtitle("Histogram for Housing type and Transportation variable i.e RPL_THEME4 ")
+
+```
+
+
+```{r}
+library(scatterplot3d)
+attach(trees)
+scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
++ type = "h", main = "3D Scatterplot of trees dataset")
+
+
+
+```
+>>>>>>> Stashed changes
 
 
 
