@@ -28,6 +28,8 @@ library(here)
 library(dplyr)
 #install.packages("leaflet")
 library(leaflet)
+#install.packages("reshape2")
+library(reshape2)
 
 
 ```
@@ -265,9 +267,6 @@ theme3_map
 
 ```{r}
 
-library(ggplot2)
-library(reshape2)
-
 # creating correlation matrix
 correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
@@ -285,9 +284,6 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 **Scatter Plot of SPL_THEMES(Total SVI) and SPL_THEME4((Housing & Transportation))**
 
 ```{r}
-
-library(ggplot2)
-
 
 CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
@@ -400,16 +396,6 @@ print(histogram_plot)
 
 
 
-
-
-
-
-<<<<<<< Updated upstream
-
-
-
-
-=======
 ```{r}
 #Initial Histogram for variables
 ggplot(CA_SVI, aes(x = SPL_THEMES)) +
@@ -439,7 +425,7 @@ ggplot(CA_SVI, aes(x = RPL_THEME2)) +
 ggplot(CA_SVI, aes(x = RPL_THEME4)) +
   geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
   geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " RPL_THEME4", y = "density") +
+  labs(x = " RPL_THEME3", y = "density") +
   ggtitle("Histogram for Housing type and Transportation variable i.e RPL_THEME4 ")
 
 ```
@@ -453,8 +439,6 @@ scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
 
 
 
-```
->>>>>>> Stashed changes
 
 
 
