@@ -11,6 +11,7 @@ output:
     toc_float: yes
 ---
 
+
 ```{r, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -29,15 +30,11 @@ library(dplyr)
 library(leaflet)
 #install.packages("reshape2")
 library(reshape2)
-#install.packages("scatterplot3d")
-library(scatterplot3d)
-#install.packages("plot3D")
-library(plot3D)
-
-
 
 
 ```
+
+
 
 **Load the data file**
 
@@ -56,7 +53,8 @@ head(SVI_Data)
 
 ```
 
-\*\*\*\* NOTE: -999 is input for missing data, should we remove the tracts that have -999 in the RPL_THEME1,2,3,4,RPL_THEMES columns?\*\*\*\*\* \*\*\* FOR MAPPING, I HAVE REMOVED THE MISSING DATA\*\*\*
+**** NOTE: -999 is input for missing data, should we remove the tracts that have -999 in the RPL_THEME1,2,3,4,RPL_THEMES columns?*****
+*** FOR MAPPING, I HAVE REMOVED THE MISSING DATA***
 
 **Remove irrelevant columns**
 
@@ -72,15 +70,16 @@ xkablesummary(Clean_data, title="Clean summary of the data.")
 
 ```
 
-**Subset to California**
+**Subset to California** 
 
 ```{r}
 #subset Clean_Data to just CA tracts
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
 
-**Show Outliers**
 
+
+**Show Outliers**
 ```{r}
 #Display the Outliers in the cleaned data
 
@@ -93,9 +92,7 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 ```
 
 ## Making Maps {.tabset}
-
-### Load, Clean, and Merge
-
+### Load, Clean, and Merge 
 ```{r}
 # Load the 2020 Census Tract shapefile for California
 ca_tracts <- tracts(state = "CA", year = 2020)
@@ -119,11 +116,8 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 #for mapping, convert CA_SVI to a SF 
 ca_svi_sf <- st_as_sf(CA_SVI)
 ```
-
 ### RPL THEME Overall
-
-Notice, the tracts are all labeled as high risk. There isn't really anything to observe.
-
+Notice, the tracts are all labeled as high risk. There isn't really anything to observe. 
 ```{r}
 #interactive map of RPL_THEMES
 
@@ -152,7 +146,6 @@ themes_map
 ```
 
 ### RPL THEME 1
-
 ```{r}
 #interactive map of RPL_THEME1
 
@@ -268,7 +261,9 @@ theme3_map
 
 ```
 
+
 **Correlation HeatMap**
+
 
 ```{r}
 
@@ -286,24 +281,120 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 ```
+**Scatter Plot of SPL_THEMES(Total SVI) and SPL_THEME4((Housing & Transportation))**
 
 ```{r}
 
 CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
-CA_SVI <- subset(head(CA_SVI, 8000))
+CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
-# Assuming your dataset is named "svi_data"
+
 ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
   geom_point() +
   labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
-  ggtitle("Socioeconomic Scatterplot")
+  ggtitle("SPL_THEMES VS SPL_THEME4")
 
 
 
 ```
+**Scatter Plot of SPL_THEMES(Total SVI) and EP_HISP(population of Hispanic)**
+
+```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI<-subset(head(CA_SVI,4000))
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
+  geom_point() +
+  labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
+  ggtitle("Social Vulnerability vs Hispanic Population")
+
+```
+**Scatter Plot of SPL_THEME1(Socioeconomic Status) and EP_NOHSDP (Percent of the population with no high school diploma)**
+
+```{r}
+
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
+
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
+  geom_point() +
+  labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
+  ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
+
+
+
+```
+
+```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+
+
+
+
+
+
+ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+  geom_point() +
+  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  ggtitle("AGE VS Total SVI")
+
+
+
+```
+
+**Top 10 Counties with highest SVI**
+
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_SVI = mean(SPL_THEMES)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean SVI
+top_10_counties <- county_svi %>%
+  top_n(10, wt = mean_SVI)
+
+# Create a histogram of the mean SVI for the top 10 counties
+histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+
+
+
 
 ```{r}
 #Initial Histogram for variables
@@ -339,11 +430,20 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 ```
 
+
 ```{r}
-attach(ca_svi_sf_clean)
 
-scatter3D(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_NOHSDP, pch = 20, bty = "g", colkey = TRUE, col.panel ="steelblue", expand =1)
 
-#scatter3D(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_UNINSUR, pch = 20, bty = "g", colkey = TRUE, col.panel ="steelblue", expand =1)
 
 ```
+
+
+
+
+
+
+
+
+
+
+
