@@ -368,7 +368,7 @@ ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
 **Top 10 Counties with highest SVI**
 
 ```{r}
-county_svi <- CA_SVI1 %>%
+county_svi <- CA_SVI %>%
   group_by(COUNTY) %>%
   summarize(mean_SVI = mean(SPL_THEMES)) %>%
   ungroup()
@@ -432,11 +432,6 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 
 ```{r}
-library(scatterplot3d)
-attach(trees)
-scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
-+ type = "h", main = "3D Scatterplot of trees dataset")
-
 
 
 
