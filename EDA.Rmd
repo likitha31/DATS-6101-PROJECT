@@ -312,12 +312,10 @@ CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
 
 
 
-<<<<<<< Updated upstream
 
-ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
-=======
+
 ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEMES, color=COUNTY)) +
->>>>>>> Stashed changes
+
   geom_point() +
   labs(x = " Percent of Hispanic", y = "RPL_THEMES(Total SVI)") +
   ggtitle("Social Vulnerability vs Hispanic Population")
@@ -334,15 +332,9 @@ CA_SVI <- subset(CA_SVI,  EP_NOHSDP!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 
-<<<<<<< Updated upstream
 
-
-
-
-ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
-=======
 ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
->>>>>>> Stashed changes
+
   geom_point() +
   labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3( Racial & Ethnic Minority Status)") +
   ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
@@ -358,16 +350,8 @@ library(ggplot2)
 CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
 
-<<<<<<< Updated upstream
-
-
-
-
-
-ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
-=======
 ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEME3, color=COUNTY)) +
->>>>>>> Stashed changes
+
   geom_point() +
   labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
   ggtitle("AGE VS Total SVI")
@@ -443,18 +427,7 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 
 ```{r}
-<<<<<<< Updated upstream
-library(scatterplot3d)
-attach(trees)
-scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
-+ type = "h", main = "3D Scatterplot of trees dataset")
 
-
-
-
-
-
-=======
 boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, CA_SVI$RPL_THEME1)
   
 
