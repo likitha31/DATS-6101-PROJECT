@@ -262,25 +262,6 @@ theme3_map
 ```
 
 
-**Correlation HeatMap**
-
-
-```{r}
-
-# creating correlation matrix
-correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
-
-correlation_melted <- melt(correlation_matrix)
-
-ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
-  geom_tile() +
-  scale_fill_gradient(low = "red", high = "green") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + # Rotate x-axis labels
-  labs(title = "Correlation Heatmap of SVI Variables and Demographics")
-
-
-```
 **Scatter Plot of SPL_THEMES(Total SVI) and SPL_THEME4((Housing & Transportation))**
 
 ```{r}
@@ -311,9 +292,6 @@ CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
 CA_SVI<-subset(head(CA_SVI,4000))
 
 
-
-
-
 ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
   geom_point() +
   labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
@@ -331,10 +309,6 @@ CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
 
 
-
-
-
-
 ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
   geom_point() +
   labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
@@ -350,11 +324,6 @@ library(ggplot2)
 
 CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
-
-
-
-
-
 
 ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
   geom_point() +
@@ -392,51 +361,104 @@ histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_S
 print(histogram_plot)
 
 ```
+**Top 10 Counties with highest Poverty**
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_POV = mean(EPL_POV150)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean EPL_POV
+top_10_counties_POV150 <- county_svi %>%
+  top_n(10, wt = mean_POV)
+
+histogram_plot <- ggplot(data = top_10_counties_POV150, aes(x = reorder(COUNTY, -mean_POV), y = mean_POV)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean EPL_POV (Poverty)", title = "Top 10 Counties with High Povery") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
 
 
+
+```
+**Top 10 Counties with highest Unemployment**
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_UNE = mean(EPL_UNEMP)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean EPL_UNEMP
+top_10_counties_UNEMP <- county_svi %>%
+  top_n(10, wt = mean_UNE)
+
+histogram_plot <- ggplot(data = top_10_counties_UNEMP, aes(x = reorder(COUNTY, -mean_UNE), y = mean_UNE)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean mean_UNE (Unemployment)", title = "Top 10 Counties with High unemployment") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+**Top 10 Counties with people without insurance**
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_UNINSUR = mean(EPL_UNINSUR)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean mean_UNINSUR
+top_10_counties_UNINSUR <- county_svi %>%
+  top_n(10, wt = mean_UNINSUR)
+
+histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY, -mean_UNINSUR), y = mean_UNINSUR)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean mean_UNINSUR (Uninsured)", title = "Top 10 Counties with people without Insurance") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+**Correlation HeatMap**
 
 
 ```{r}
-#Initial Histogram for variables
-ggplot(CA_SVI, aes(x = SPL_THEMES)) +
-  geom_histogram(aes(y=..density..),binwidth=0.09, fill="#00008B", color="#000000", alpha=0.7)+
-geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " SPL_THEMES", y = "density") +
-  ggtitle("Histogram of SPL_THEMES")
 
-ggplot(CA_SVI, aes(x = RPL_THEMES)) +
-  geom_histogram(aes(y=..density..),binwidth=0.025, fill="#00008B", color="#000000", alpha=0.7)+
-  geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " RPL_THEMES", y = "density") +
-  ggtitle("Histogram of RPL_THEMES")
+# creating correlation matrix
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
-ggplot(CA_SVI, aes(x = RPL_THEME1)) +
-  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
-  geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " RPL_THEME1", y = "density") +
-  ggtitle("Histogram of Socioeconomic status variable i.e RPL_THEME1")
+correlation_melted <- melt(correlation_matrix)
 
-ggplot(CA_SVI, aes(x = RPL_THEME2)) +
-  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
-  geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " RPL_THEME2", y = "density") +
-  ggtitle("Histogram for Household characteristics variable i.e RPL_THEME2")
+ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "red", high = "green") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + # Rotate x-axis labels
+  labs(title = "Correlation Heatmap of SVI Variables and Demographics")
 
-ggplot(CA_SVI, aes(x = RPL_THEME4)) +
-  geom_histogram(aes(y=..density..),binwidth=0.05, fill="#00008B", color="#000000", alpha=0.7)+
-  geom_density(alpha=.5, fill="yellow") + 
-  labs(x = " RPL_THEME3", y = "density") +
-  ggtitle("Histogram for Housing type and Transportation variable i.e RPL_THEME4 ")
 
 ```
 
-
 ```{r}
-
-
-
-
-
 
 
 
