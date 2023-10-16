@@ -24,10 +24,12 @@ library(tigris)
 library(sf)
 #install.packages("here")
 library(here)
-#install.packages("dply")
+#install.packages("dplyr")
 library(dplyr)
 #install.packages("leaflet")
 library(leaflet)
+#install.packages("corrplot")
+library(corrplot)
 
 ```
 
@@ -65,8 +67,14 @@ summary(Clean_data)
 xkablesummary(Clean_data, title="Clean summary of the data.")
 
 ```
+CREATE PERCENT MINORITY COLUMN
+
+```{r}
+E_TOTPOP
+```
 
 **Subset to California** 
+
 
 ```{r}
 #subset Clean_Data to just CA tracts
@@ -263,23 +271,21 @@ theme4_map
 ```{r}
 # Remove rows with -999 in the E_MINRTY column
 
-ca_svi_sf_clean <- subset(ca_svi_sf, E_MINRTY != -999)
-#normalize the data 
-ca_svi_sf_clean$E_MINRTY <- (ca_svi_sf_clean$E_MINRTY - min(ca_svi_sf_clean$E_MINRTY)) / (max(ca_svi_sf_clean$E_MINRTY) - min(ca_svi_sf_clean$E_MINRTY))
+ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
 
 
 color_pal <- colorNumeric(
-  palette = "RdPu", domain = ca_svi_sf_clean$E_MINRTY
+  palette = "RdPu", domain = ca_svi_sf_clean$EPL_MINRTY
 )
 
 perminority_map <- leaflet() %>%
   addTiles() %>%
   addPolygons(data = ca_svi_sf_clean,
-              fillColor = ~color_pal(E_MINRTY),
+              fillColor = ~color_pal(EPL_MINRTY),
               fillOpacity = 0.5,
               color = "black",
               weight = 1,
-              popup = ~as.character(E_MINRTY)) %>%
+              popup = ~as.character(EPL_MINRTY)) %>%
   setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
 
 # Display the map
@@ -558,3 +564,30 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 >>>>>>> Stashed changes
+
+## Check means of SVI theme means 
+
+### BUBBLE PLOTS - 3 Variables -
+
+Compare age, race and RPL_THEME1
+```{r}
+
+ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, E_AGE65 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
+
+
+
+# Assuming you have a data frame called 'selected_vars' with columns 'EPL_MINRTY', 'E_AGE65', 'RPL_THEME1'
+
+# Create a bubble plot
+ggplot(ca_svi_sf_clean, aes(x = EPL_MINRTY, y = E_AGE65, size = RPL_THEME1)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Bubble Plot",
+       x = "EPL_MINRTY",
+       y = "E_AGE65",
+       size = "RPL_THEME1") +
+  scale_size_continuous(range = c(5, 15))
+
+```
+
