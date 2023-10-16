@@ -11,7 +11,6 @@ output:
     toc_float: yes
 ---
 
-
 ```{r, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,11 +29,15 @@ library(dplyr)
 library(leaflet)
 #install.packages("reshape2")
 library(reshape2)
+#install.packages("scatterplot3d")
+library(scatterplot3d)
+#install.packages("plot3D")
+library(plot3D)
+
+
 
 
 ```
-
-
 
 **Load the data file**
 
@@ -53,8 +56,7 @@ head(SVI_Data)
 
 ```
 
-**** NOTE: -999 is input for missing data, should we remove the tracts that have -999 in the RPL_THEME1,2,3,4,RPL_THEMES columns?*****
-*** FOR MAPPING, I HAVE REMOVED THE MISSING DATA***
+\*\*\*\* NOTE: -999 is input for missing data, should we remove the tracts that have -999 in the RPL_THEME1,2,3,4,RPL_THEMES columns?\*\*\*\*\* \*\*\* FOR MAPPING, I HAVE REMOVED THE MISSING DATA\*\*\*
 
 **Remove irrelevant columns**
 
@@ -70,16 +72,15 @@ xkablesummary(Clean_data, title="Clean summary of the data.")
 
 ```
 
-**Subset to California** 
+**Subset to California**
 
 ```{r}
 #subset Clean_Data to just CA tracts
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
 
-
-
 **Show Outliers**
+
 ```{r}
 #Display the Outliers in the cleaned data
 
@@ -92,7 +93,9 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 ```
 
 ## Making Maps {.tabset}
-### Load, Clean, and Merge 
+
+### Load, Clean, and Merge
+
 ```{r}
 # Load the 2020 Census Tract shapefile for California
 ca_tracts <- tracts(state = "CA", year = 2020)
@@ -116,8 +119,11 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 #for mapping, convert CA_SVI to a SF 
 ca_svi_sf <- st_as_sf(CA_SVI)
 ```
+
 ### RPL THEME Overall
-Notice, the tracts are all labeled as high risk. There isn't really anything to observe. 
+
+Notice, the tracts are all labeled as high risk. There isn't really anything to observe.
+
 ```{r}
 #interactive map of RPL_THEMES
 
@@ -146,6 +152,7 @@ themes_map
 ```
 
 ### RPL THEME 1
+
 ```{r}
 #interactive map of RPL_THEME1
 
@@ -261,9 +268,7 @@ theme3_map
 
 ```
 
-
 **Correlation HeatMap**
-
 
 ```{r}
 
@@ -281,6 +286,7 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 ```
+
 ```{r}
 
 CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
@@ -298,9 +304,6 @@ ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
 
 
 ```
-
-
-
 
 ```{r}
 #Initial Histogram for variables
@@ -336,25 +339,11 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 ```
 
-
 ```{r}
-library(scatterplot3d)
-attach(trees)
-scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
-+ type = "h", main = "3D Scatterplot of trees dataset")
+attach(ca_svi_sf_clean)
 
+scatter3D(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_NOHSDP, pch = 20, bty = "g", colkey = TRUE, col.panel ="steelblue", expand =1)
 
+#scatter3D(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_UNINSUR, pch = 20, bty = "g", colkey = TRUE, col.panel ="steelblue", expand =1)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
