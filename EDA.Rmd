@@ -438,6 +438,22 @@ histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY,
 print(histogram_plot)
 
 ```
+
+
+**Boxplots**
+
+```{r}
+boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, RPL_THEME1)
+  
+
+boxplot(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_LIMENG, CA_SVI$EPL_AGE17,	CA_SVI$EPL_SNGPNT, CA_SVI$RPL_THEME2)
+
+boxplot(CA_SVI$EPL_MINRTY, CA_SVI$RPL_THEME3)
+
+boxplot(CA_SVI$EPL_MUNIT,	CA_SVI$EPL_MOBILE, CA_SVI$EPL_CROWD, CA_SVI$EPL_NOVEH, CA_SVI$EPL_GROUPQ, CA_SVI$RPL_THEME4)
+
+boxplot(CA_SVI$RPL_THEME1, CA_SVI$RPL_THEME2, CA_SVI$RPL_THEME3, CA_SVI$RPL_THEME4, CA_SVI$RPL_THEMES)
+```
 **Correlation HeatMap**
 
 
@@ -457,8 +473,6 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 ```
-
-```{r}
 
 
 
