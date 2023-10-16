@@ -63,7 +63,7 @@ head(SVI_Data)
 
 #selecting the required columns by subset function
 
-Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
 ) )
 
 summary(Clean_data)
@@ -351,16 +351,16 @@ estpov_map
 
 ```{r}
 
-CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
 
-ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
   geom_point() +
-  labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
+  labs(x = " Total Svi score", y = "RPL_THEME4(Housing Type & Transportation)") +
   ggtitle("SPL_THEMES VS SPL_THEME4")
 
 
@@ -373,14 +373,15 @@ library(ggplot2)
 
 
 CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI<-subset(head(CA_SVI,4000))
 
 
-ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEMES, color=COUNTY)) +
   geom_point() +
-  labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
+  labs(x = " Percent of Hispanic", y = "RPL_THEMES(Total SVI)") +
   ggtitle("Social Vulnerability vs Hispanic Population")
+
 
 ```
 **Scatter Plot of SPL_THEME1(Socioeconomic Status) and EP_NOHSDP (Percent of the population with no high school diploma)**
@@ -390,14 +391,15 @@ ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 
-ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
   geom_point() +
-  labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
-  ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
+  labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3(Race and Ethnicity )") +
+  ggtitle("Scatterplot of Education and SVI")
+
 
 
 
@@ -407,13 +409,14 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 
-ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEMES, color=COUNTY)) +
   geom_point() +
-  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
   ggtitle("AGE VS Total SVI")
+
 
 
 
@@ -424,7 +427,7 @@ ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
 ```{r}
 county_svi <- CA_SVI %>%
   group_by(COUNTY) %>%
-  summarize(mean_SVI = mean(SPL_THEMES)) %>%
+  summarize(mean_SVI = mean(RPL_THEMES)) %>%
   ungroup()
 
 # Select the top 10 counties with the highest mean SVI
@@ -528,7 +531,7 @@ print(histogram_plot)
 **Boxplots**
 
 ```{r}
-boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, RPL_THEME1)
+boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, CA_SVI$RPL_THEME1)
   
 
 boxplot(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_LIMENG, CA_SVI$EPL_AGE17,	CA_SVI$EPL_SNGPNT, CA_SVI$RPL_THEME2)
@@ -545,7 +548,7 @@ boxplot(CA_SVI$RPL_THEME1, CA_SVI$RPL_THEME2, CA_SVI$RPL_THEME3, CA_SVI$RPL_THEM
 ```{r}
 
 # creating correlation matrix
-correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
 correlation_melted <- melt(correlation_matrix)
 
