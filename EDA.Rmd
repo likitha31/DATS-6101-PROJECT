@@ -257,7 +257,87 @@ theme4_map
 
 ```
 
-<<<<<<< Updated upstream
+
+## DEMOGRAPHIC MAPS### 
+### E_MINRTY Map (estimate of minority population)
+```{r}
+# Remove rows with -999 in the E_MINRTY column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, E_MINRTY != -999)
+#normalize the data 
+ca_svi_sf_clean$E_MINRTY <- (ca_svi_sf_clean$E_MINRTY - min(ca_svi_sf_clean$E_MINRTY)) / (max(ca_svi_sf_clean$E_MINRTY) - min(ca_svi_sf_clean$E_MINRTY))
+
+
+color_pal <- colorNumeric(
+  palette = "RdPu", domain = ca_svi_sf_clean$E_MINRTY
+)
+
+perminority_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(E_MINRTY),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(E_MINRTY)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+perminority_map
+```
+
+
+### E_AGE65 Map (Persons aged 65 and older estimate, 2016-2020 ACS)
+
+```{r}
+# Remove rows with -999 in the E_AGE65 column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, E_AGE65 != -999)
+
+
+color_pal <- colorNumeric(
+  palette = "RdPu", domain = ca_svi_sf_clean$E_AGE65
+)
+
+estage_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(E_AGE65),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(E_AGE65)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+estage_map
+```
+
+### EP_POV150 Map (Persons below 150% poverty estimate)
+
+```{r}
+# Remove rows with -999 in the EP_POV150 column
+
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_POV150 != -999)
+
+
+color_pal <- colorNumeric(
+  palette = "RdPu", domain = ca_svi_sf_clean$EP_POV150
+)
+
+estpov_map <- leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = ca_svi_sf_clean,
+              fillColor = ~color_pal(EP_POV150),
+              fillOpacity = 0.5,
+              color = "black",
+              weight = 1,
+              popup = ~as.character(EP_POV150)) %>%
+  setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
+
+# Display the map
+estpov_map
+```
 
 
 
