@@ -67,11 +67,7 @@ summary(Clean_data)
 xkablesummary(Clean_data, title="Clean summary of the data.")
 
 ```
-CREATE PERCENT MINORITY COLUMN
 
-```{r}
-E_TOTPOP
-```
 
 **Subset to California** 
 
@@ -293,26 +289,26 @@ perminority_map
 ```
 
 
-### E_AGE65 Map (Persons aged 65 and older estimate, 2016-2020 ACS)
+### EP_AGE65 Map (Percentage of persons aged 65 and older estimate, 2016-2020 ACS)
 
 ```{r}
 # Remove rows with -999 in the E_AGE65 column
 
-ca_svi_sf_clean <- subset(ca_svi_sf, E_AGE65 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65 != -999)
 
 
 color_pal <- colorNumeric(
-  palette = "RdPu", domain = ca_svi_sf_clean$E_AGE65
+  palette = "RdPu", domain = ca_svi_sf_clean$EP_AGE65
 )
 
 estage_map <- leaflet() %>%
   addTiles() %>%
   addPolygons(data = ca_svi_sf_clean,
-              fillColor = ~color_pal(E_AGE65),
+              fillColor = ~color_pal(EP_AGE65),
               fillOpacity = 0.5,
               color = "black",
               weight = 1,
-              popup = ~as.character(E_AGE65)) %>%
+              popup = ~as.character(EP_AGE65)) %>%
   setView(lng = -119.417931, lat = 36.778261, zoom = 6)  # Set the initial view
 
 # Display the map
@@ -573,21 +569,50 @@ Compare age, race and RPL_THEME1
 ```{r}
 
 ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, E_AGE65 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65 != -999)
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 
-
-
-# Assuming you have a data frame called 'selected_vars' with columns 'EPL_MINRTY', 'E_AGE65', 'RPL_THEME1'
-
 # Create a bubble plot
-ggplot(ca_svi_sf_clean, aes(x = EPL_MINRTY, y = E_AGE65, size = RPL_THEME1)) +
+ggplot(ca_svi_sf_clean, aes(x = EPL_MINRTY, y = EP_AGE65, size = RPL_THEME1)) +
   geom_point(alpha = 0.7) +
   labs(title = "Bubble Plot",
        x = "EPL_MINRTY",
-       y = "E_AGE65",
+       y = "EP_AGE65",
        size = "RPL_THEME1") +
   scale_size_continuous(range = c(5, 15))
 
+```
+### Hypothesis testing among themes of SVI 
+
+RPL_THEMES and RPL_THEME1
+```{r}
+t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
+
+# Print the results
+print(t_test_result1)
+
+```
+
+RPL_THEMES and RPL_THEME2
+```{r}
+t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
+
+# Print the results
+print(t_test_result2)
+```
+RPL_THEMES and RPL_THEME3
+```{r}
+t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
+
+# Print the results
+print(t_test_result3)
+```
+
+RPL_THEMES and RPL_THEME4
+```{r}
+t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
+
+# Print the results
+print(t_test_result4)
 ```
 
