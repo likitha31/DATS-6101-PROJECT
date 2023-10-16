@@ -435,11 +435,6 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 
 
-```
-
-
-
-
 
 
 
