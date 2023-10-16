@@ -61,7 +61,7 @@ head(SVI_Data)
 ```{r select columns}
 
 #selecting the required columns by subset function
-Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3,  EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EP_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EP_AGE65,	EP_AGE17,	EP_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3,  EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES
 ) )
 
 summary(Clean_data)
@@ -285,17 +285,17 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 ```{r}
 
-CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
 
-ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
   geom_point() +
-  labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
-  ggtitle("SPL_THEMES VS SPL_THEME4")
+  labs(x = " Total Svi score", y = "RPL_THEME4(Housing Type & Transportation)") +
+  ggtitle("RPL_THEMES VS RPL_THEME4")
 
 
 
@@ -307,16 +307,19 @@ library(ggplot2)
 
 
 CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
-CA_SVI<-subset(head(CA_SVI,4000))
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
 
 
 
 
+<<<<<<< Updated upstream
 
 ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
+=======
+ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEMES, color=COUNTY)) +
+>>>>>>> Stashed changes
   geom_point() +
-  labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
+  labs(x = " Percent of Hispanic", y = "RPL_THEMES(Total SVI)") +
   ggtitle("Social Vulnerability vs Hispanic Population")
 
 ```
@@ -327,17 +330,21 @@ ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 
+<<<<<<< Updated upstream
 
 
 
 
 ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
+=======
+ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
+>>>>>>> Stashed changes
   geom_point() +
-  labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
+  labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3( Racial & Ethnic Minority Status)") +
   ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
 
 
@@ -348,17 +355,21 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
 CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
 
+<<<<<<< Updated upstream
 
 
 
 
 
 ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+=======
+ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEME3, color=COUNTY)) +
+>>>>>>> Stashed changes
   geom_point() +
-  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
   ggtitle("AGE VS Total SVI")
 
 
@@ -370,7 +381,7 @@ ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
 ```{r}
 county_svi <- CA_SVI1 %>%
   group_by(COUNTY) %>%
-  summarize(mean_SVI = mean(SPL_THEMES)) %>%
+  summarize(mean_SVI = mean(RPL_THEMES)) %>%
   ungroup()
 
 # Select the top 10 counties with the highest mean SVI
@@ -382,7 +393,7 @@ histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_S
   geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
   
   # Label the axes and add a title
-  labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
+  labs(x = "County", y = "Mean RPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
   
   # Customize the appearance
   theme_minimal() +
@@ -432,6 +443,7 @@ ggplot(CA_SVI, aes(x = RPL_THEME4)) +
 
 
 ```{r}
+<<<<<<< Updated upstream
 library(scatterplot3d)
 attach(trees)
 scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
@@ -442,6 +454,38 @@ scatterplot3d(, Height, Volume, pch = 20, highlight.3d = TRUE,
 
 
 
+=======
+boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, CA_SVI$RPL_THEME1)
+  
+
+boxplot(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_LIMENG, CA_SVI$EPL_AGE17,	CA_SVI$EPL_SNGPNT, CA_SVI$RPL_THEME2)
+
+boxplot(CA_SVI$EPL_MINRTY, CA_SVI$RPL_THEME3)
+
+boxplot(CA_SVI$EPL_MUNIT,	CA_SVI$EPL_MOBILE, CA_SVI$EPL_CROWD, CA_SVI$EPL_NOVEH, CA_SVI$EPL_GROUPQ, CA_SVI$RPL_THEME4)
+
+boxplot(CA_SVI$RPL_THEME1, CA_SVI$RPL_THEME2, CA_SVI$RPL_THEME3, CA_SVI$RPL_THEME4, CA_SVI$RPL_THEMES)
+```
+**Correlation HeatMap**
+
+
+```{r}
+
+# creating correlation matrix
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EP_AGE17", "EP_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+
+correlation_melted <- melt(correlation_matrix)
+
+ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "red", high = "green") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + # Rotate x-axis labels
+  labs(title = "Correlation Heatmap of SVI Variables and Demographics")
+
+
+```
+>>>>>>> Stashed changes
 
 
 
