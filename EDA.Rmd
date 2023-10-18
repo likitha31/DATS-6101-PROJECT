@@ -564,4 +564,26 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 
+RPL_THEMES and RPL_THEME2
+```{r}
+t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
+
+# Print the results
+print(t_test_result2)
+```
+RPL_THEMES and RPL_THEME3
+```{r}
+t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
+
+# Print the results
+print(t_test_result3)
+```
+
+RPL_THEMES and RPL_THEME4
+```{r}
+t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
+
+# Print the results
+print(t_test_result4)
+```
 
