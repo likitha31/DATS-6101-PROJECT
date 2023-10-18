@@ -363,9 +363,9 @@ ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
   labs(x = " Total Svi score", y = "RPL_THEME4(Housing Type & Transportation)") +
   ggtitle("SPL_THEMES VS SPL_THEME4")
 
-
-
 ```
+
+
 **Scatter Plot of SPL_THEMES(Total SVI) and EP_HISP(population of Hispanic)**
 
 ```{r}
