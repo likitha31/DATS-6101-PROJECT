@@ -30,8 +30,14 @@ library(dplyr)
 library(leaflet)
 #install.packages("reshape2")
 library(reshape2)
-```
+#install.packages("tmap")
+library(tmap)
+#install.packages("viridis")
+library(viridis)
+#install.packages("stargazer")
+library(stargazer)
 
+```
 
 
 **Load the data file**
@@ -113,6 +119,20 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 ca_svi_sf <- st_as_sf(CA_SVI)
 ```
 ### RPL THEME Overall
+
+```{r}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
+
+
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEMES)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Overall SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+```
+
 Notice, the tracts are all labeled as high risk. There isn't really anything to observe. 
 ```{r}
 #interactive map of RPL_THEMES
@@ -127,7 +147,11 @@ color_pal <- colorNumeric(
 )
 
 themes_map <- leaflet() %>%
-  addTiles() %>%
+```
+
+
+```{r}
+addTiles() %>%
   addPolygons(data = ca_svi_sf_clean,
               fillColor = ~color_pal(RPL_THEMES),
               fillOpacity = 0.5,
@@ -166,6 +190,59 @@ theme1_map <- leaflet() %>%
 
 # Display the map
 theme1_map
+
+```
+
+```{r}
+map1 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME1)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme1.png", plot = map1, device = "png")
+
+```
+
+
+```{r}
+map2 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME2)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme2.png", plot = map2, device = "png")
+
+```
+
+
+```{r}
+map3 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME3)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 3 (Racial & Ethnic Minority Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme3.png", plot = map3, device = "png")
+
+```
+
+```{r}
+map4 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME4)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+ggsave("path_to_desktop/theme4.png", plot = map4, device = "png")
 
 ```
 
@@ -581,6 +658,16 @@ ggplot(ca_svi_sf_clean, aes(x = EPL_MINRTY, y = EP_AGE65, size = RPL_THEME1)) +
 ### Hypothesis testing among themes of SVI 
 
 RPL_THEMES and RPL_THEME1
+```{r}
+
+
+t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
+
+# Create a nicely formatted table
+stargazer(t_test_result1, type = "text")
+
+```
+
 ```{r}
 t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
 
