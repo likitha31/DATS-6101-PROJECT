@@ -433,7 +433,7 @@ top_10_counties <- county_svi %>%
 
 # Create a histogram of the mean SVI for the top 10 counties
 histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
@@ -458,7 +458,7 @@ top_10_counties_POV150 <- county_svi %>%
   top_n(10, wt = mean_POV)
 
 histogram_plot <- ggplot(data = top_10_counties_POV150, aes(x = reorder(COUNTY, -mean_POV), y = mean_POV)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean EPL_POV (Poverty)", title = "Top 10 Counties with High Povery") +
@@ -485,7 +485,7 @@ top_10_counties_UNEMP <- county_svi %>%
   top_n(10, wt = mean_UNE)
 
 histogram_plot <- ggplot(data = top_10_counties_UNEMP, aes(x = reorder(COUNTY, -mean_UNE), y = mean_UNE)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean mean_UNE (Unemployment)", title = "Top 10 Counties with High unemployment") +
@@ -510,7 +510,7 @@ top_10_counties_UNINSUR <- county_svi %>%
   top_n(10, wt = mean_UNINSUR)
 
 histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY, -mean_UNINSUR), y = mean_UNINSUR)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean mean_UNINSUR (Uninsured)", title = "Top 10 Counties with people without Insurance") +
