@@ -30,12 +30,15 @@ library(dplyr)
 library(leaflet)
 #install.packages("reshape2")
 library(reshape2)
+#install.packages("tmap")
+library(tmap)
+#install.packages("viridis")
+library(viridis)
+#install.packages("stargazer")
+library(stargazer)
 
 
-#install.packages("reshape2")
-library(reshape2)
 ```
-
 
 
 **Load the data file**
@@ -63,7 +66,7 @@ head(SVI_Data)
 
 #selecting the required columns by subset function
 
-Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
 ) )
 
 summary(Clean_data)
@@ -121,6 +124,20 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 ca_svi_sf <- st_as_sf(CA_SVI)
 ```
 ### RPL THEME Overall
+
+```{r}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
+
+
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEMES)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Overall SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+```
+
 Notice, the tracts are all labeled as high risk. There isn't really anything to observe. 
 ```{r}
 #interactive map of RPL_THEMES
@@ -135,7 +152,11 @@ color_pal <- colorNumeric(
 )
 
 themes_map <- leaflet() %>%
-  addTiles() %>%
+```
+
+
+```{r}
+addTiles() %>%
   addPolygons(data = ca_svi_sf_clean,
               fillColor = ~color_pal(RPL_THEMES),
               fillOpacity = 0.5,
@@ -174,6 +195,59 @@ theme1_map <- leaflet() %>%
 
 # Display the map
 theme1_map
+
+```
+
+```{r}
+map1 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME1)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme1.png", plot = map1, device = "png")
+
+```
+
+
+```{r}
+map2 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME2)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme2.png", plot = map2, device = "png")
+
+```
+
+
+```{r}
+map3 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME3)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 3 (Racial & Ethnic Minority Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+ggsave("path_to_desktop/theme3.png", plot = map3, device = "png")
+
+```
+
+```{r}
+map4 = 
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME4)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+ggsave("path_to_desktop/theme4.png", plot = map4, device = "png")
 
 ```
 
@@ -351,21 +425,21 @@ estpov_map
 
 ```{r}
 
-CA_SVI <- subset(CA_SVI,  SPL_THEME4!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
 
-ggplot(CA_SVI, aes(x = SPL_THEMES, y = SPL_THEME4, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
   geom_point() +
-  labs(x = " Total Svi score", y = "SPL_THEME4(Housing Type & Transportation)") +
+  labs(x = " Total Svi score", y = "RPL_THEME4(Housing Type & Transportation)") +
   ggtitle("SPL_THEMES VS SPL_THEME4")
 
-
-
 ```
+
+
 **Scatter Plot of SPL_THEMES(Total SVI) and EP_HISP(population of Hispanic)**
 
 ```{r}
@@ -373,14 +447,15 @@ library(ggplot2)
 
 
 CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI<-subset(head(CA_SVI,4000))
 
 
-ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEMES, color=COUNTY)) +
   geom_point() +
-  labs(x = " Percent of Hispanic", y = "SPL_THEMES(Total SVI)") +
+  labs(x = " Percent of Hispanic", y = "RPL_THEMES(Total SVI)") +
   ggtitle("Social Vulnerability vs Hispanic Population")
+
 
 ```
 **Scatter Plot of SPL_THEME1(Socioeconomic Status) and EP_NOHSDP (Percent of the population with no high school diploma)**
@@ -390,14 +465,15 @@ ggplot(CA_SVI, aes(x = EP_HISP, y = SPL_THEMES, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_NOHSDP!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 
-ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
   geom_point() +
-  labs(x = "  Percent of the population with no high school diploma", y = "SPL_THEME1(Socioeconomic Status)") +
-  ggtitle("Scatterplot of Educational Attainment and Social Vulnerability")
+  labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3(Race and Ethnicity )") +
+  ggtitle("Scatterplot of Education and SVI")
+
 
 
 
@@ -407,13 +483,14 @@ ggplot(CA_SVI, aes(x = EPL_NOHSDP, y = SPL_THEME1, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EPL_AGE65!= -999 )
-CA_SVI <- subset(CA_SVI,  SPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 
-ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEMES, color=COUNTY)) +
   geom_point() +
-  labs(x = "Percent of the population age 65 and older", y = "SPL_THEMES(Total SVI)") +
+  labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
   ggtitle("AGE VS Total SVI")
+
 
 
 
@@ -424,7 +501,7 @@ ggplot(CA_SVI, aes(x = EPL_AGE65, y = SPL_THEMES, color=COUNTY)) +
 ```{r}
 county_svi <- CA_SVI %>%
   group_by(COUNTY) %>%
-  summarize(mean_SVI = mean(SPL_THEMES)) %>%
+  summarize(mean_SVI = mean(RPL_THEMES)) %>%
   ungroup()
 
 # Select the top 10 counties with the highest mean SVI
@@ -528,7 +605,7 @@ print(histogram_plot)
 **Boxplots**
 
 ```{r}
-boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, RPL_THEME1)
+boxplot(CA_SVI$EPL_POV150, CA_SVI$EPL_UNEMP, CA_SVI$EPL_HBURD, CA_SVI$EPL_NOHSDP, CA_SVI$EPL_UNINSUR, CA_SVI$RPL_THEME1)
   
 
 boxplot(CA_SVI$EPL_AGE65, CA_SVI$EPL_DISABL, CA_SVI$EPL_LIMENG, CA_SVI$EPL_AGE17,	CA_SVI$EPL_SNGPNT, CA_SVI$RPL_THEME2)
@@ -545,7 +622,7 @@ boxplot(CA_SVI$RPL_THEME1, CA_SVI$RPL_THEME2, CA_SVI$RPL_THEME3, CA_SVI$RPL_THEM
 ```{r}
 
 # creating correlation matrix
-correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR","EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
 correlation_melted <- melt(correlation_matrix)
 
@@ -561,4 +638,68 @@ ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
 
 
 
+## Check means of SVI theme means 
+
+### BUBBLE PLOTS - 3 Variables -
+
+Compare age, race and RPL_THEME1
+```{r}
+
+ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
+
+# Create a bubble plot
+ggplot(ca_svi_sf_clean, aes(x = EPL_MINRTY, y = EP_AGE65, size = RPL_THEME1)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Bubble Plot",
+       x = "EPL_MINRTY",
+       y = "EP_AGE65",
+       size = "RPL_THEME1") +
+  scale_size_continuous(range = c(5, 15))
+
+```
+### Hypothesis testing among themes of SVI 
+
+RPL_THEMES and RPL_THEME1
+```{r}
+
+
+t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
+
+# Create a nicely formatted table
+stargazer(t_test_result1, type = "text")
+
+```
+
+```{r}
+t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
+
+# Print the results
+print(t_test_result1)
+
+```
+
+RPL_THEMES and RPL_THEME2
+```{r}
+t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
+
+# Print the results
+print(t_test_result2)
+```
+RPL_THEMES and RPL_THEME3
+```{r}
+t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
+
+# Print the results
+print(t_test_result3)
+```
+
+RPL_THEMES and RPL_THEME4
+```{r}
+t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
+
+# Print the results
+print(t_test_result4)
+```
 
