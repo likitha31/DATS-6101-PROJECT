@@ -486,9 +486,9 @@ library(ggplot2)
 CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 
-ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEMES, color=COUNTY)) +
-  geom_point() +
-  labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
+ggplot(CA_SVI, aes(y = EP_AGE65, x = RPL_THEMES)) +
+  geom_point(color = 'red') +
+  labs(x = "RPL_THEMES(Total SVI)", y = "Percent of the population age 65 and older") +
   ggtitle("AGE VS Total SVI")
 
 
