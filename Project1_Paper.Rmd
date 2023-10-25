@@ -49,12 +49,16 @@ library(stargazer)
 ### Research Topic 
 The aim of the project was to identify areas of vulnerability for different demographic groups at the census tract level by examining trends in the variables comprising the Social Vulnerability Index (SVI) created by the CDC. SMART questions were identified to narrow the scope of the project. The project sought to address a series of questions, all attempting to identify if there was any correlation between individual census variables and the compiled Thematic SVI scores, to illuminate any possible underrepresented groups across the indexes. 
 
-*1*: Does breaking down the SVI by different demographics, such as elderly populations, minority group populations, sex, income impact the vulnerability scores of the census tracts?
-*2*: Is there significance in identifying areas of population vulnerability based on different demographics compared to the overall population of each tract? 
-*3*: Do specific demographics’ vulnerability ratings have a higher impact on the overall SVI score of the census tract? 
+**1**: Does breaking down the SVI by different demographics, such as elderly populations, minority group populations, sex, income impact the vulnerability scores of the census tracts?
+
+**2**: Is there significance in identifying areas of population vulnerability based on different demographics compared to the overall population of each tract? 
+
+**3**: Do specific demographics’ vulnerability ratings have a higher impact on the overall SVI score of the census tract? 
 Can we visualize the different vulnerability scores based on demographic in an impactful way for public health officials and emergency planners? 
-*4*: With the available data and resources (R scripting and visualizations), is it possible to conduct this analysis within the class project deadlines? 
-*5*: Can we provide relevant/significant findings to public health and emergency planning officials (in terms of emergency response and social justice issues)? 
+
+**4**: With the available data and resources (R scripting and visualizations), is it possible to conduct this analysis within the class project deadlines? 
+
+**5**: Can we provide relevant/significant findings to public health and emergency planning officials (in terms of emergency response and social justice issues)? 
 
 ### Social Vulnerability Index (SVI) 
 
@@ -69,6 +73,7 @@ By assessing trends in the variables used to create the SVI, the project will ex
 The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summary composed by the sum of the themes. 
 
 **Socioeconomic Status**: `RPL_THEME1`
+
 * Below 150% Poverty
 
 * Unemployed
@@ -80,6 +85,7 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 * No Health Insurance
 
 **Household Characteristics**: `RPL_THEME2`
+
 * Aged 65 & Older
  
 * Aged 17 & Younger	
@@ -92,6 +98,7 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 
 
 **Racial & Ethnic Minority Status**:`RPL_THEME3`
+
 * Hispanic or Latino (of any race); Black and African American, Not Hispanic or Latino; American Indian and Alaska Native, Not Hispanic or Latino; Asian, Not Hispanic or Latino; Native Hawaiian and Other Pacific Islander, Not Hispanic or Latino; Two or More Races, Not Hispanic or Latino; Other Races, Not Hispanic or Latino
 
 **Housing Type & Transportation**: `RPL_THEME4`
@@ -107,6 +114,7 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 * Group Quarters
 
 **Overall**: `RPL_THEMES`
+
 * CDC then sums the sums for each theme, orders the tracts, and then calculates overall percentile rankings. 
 
 ## Clean the Data
@@ -173,7 +181,7 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ### Explanation
 
-Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis the missing values values were removed, but the outliers were remved, to identify any particular at risk census tracts. 
+Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis the missing values values were removed, but the outliers were not removed, to identify any particular at risk census tracts (if the SVI is unusually low or high compared to the others is still significant and interesting to examine). 
  
 **RPL_THEMES**
 ```{r}
