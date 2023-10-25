@@ -1,0 +1,104 @@
+---
+title: "Project1 Paper"
+author: "Likhitha, Paulina, Shrihan"
+date: "2023-10-24"
+output:
+  html_document:
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+options(scientific=T, digits = 3) 
+library(ezids)
+library(ggplot2)
+#install.packages("tigris")
+library(tigris)
+#install.packages("sf")
+library(sf)
+#install.packages("here")
+library(here)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("leaflet")
+library(leaflet)
+#install.packages("reshape2")
+library(reshape2)
+#install.packages("tmap")
+library(tmap)
+#install.packages("viridis")
+library(viridis)
+#install.packages("stargazer")
+library(stargazer)
+```
+
+## Introduction and SVI
+
+Text about the Introduction
+
+## Data set and Variables
+
+Text and code showing the Dataset and variables
+
+## Clean the Data
+
+Load the data file
+
+```{r Load the data file}
+SVI_Data <- read.csv("SVI_2020_US.csv")
+head(SVI_Data)
+```
+
+Keep relevant columns
+
+```{r select columns}
+
+#selecting the required columns by subset function
+
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
+) )
+
+head(Clean_data)
+
+
+```
+
+subset Clean_Data to just CA tracts
+
+```{r CA tracts}
+CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
+```
+
+Show Outliers
+
+```{r Outliers}
+#Display the Outliers in the cleaned data
+
+Outliers1 = outlierKD2(CA_SVI, RPL_THEME1, rm = FALSE, qqplt = TRUE)
+Outliers2 = outlierKD2(CA_SVI, RPL_THEME2, rm = FALSE, qqplt = TRUE)
+Outliers3 = outlierKD2(CA_SVI, RPL_THEME3, rm = FALSE, qqplt = TRUE)
+Outliers4 = outlierKD2(CA_SVI, RPL_THEME4, rm = FALSE, qqplt = TRUE)
+Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
+
+```
+
+## Data Analysis
+
+Code and findings for each of Maps, Scatterplots and histograms
+
+## Correlation Heatmap
+
+## Hypothesis Testing
+
+## Conclusion
+
+## Future Work
