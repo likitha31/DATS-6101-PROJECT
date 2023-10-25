@@ -1,4 +1,10 @@
 ---
+title: "Project 1:Write Up"
+author: "Likhitha, Paulina, Shrihan"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: cosmo
 title: "Project1 Paper"
 author: "Likhitha, Paulina, Shrihan"
 date: "2023-10-24"
@@ -8,7 +14,7 @@ output:
     number_sections: false
     toc: yes
     toc_depth: 3
-    toc_float: yes
+
 ---
 
 ```{r setup, include=FALSE}
@@ -41,7 +47,8 @@ library(viridis)
 library(stargazer)
 ```
 
-## Introduction and SVI
+## Introduction
+
 
 Text about the Introduction
 
@@ -92,15 +99,19 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ```
 
+## Data Analysis {.tabset}
 
-## Data Analysis
-
+### MAPS
 Code and findings for each of Maps, Scatterplots and histograms 
 
-## Correlation Heatmap
+### Scatterplots 
+
+### Histograms
+
+### Correlation Heatmap
 
 
-## Hypothesis Testing
+### Hypothesis Testing
 
 ## Conclusion
 
