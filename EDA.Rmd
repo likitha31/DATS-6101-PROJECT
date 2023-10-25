@@ -427,6 +427,7 @@ estpov_map
 
 CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+CA_SVI<-subset(head(CA_SVI,4000))
 CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
@@ -446,14 +447,14 @@ ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
 library(ggplot2)
 
 
-CA_SVI <- subset(CA_SVI,  EP_HISP!= -999 )
+CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
-CA_SVI<-subset(head(CA_SVI,4000))
 
 
-ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEMES, color=COUNTY)) +
-  geom_point() +
-  labs(x = " Percent of Hispanic", y = "RPL_THEMES(Total SVI)") +
+
+ggplot(CA_SVI, aes(y = EP_AGE65, x = RPL_THEMES)) +
+  geom_point(color='red') +
+  labs(x = "Percent of population Age 65 or older", x = "RPL_THEMES(Total SVI)") +
   ggtitle("Social Vulnerability vs Hispanic Population")
 
 
@@ -470,7 +471,7 @@ CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 
 ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
-  geom_point() +
+  geom_point(color='blue') +
   labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3(Race and Ethnicity )") +
   ggtitle("Scatterplot of Education and SVI")
 
@@ -482,14 +483,9 @@ ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
 ```{r}
 library(ggplot2)
 
+CA_SVI <- subset(CA_SVI, EP_HISP != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
 
-CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
-CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
-
-ggplot(CA_SVI, aes(x = EP_AGE65, y = RPL_THEMES, color=COUNTY)) +
-  geom_point() +
-  labs(x = "Percent of the population age 65 and older", y = "RPL_THEMES(Total SVI)") +
-  ggtitle("AGE VS Total SVI")
 
 
 
@@ -510,7 +506,7 @@ top_10_counties <- county_svi %>%
 
 # Create a histogram of the mean SVI for the top 10 counties
 histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
@@ -535,7 +531,7 @@ top_10_counties_POV150 <- county_svi %>%
   top_n(10, wt = mean_POV)
 
 histogram_plot <- ggplot(data = top_10_counties_POV150, aes(x = reorder(COUNTY, -mean_POV), y = mean_POV)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean EPL_POV (Poverty)", title = "Top 10 Counties with High Povery") +
@@ -562,7 +558,7 @@ top_10_counties_UNEMP <- county_svi %>%
   top_n(10, wt = mean_UNE)
 
 histogram_plot <- ggplot(data = top_10_counties_UNEMP, aes(x = reorder(COUNTY, -mean_UNE), y = mean_UNE)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean mean_UNE (Unemployment)", title = "Top 10 Counties with High unemployment") +
@@ -587,7 +583,7 @@ top_10_counties_UNINSUR <- county_svi %>%
   top_n(10, wt = mean_UNINSUR)
 
 histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY, -mean_UNINSUR), y = mean_UNINSUR)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "blue", alpha = 0.7) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
   
   # Label the axes and add a title
   labs(x = "County", y = "Mean mean_UNINSUR (Uninsured)", title = "Top 10 Counties with people without Insurance") +
@@ -622,7 +618,7 @@ boxplot(CA_SVI$RPL_THEME1, CA_SVI$RPL_THEME2, CA_SVI$RPL_THEME3, CA_SVI$RPL_THEM
 ```{r}
 
 # creating correlation matrix
-correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN", "SPL_THEME1", "SPL_THEME2","SPL_THEME3", "SPL_THEME4", "SPL_THEMES","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
 
 correlation_melted <- melt(correlation_matrix)
 
