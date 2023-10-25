@@ -1610,20 +1610,22 @@ of the project. The project sought to address a series of questions, all
 attempting to identify if there was any correlation between individual
 census variables and the compiled Thematic SVI scores, to illuminate any
 possible underrepresented groups across the indexes.</p>
-<p><em>1</em>: Does breaking down the SVI by different demographics,
-such as elderly populations, minority group populations, sex, income
-impact the vulnerability scores of the census tracts? <em>2</em>: Is
-there significance in identifying areas of population vulnerability
-based on different demographics compared to the overall population of
-each tract? <em>3</em>: Do specific demographics’ vulnerability ratings
+<p><strong>1</strong>: Does breaking down the SVI by different
+demographics, such as elderly populations, minority group populations,
+sex, income impact the vulnerability scores of the census tracts?</p>
+<p><strong>2</strong>: Is there significance in identifying areas of
+population vulnerability based on different demographics compared to the
+overall population of each tract?</p>
+<p><strong>3</strong>: Do specific demographics’ vulnerability ratings
 have a higher impact on the overall SVI score of the census tract? Can
 we visualize the different vulnerability scores based on demographic in
-an impactful way for public health officials and emergency planners?
-<em>4</em>: With the available data and resources (R scripting and
-visualizations), is it possible to conduct this analysis within the
-class project deadlines? <em>5</em>: Can we provide relevant/significant
-findings to public health and emergency planning officials (in terms of
-emergency response and social justice issues)?</p>
+an impactful way for public health officials and emergency planners?</p>
+<p><strong>4</strong>: With the available data and resources (R
+scripting and visualizations), is it possible to conduct this analysis
+within the class project deadlines?</p>
+<p><strong>5</strong>: Can we provide relevant/significant findings to
+public health and emergency planning officials (in terms of emergency
+response and social justice issues)?</p>
 </div>
 <div id="social-vulnerability-index-svi" class="section level3">
 <h3>Social Vulnerability Index (SVI)</h3>
@@ -1649,29 +1651,32 @@ well as where different vulnerable groups are located.</p>
 <h3>SVI Data</h3>
 <p>The SVI is comprised of 5 total SVI calculations: 4 thematic and 1
 overall summary composed by the sum of the themes.</p>
-<p><strong>Socioeconomic Status</strong>: <code>RPL_THEME1</code> *
-Below 150% Poverty</p>
+<p><strong>Socioeconomic Status</strong>: <code>RPL_THEME1</code></p>
 <ul>
+<li><p>Below 150% Poverty</p></li>
 <li><p>Unemployed</p></li>
 <li><p>Housing Cost Burden</p></li>
 <li><p>No High School Diploma</p></li>
 <li><p>No Health Insurance</p></li>
 </ul>
-<p><strong>Household Characteristics</strong>: <code>RPL_THEME2</code> *
-Aged 65 &amp; Older</p>
+<p><strong>Household Characteristics</strong>:
+<code>RPL_THEME2</code></p>
 <ul>
+<li><p>Aged 65 &amp; Older</p></li>
 <li><p>Aged 17 &amp; Younger</p></li>
 <li><p>Civilian with a Disability</p></li>
 <li><p>Single-Parent Households</p></li>
 <li><p>English Language Proficiency</p></li>
 </ul>
 <p><strong>Racial &amp; Ethnic Minority
-Status</strong>:<code>RPL_THEME3</code> * Hispanic or Latino (of any
-race); Black and African American, Not Hispanic or Latino; American
-Indian and Alaska Native, Not Hispanic or Latino; Asian, Not Hispanic or
-Latino; Native Hawaiian and Other Pacific Islander, Not Hispanic or
-Latino; Two or More Races, Not Hispanic or Latino; Other Races, Not
-Hispanic or Latino</p>
+Status</strong>:<code>RPL_THEME3</code></p>
+<ul>
+<li>Hispanic or Latino (of any race); Black and African American, Not
+Hispanic or Latino; American Indian and Alaska Native, Not Hispanic or
+Latino; Asian, Not Hispanic or Latino; Native Hawaiian and Other Pacific
+Islander, Not Hispanic or Latino; Two or More Races, Not Hispanic or
+Latino; Other Races, Not Hispanic or Latino</li>
+</ul>
 <p><strong>Housing Type &amp; Transportation</strong>:
 <code>RPL_THEME4</code></p>
 <ul>
@@ -1681,9 +1686,11 @@ Hispanic or Latino</p>
 <li><p>No Vehicle</p></li>
 <li><p>Group Quarters</p></li>
 </ul>
-<p><strong>Overall</strong>: <code>RPL_THEMES</code> * CDC then sums the
-sums for each theme, orders the tracts, and then calculates overall
-percentile rankings.</p>
+<p><strong>Overall</strong>: <code>RPL_THEMES</code></p>
+<ul>
+<li>CDC then sums the sums for each theme, orders the tracts, and then
+calculates overall percentile rankings.</li>
+</ul>
 </div>
 </div>
 <div id="clean-the-data" class="section level2">
@@ -1764,7 +1771,9 @@ head(Clean_data)</code></pre>
 represented by <code>-999</code>, but the number of missing values does
 not equal the number of outliers identified. Thus, for the purposes of
 our analysis the missing values values were removed, but the outliers
-were remved, to identify any particular at risk census tracts.</p>
+were not removed, to identify any particular at risk census tracts (if
+the SVI is unusually low or high compared to the others is still
+significant and interesting to examine).</p>
 <p><strong>RPL_THEMES</strong></p>
 <pre class="r"><code>count &lt;- sum(CA_SVI$RPL_THEMES == -999)
 count1 &lt;- sum(CA_SVI$RPL_THEME1 == -999) 
