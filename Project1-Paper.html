@@ -1598,13 +1598,93 @@ font-size: 0.95em;
 </div>
 
 
-<div id="introductio" class="section level2">
-<h2>Introductio</h2>
-<p>Text about the Introduction</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<div id="research-topic" class="section level3">
+<h3>Research Topic</h3>
+<p>The aim of the project was to identify areas of vulnerability for
+different demographic groups at the census tract level by examining
+trends in the variables comprising the Social Vulnerability Index (SVI)
+created by the CDC. SMART questions were identified to narrow the scope
+of the project. The project sought to address a series of questions, all
+attempting to identify if there was any correlation between individual
+census variables and the compiled Thematic SVI scores, to illuminate any
+possible underrepresented groups across the indexes.</p>
+<p><em>1</em>: Does breaking down the SVI by different demographics,
+such as elderly populations, minority group populations, sex, income
+impact the vulnerability scores of the census tracts? <em>2</em>: Is
+there significance in identifying areas of population vulnerability
+based on different demographics compared to the overall population of
+each tract? <em>3</em>: Do specific demographics’ vulnerability ratings
+have a higher impact on the overall SVI score of the census tract? Can
+we visualize the different vulnerability scores based on demographic in
+an impactful way for public health officials and emergency planners?
+<em>4</em>: With the available data and resources (R scripting and
+visualizations), is it possible to conduct this analysis within the
+class project deadlines? <em>5</em>: Can we provide relevant/significant
+findings to public health and emergency planning officials (in terms of
+emergency response and social justice issues)?</p>
+</div>
+<div id="social-vulnerability-index-svi" class="section level3">
+<h3>Social Vulnerability Index (SVI)</h3>
+<p>According to the <a href="https://www.atsdr.cdc.gov/placeandhealth/svi/index.html">CDC</a>,
+social vulnerability defines the potential negative effects on
+communities caused by external stresses on human health. These stresses
+can be events like natural disasters, disease outbreaks, or human-caused
+events. To address social vulnerability, the CDC has compiled the SVI as
+a tool to help public health officials and emergency response planners
+identify communities that may need support before, during, or after
+disasters. It is provided at the state, county, and census tract level.
+It is comprised of 16 census variables. By assessing trends in the
+variables used to create the SVI, the project will examine how splitting
+the population by different demographics such as race or age affects
+each census tract’s vulnerability across the 5 compiled themes. This
+could help identify if there are systemic injustices or inequities, as
+well as where different vulnerable groups are located.</p>
+</div>
 </div>
 <div id="data-set-and-variables" class="section level2">
-<h2>Data set and Variables</h2>
-<p>Text and code showing the Dataset and variables</p>
+<h2>Data Set and Variables</h2>
+<div id="svi-data" class="section level3">
+<h3>SVI Data</h3>
+<p>The SVI is comprised of 5 total SVI calculations: 4 thematic and 1
+overall summary composed by the sum of the themes.</p>
+<p><strong>Socioeconomic Status</strong>: <code>RPL_THEME1</code> *
+Below 150% Poverty</p>
+<ul>
+<li><p>Unemployed</p></li>
+<li><p>Housing Cost Burden</p></li>
+<li><p>No High School Diploma</p></li>
+<li><p>No Health Insurance</p></li>
+</ul>
+<p><strong>Household Characteristics</strong>: <code>RPL_THEME2</code> *
+Aged 65 &amp; Older</p>
+<ul>
+<li><p>Aged 17 &amp; Younger</p></li>
+<li><p>Civilian with a Disability</p></li>
+<li><p>Single-Parent Households</p></li>
+<li><p>English Language Proficiency</p></li>
+</ul>
+<p><strong>Racial &amp; Ethnic Minority
+Status</strong>:<code>RPL_THEME3</code> * Hispanic or Latino (of any
+race); Black and African American, Not Hispanic or Latino; American
+Indian and Alaska Native, Not Hispanic or Latino; Asian, Not Hispanic or
+Latino; Native Hawaiian and Other Pacific Islander, Not Hispanic or
+Latino; Two or More Races, Not Hispanic or Latino; Other Races, Not
+Hispanic or Latino</p>
+<p><strong>Housing Type &amp; Transportation</strong>:
+<code>RPL_THEME4</code></p>
+<ul>
+<li><p>Multi-Unit Structures</p></li>
+<li><p>Mobile Homes</p></li>
+<li><p>Crowding</p></li>
+<li><p>No Vehicle</p></li>
+<li><p>Group Quarters</p></li>
+</ul>
+<p><strong>Overall</strong>: <code>RPL_THEMES</code> * CDC then sums the
+sums for each theme, orders the tracts, and then calculates overall
+percentile rankings.</p>
+</div>
 </div>
 <div id="clean-the-data" class="section level2">
 <h2>Clean the Data</h2>
