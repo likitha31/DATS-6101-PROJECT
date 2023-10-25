@@ -111,17 +111,16 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 
 ## Clean the Data
 
-Load the data file
+**Load the data file**
 
-
-```{r Load the data file}
+```{r Load the data file, echo=T, results='hide'}
 SVI_Data <- read.csv("SVI_2020_US.csv")
 head(SVI_Data)
 ```
 
-Keep relevant columns
+**Keep relevant columns**
 
-```{r select columns}
+```{r select columns, echo=T, results='hide'}
 
 #selecting the required columns by subset function
 
@@ -133,24 +132,69 @@ head(Clean_data)
 
 ```
 
-
-subset Clean_Data to just CA tracts
-```{r CA tracts}
+**Subset to just CA tracts** 
+```{r CA tracts, echo=T, results='hide'}
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
 
 
-Show Outliers
-```{r Outliers}
-#Display the Outliers in the cleaned data
+## Outliers {.tabset}
 
+### RPL_THEME1
+
+```{r Outliers}
 Outliers1 = outlierKD2(CA_SVI, RPL_THEME1, rm = FALSE, qqplt = TRUE)
+```
+
+### RPL_THEME2
+
+```{r}
 Outliers2 = outlierKD2(CA_SVI, RPL_THEME2, rm = FALSE, qqplt = TRUE)
+```
+
+### RPL_THEME3
+
+```{r}
 Outliers3 = outlierKD2(CA_SVI, RPL_THEME3, rm = FALSE, qqplt = TRUE)
-Outliers4 = outlierKD2(CA_SVI, RPL_THEME4, rm = FALSE, qqplt = TRUE)
-Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ```
+
+### RPL_THEME4
+
+```{r}
+Outliers4 = outlierKD2(CA_SVI, RPL_THEME4, rm = FALSE, qqplt = TRUE)
+```
+
+### RPL_THEMES
+
+```{r}
+Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
+```
+
+### Explanation
+
+Here we can see that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis we will remove the missing values, but keep outliers, to identify any particulary at risk census tracts.
+
+**RPL_THEMES**
+```{r}
+count <- sum(CA_SVI$RPL_THEMES == -999)
+count1 <- sum(CA_SVI$RPL_THEME1 == -999) 
+count2 <- sum(CA_SVI$RPL_THEME2 == -999) 
+count3 <- sum(CA_SVI$RPL_THEME3 == -999)
+count4 <- sum(CA_SVI$RPL_THEME4 == -999)
+```
+
+* There are `r count` missing values in `RPL_THEMES`
+
+* There are `r count1` missing values in `RPL_THEME1`
+
+* There are `r count2` missing values in `RPL_THEME2`
+
+* There are `r count3` missing values in `RPL_THEME3`
+
+* There are `r count4` missing values in `RPL_THEME4`
+
+## {-}
 
 ## Data Analysis {.tabset}
 
