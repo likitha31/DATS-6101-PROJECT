@@ -173,8 +173,8 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ### Explanation
 
-Here we can see that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis we will remove the missing values, but keep outliers, to identify any particulary at risk census tracts.
-
+Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis the missing values values were removed, but the outliers were remved, to identify any particular at risk census tracts. 
+ 
 **RPL_THEMES**
 ```{r}
 count <- sum(CA_SVI$RPL_THEMES == -999)
@@ -196,19 +196,80 @@ count4 <- sum(CA_SVI$RPL_THEME4 == -999)
 
 ## {-}
 
-## Data Analysis {.tabset}
 
-### MAPS
-Code and findings for each of Maps, Scatterplots and histograms 
+## Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+### Maps
+
+#### Maps {.tabset .tabset-fade .tabset-pills}
+
+##### RPL_THEMES
+
+aaa
+
+##### RPL_THEME1
+
+aaa
+
+##### RPL_THEME2
+
+aa
+
+##### RPL_THEME3
+
+a
+
+##### RPL_THEME4
+
+a
+
+### Histogram
+
+#### Histograms {.tabset .tabset-fade .tabset-pills}
+
+##### HISTOGRAM #1
+
+##### HISTOGRAM #2
+
+##### HISTOGRAM #3
 
 ### Scatterplots 
 
-### Histograms
+#### Scatterplots {.tabset .tabset-fade .tabset-pills}
+
+##### Scatterplots #1
+
+##### Scatterplots #2
+
+##### Scatterplots #3
+
 
 ### Correlation Heatmap
 
 
 ### Hypothesis Testing
+
+#### Hypothesis Tests {.tabset .tabset-fade .tabset-pills}
+
+
+##### RPL_THEME1
+
+aaa
+
+##### RPL_THEME2
+
+aa
+
+##### RPL_THEME3
+
+a
+
+##### RPL_THEME4
+
+a
+
+
+
 
 ## Conclusion
 
