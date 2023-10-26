@@ -115,7 +115,8 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 
 **Extract the data file**
 
-As mentioned before the dataset was sourced directly from the CDC website. The dataset was downloaded in the form of CSV file and integrated into the project. 
+As mentioned before the dataset was sourced directly from the CDC website. The dataset was downloaded in the form of CSV file and integrated into the project.
+
 
 ```{r Load the data file, echo=T, results='hide'}
 SVI_Data <- read.csv("SVI_2020_US.csv")
