@@ -62,11 +62,26 @@ According to the [CDC](https://www.atsdr.cdc.gov/placeandhealth/svi/index.html),
 To address social vulnerability, the CDC has compiled the SVI as a tool to help public health officials and emergency response planners identify communities that may need support before, during, or after disasters. It is provided at the state, county, and census tract level. It is comprised of 16 census variables. 
 By assessing trends in the variables used to create the SVI, the project will examine how splitting the population by different demographics such as race or age affects each census tract’s vulnerability across the 5 compiled themes. This could help identify if there are systemic injustices or inequities, as well as where different vulnerable groups are located. 
 
-
+###
+Tracts with zero estimates for total population (N = 645 for the U.S.) were removed during the ranking
+process. These tracts were added back to the SVI databases after ranking. The TOTPOP field value is 0,
+but the percentile ranking fields (RPL_THEME1, RPL_THEME2, RPL_THEME3, RPL_THEME4, and
+RPL_THEMES) were set to -999.
+▪ For tracts with > 0 TOTPOP, a value of -999 in any field either means the value was unavailable from the
+original census data or we could not calculate a derived value because of unavailable census data.
+▪ Any cells with a -999 were not used for further calculations. For example, total flags do not include fields
+with a -999 value.
+▪ Whenever available, w
+###
 ## Data Set and Variables 
 
 ### SVI Data 
 The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summary composed by the sum of the themes. 
+
+It is constructed by selecting the specific indicator variables within different themes that are chosen to represent the various aspects of vulnerability, enabling this project to examine if any themes leave out variable that could be important. Then Census tracts are ranked within each state, as well as against other states, creating tract rankings ranging from 0 to 1, with higher values indicating greater vulnerability.
+The CDC states: "For each tract, we generated its percentile rank among all tracts for 1) the 16 individual variables, 2) the four themes, and 3) its overall position."
+
+Then, these percentiles were summed for each of the four themes, and then ordered to determine theme-specific percentile rankings.
 
 **Socioeconomic Status**: `RPL_THEME1`
 * Below 150% Poverty
@@ -107,7 +122,11 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 * Group Quarters
 
 **Overall**: `RPL_THEMES`
-* CDC then sums the sums for each theme, orders the tracts, and then calculates overall percentile rankings. 
+* CDC then sums the sums for each theme, orders the tracts, and then calculates overall percentile rankings.
+
+### Spatial Data
+
+The geographic scale of the data is limited to California census tracts, which allows a detailed analysis of over 9,000 census tracts, hopefully enabling more tailored actions and responses. CA is a state that is prone to natural disasters such as earthquakes, wildfires, and has a very high population, making it an important case study. 
 
 ## Clean the Data
 
@@ -125,7 +144,7 @@ head(SVI_Data)
 
 **Subset the columns**
 
-The SVI dataset has close to 138 columns. However, for our specific analysis, we don't require all of 138 columns. Hence we subsetted the dataset by carefully selecting the 40 most pertinent and crucial columns for our analysis.
+The SVI dataset has close to 138 columns. However, for our specific analysis, we don't require all of 138 columns. Hence we subsetted the dataset by carefully selecting the 40 most pertinent and crucial columns for our analysis. This included demographic variables and important comparsion variables.
 
 ```{r select columns, echo=T, results='hide'}
 #selecting the required columns by subset function
@@ -140,7 +159,7 @@ head(Clean_data)
 
 **Subset the rows**
 
-Additionally, the dataset comprises of substantial 84,000 rows. Again to tailor our analysis, we opted to narrow our scope to a specific area of interest, so we performed a row subsetting operation to include data exclusively related to California.
+Additionally, the dataset comprises of over 84,000 rows, all of the USA census tracts. Again to tailor our analysis, we opted to narrow our scope to a specific area of interest, so we performed a row subsetting operation to include data exclusively related to California.
 
 ```{r CA tracts, echo=T, results='hide'}
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
@@ -181,7 +200,7 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ### Explanation
 
-Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis the missing values values were removed, but the outliers were remved, to identify any particular at risk census tracts. 
+Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of the analysis the missing values values were removed, but the outliers were not removed so it would be possible to identify any particular at risk census tracts in the analysis. 
  
 **RPL_THEMES**
 ```{r}
@@ -241,7 +260,7 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
 ##### RPL_THEMES
 
 ```{r}
-
+map0= 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEMES)) +
   scale_fill_viridis(option = "D", direction = 1) +
@@ -264,7 +283,7 @@ ggplot(data = ca_svi_sf_clean) +
   labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
-
+map1
 
 ```
 
@@ -278,12 +297,12 @@ ggplot(data = ca_svi_sf_clean) +
   labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
-
+map2
 ```
 
 ##### RPL_THEME3
 ```{r}
-
+map3 = 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME3)) +
   scale_fill_viridis(option = "D", direction = 1) +
@@ -291,7 +310,7 @@ ggplot(data = ca_svi_sf_clean) +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
 
-
+map3
 ```
 
 ##### RPL_THEME4
@@ -310,6 +329,38 @@ ggplot(data = ca_svi_sf_clean) +
 map4
 
 ```
+
+##### Demographic Maps 
+In addition to mapping the various SVI scores, it was also deemed important to map the spatial distribution of these demographic variables used to comprise the indexes. This way, it is possible to compare the spatial distribution of demographic data to where high risk scores are located. This analysis was done on the county level scale, to understand an overall picture of demographics. 
+
+### E_MINRTY Map (estimate of minority population)
+
+
+```{r}
+
+ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
+
+EPL_MINRTY_map =
+  
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = EPL_MINRTY)) +
+  scale_fill_viridis(option = "C", direction = 1) +
+  labs(title = "Estimate of Minority Population by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+EPL_MINRTY_map
+
+```
+
+
+### EP_AGE65 Map (Percentage of persons aged 65 and older estimate, 2016-2020 ACS)
+
+
+
+### EP_POV150 Map (Persons below 150% poverty estimate)
+
+
 
 ### Histogram
 
@@ -598,6 +649,15 @@ EP_ASIAN is litte negatively correlated with RPL_THEME1 and RPL_THEME2. This sug
 
 Like the previous scenario with the elderly population, a higher percentage of Asian residents may act as protective factors against certain social vulnerabilities. This could be due to factors such as economic stability, community support, and educational attainment.
 
+### Charts
+
+#### Charts {.tabset .tabset-fade .tabset-pills}
+
+##### Most At-Risk Tracts
+
+```{r}
+
+```
 
 
 
