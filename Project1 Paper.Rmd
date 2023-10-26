@@ -1,5 +1,5 @@
 ---
-title: "Project 1:Write Up"
+<title: "Project 1:Write Up"
 author: "Likhitha, Paulina, Shrihan"
 date: "`r Sys.Date()`"
 output:
@@ -146,6 +146,7 @@ Additionally, the dataset comprises of substantial 84,000 rows. Again to tailor 
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
 
+
 ## Outliers {.tabset}
 
 ### RPL_THEME1
@@ -227,12 +228,7 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 ca_svi_sf <- st_as_sf(CA_SVI)
 
 #remove missing values from our variables:
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME3 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
-
 
 ```
 
@@ -240,201 +236,36 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
 
 ##### RPL_THEMES
 
-```{r}
-
-ggplot(data = ca_svi_sf_clean) +
-  geom_sf(aes(fill = RPL_THEMES)) +
-  scale_fill_viridis(option = "D", direction = 1) +
-  labs(title = "Overall SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-map0 
-
-
-```
+aaa
 
 ##### RPL_THEME1
 
-```{r}
-
-map1 = 
-ggplot(data = ca_svi_sf_clean) +
-  geom_sf(aes(fill = RPL_THEME1)) +
-  scale_fill_viridis(option = "D", direction = 1) +
-  labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-
-
-```
+aaa
 
 ##### RPL_THEME2
+
 ```{r}
 
-map2 = 
-ggplot(data = ca_svi_sf_clean) +
-  geom_sf(aes(fill = RPL_THEME2)) +
-  scale_fill_viridis(option = "D", direction = 1) +
-  labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-
 ```
+
 
 ##### RPL_THEME3
-```{r}
 
-ggplot(data = ca_svi_sf_clean) +
-  geom_sf(aes(fill = RPL_THEME3)) +
-  scale_fill_viridis(option = "D", direction = 1) +
-  labs(title = "Theme 3 (Racial & Ethnic Minority Status) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-
-
-```
+a
 
 ##### RPL_THEME4
 
-```{r}
-
-map4 =
-  
-ggplot(data = ca_svi_sf_clean) +
-  geom_sf(aes(fill = RPL_THEME4)) +
-  scale_fill_viridis(option = "D", direction = 1) +
-  labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-
-map4
-
-```
+a
 
 ### Histogram
 
 #### Histograms {.tabset .tabset-fade .tabset-pills}
 
-*We harnessed the power of histograms to pinpoint the counties within different California regions that could be particularly vulnerable to the effects of disasters or health crises. Our analysis successfully unveiled the top 10 counties characterized by the highest Social Vulnerability Index (SVI) scores, elevated poverty rates, increased unemployment levels, and a notable population lacking insurance coverage.*
-
 ##### HISTOGRAM #1
-
-The below histogram displays the counties with the highest SVI index. 
-
-```{r Histogram1}
-county_svi <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(mean_SVI = mean(RPL_THEMES)) %>%
-  ungroup()
-
-# Select the top 10 counties with the highest mean SVI
-top_10_counties <- county_svi %>%
-  top_n(10, wt = mean_SVI)
-
-# Create a histogram of the mean SVI for the top 10 counties
-histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
-  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
-  
-  # Label the axes and add a title
-  labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
-  
-  # Customize the appearance
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
-
-# Display the histogram
-print(histogram_plot)
-
-```
 
 ##### HISTOGRAM #2
 
-The below histogram displays the counties with the highest Poverty. 
-
-```{r}
-county_svi <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(mean_POV = mean(EPL_POV150)) %>%
-  ungroup()
-
-# Select the top 10 counties with the highest mean EPL_POV
-top_10_counties_POV150 <- county_svi %>%
-  top_n(10, wt = mean_POV)
-
-histogram_plot <- ggplot(data = top_10_counties_POV150, aes(x = reorder(COUNTY, -mean_POV), y = mean_POV)) +
-  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
-  
-  # Label the axes and add a title
-  labs(x = "County", y = "Mean EPL_POV (Poverty)", title = "Top 10 Counties with High Povery") +
-  
-  # Customize the appearance
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
-
-# Display the histogram
-print(histogram_plot)
-
-```
-
 ##### HISTOGRAM #3
-
-The below histogram displays the counties with the highest Unemployment. 
-
-```{r}
-county_svi <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(mean_UNE = mean(EPL_UNEMP)) %>%
-  ungroup()
-
-# Select the top 10 counties with the highest mean EPL_UNEMP
-top_10_counties_UNEMP <- county_svi %>%
-  top_n(10, wt = mean_UNE)
-
-histogram_plot <- ggplot(data = top_10_counties_UNEMP, aes(x = reorder(COUNTY, -mean_UNE), y = mean_UNE)) +
-  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
-  
-  # Label the axes and add a title
-  labs(x = "County", y = "Mean mean_UNE (Unemployment)", title = "Top 10 Counties with High unemployment") +
-  
-  # Customize the appearance
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
-
-# Display the histogram
-print(histogram_plot)
-
-```
-
-##### HISTOGRAM #4
-
-The below histogram displays the counties with the highest uninsured population. 
-
-```{r}
-county_svi <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(mean_UNINSUR = mean(EPL_UNINSUR)) %>%
-  ungroup()
-
-# Select the top 10 counties with the highest mean mean_UNINSUR
-top_10_counties_UNINSUR <- county_svi %>%
-  top_n(10, wt = mean_UNINSUR)
-
-histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY, -mean_UNINSUR), y = mean_UNINSUR)) +
-  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
-  
-  # Label the axes and add a title
-  labs(x = "County", y = "Mean mean_UNINSUR (Uninsured)", title = "Top 10 Counties with people without Insurance") +
-  
-  # Customize the appearance
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
-
-# Display the histogram
-print(histogram_plot)
-
-```
-
-*What stands out in these plots is the consistent presence of certain counties like Madera, Fresno, Merced and Mendocino among the top 10 counties for all four of these critical variables. This highlights that these counties could be potential focal points for targeted interventions and disaster preparedness efforts.*
 
 ### Scatterplots 
 
@@ -588,43 +419,23 @@ Like the previous scenario with the elderly population, a higher percentage of A
 
 #### Hypothesis Tests {.tabset .tabset-fade .tabset-pills}
 
-##### RPL_THEMES and RPL_THEME1
-```{r}
-t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
 
-# Create a nicely formatted table
-stargazer(t_test_result1, type = "text")
+##### RPL_THEME1
 
-```
+aaa
 
+##### RPL_THEME2
 
-##### RPL_THEMES and RPL_THEME2
-```{r}
-t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
+aa
 
-# Print the results
-print(t_test_result2)
-```
+##### RPL_THEME3
 
-##### RPL_THEMES and RPL_THEME3
-```{r}
-t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
+a
 
-# Print the results
-print(t_test_result3)
-```
+##### RPL_THEME4
 
-##### RPL_THEMES and RPL_THEME4
-```{r}
-t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
-
-# Print the results
-print(t_test_result4)
-```
-
+a
 
 ## Conclusion
 
 ## Future Work
-
-

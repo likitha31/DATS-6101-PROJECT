@@ -425,7 +425,7 @@ estpov_map
 
 ```{r}
 
-CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 CA_SVI<-subset(head(CA_SVI,4000))
 CA_SVI1 <- subset(head(CA_SVI, 8000))
@@ -433,10 +433,10 @@ CA_SVI1 <- subset(head(CA_SVI, 8000))
 
 
 
-ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME4, color=COUNTY)) +
+ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME1, color=COUNTY)) +
   geom_point() +
-  labs(x = " Total Svi score", y = "RPL_THEME4(Housing Type & Transportation)") +
-  ggtitle("SPL_THEMES VS SPL_THEME4")
+  labs(x = " Total Svi score", y = "RPL_THEME1(Socioeconomic Status)") +
+  ggtitle("SPL_THEMES VS SPL_THEME1")
 
 ```
 
@@ -485,9 +485,9 @@ library(ggplot2)
 
 CA_SVI <- subset(CA_SVI, EP_HISP != -999)
 CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
-
-
-
+ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEME1)) +
+  geom_point(color = 'skyblue') +
+  labs(x = "Percentage of Hispanic population", y = "RPL_THEME1 (Socioeconomic Status)") +ggtitle("Race VS RPL_THEME1(socioeconmic Status)")
 
 
 ```
@@ -642,7 +642,7 @@ Compare age, race and RPL_THEME1
 ```{r}
 
 ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65!= -999)
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 
 # Create a bubble plot
