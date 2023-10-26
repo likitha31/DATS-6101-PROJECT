@@ -1,14 +1,17 @@
 ---
-title: "Project1 Paper"
+<title: "Project 1:Write Up"
 author: "Likhitha, Paulina, Shrihan"
-date: "2023-10-24"
+date: "`r Sys.Date()`"
 output:
   html_document:
+    theme: cosmo
     code_folding: hide
     number_sections: false
     toc: yes
     toc_depth: 3
-    toc_float: yes
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
 ---
 
 ```{r setup, include=FALSE}
@@ -41,27 +44,83 @@ library(viridis)
 library(stargazer)
 ```
 
-## Introduction and SVI
+## Introduction
 
-Text about the Introduction
+### Research Topic 
+The aim of the project was to identify areas of vulnerability for different demographic groups at the census tract level by examining trends in the variables comprising the Social Vulnerability Index (SVI) created by the CDC. SMART questions were identified to narrow the scope of the project. The project sought to address a series of questions, all attempting to identify if there was any correlation between individual census variables and the compiled Thematic SVI scores, to illuminate any possible underrepresented groups across the indexes. 
 
-## Data set and Variables
+*1*: Does breaking down the SVI by different demographics, such as elderly populations, minority group populations, sex, income impact the vulnerability scores of the census tracts?
+*2*: Is there significance in identifying areas of population vulnerability based on different demographics compared to the overall population of each tract? 
+*3*: Do specific demographics’ vulnerability ratings have a higher impact on the overall SVI score of the census tract? 
+Can we visualize the different vulnerability scores based on demographic in an impactful way for public health officials and emergency planners? 
+*4*: With the available data and resources (R scripting and visualizations), is it possible to conduct this analysis within the class project deadlines? 
+*5*: Can we provide relevant/significant findings to public health and emergency planning officials (in terms of emergency response and social justice issues)? 
 
-Text and code showing the Dataset and variables
+### Social Vulnerability Index (SVI) 
+
+According to the [CDC](https://www.atsdr.cdc.gov/placeandhealth/svi/index.html), social vulnerability defines the potential negative effects on communities caused by external stresses on human health. These stresses can be events like natural disasters, disease outbreaks, or human-caused events. 
+To address social vulnerability, the CDC has compiled the SVI as a tool to help public health officials and emergency response planners identify communities that may need support before, during, or after disasters. It is provided at the state, county, and census tract level. It is comprised of 16 census variables. 
+By assessing trends in the variables used to create the SVI, the project will examine how splitting the population by different demographics such as race or age affects each census tract’s vulnerability across the 5 compiled themes. This could help identify if there are systemic injustices or inequities, as well as where different vulnerable groups are located. 
+
+
+## Data Set and Variables 
+
+### SVI Data 
+The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summary composed by the sum of the themes. 
+
+**Socioeconomic Status**: `RPL_THEME1`
+* Below 150% Poverty
+
+* Unemployed
+
+* Housing Cost Burden
+
+* No High School Diploma
+
+* No Health Insurance
+
+**Household Characteristics**: `RPL_THEME2`
+* Aged 65 & Older
+ 
+* Aged 17 & Younger	
+
+* Civilian with a Disability
+
+* Single-Parent Households
+
+* English Language Proficiency
+
+
+**Racial & Ethnic Minority Status**:`RPL_THEME3`
+* Hispanic or Latino (of any race); Black and African American, Not Hispanic or Latino; American Indian and Alaska Native, Not Hispanic or Latino; Asian, Not Hispanic or Latino; Native Hawaiian and Other Pacific Islander, Not Hispanic or Latino; Two or More Races, Not Hispanic or Latino; Other Races, Not Hispanic or Latino
+
+**Housing Type & Transportation**: `RPL_THEME4`
+
+* Multi-Unit Structures
+
+* Mobile Homes
+
+* Crowding
+
+* No Vehicle
+
+* Group Quarters
+
+**Overall**: `RPL_THEMES`
+* CDC then sums the sums for each theme, orders the tracts, and then calculates overall percentile rankings. 
 
 ## Clean the Data
 
-Load the data file
+**Load the data file**
 
-```{r Load the data file}
+```{r Load the data file, echo=T, results='hide'}
 SVI_Data <- read.csv("SVI_2020_US.csv")
 head(SVI_Data)
 ```
 
-Keep relevant columns
+**Keep relevant columns**
 
-```{r select columns}
-
+```{r select columns, echo=T, results='hide'}
 #selecting the required columns by subset function
 
 Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
@@ -72,32 +131,300 @@ head(Clean_data)
 
 ```
 
-subset Clean_Data to just CA tracts
-
-```{r CA tracts}
+**Subset to just CA tracts** 
+```{r CA tracts, echo=T, results='hide'}
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
 
-Show Outliers
+
+## Outliers {.tabset}
+
+### RPL_THEME1
 
 ```{r Outliers}
-#Display the Outliers in the cleaned data
-
 Outliers1 = outlierKD2(CA_SVI, RPL_THEME1, rm = FALSE, qqplt = TRUE)
+```
+
+### RPL_THEME2
+
+```{r}
 Outliers2 = outlierKD2(CA_SVI, RPL_THEME2, rm = FALSE, qqplt = TRUE)
+```
+
+### RPL_THEME3
+
+```{r}
 Outliers3 = outlierKD2(CA_SVI, RPL_THEME3, rm = FALSE, qqplt = TRUE)
-Outliers4 = outlierKD2(CA_SVI, RPL_THEME4, rm = FALSE, qqplt = TRUE)
-Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ```
 
-## Data Analysis
+### RPL_THEME4
 
-Code and findings for each of Maps, Scatterplots and histograms
+```{r}
+Outliers4 = outlierKD2(CA_SVI, RPL_THEME4, rm = FALSE, qqplt = TRUE)
+```
 
-## Correlation Heatmap
+### RPL_THEMES
 
-## Hypothesis Testing
+```{r}
+Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
+```
+
+### Explanation
+
+Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of our analysis the missing values values were removed, but the outliers were remved, to identify any particular at risk census tracts. 
+ 
+**RPL_THEMES**
+```{r}
+count <- sum(CA_SVI$RPL_THEMES == -999)
+count1 <- sum(CA_SVI$RPL_THEME1 == -999) 
+count2 <- sum(CA_SVI$RPL_THEME2 == -999) 
+count3 <- sum(CA_SVI$RPL_THEME3 == -999)
+count4 <- sum(CA_SVI$RPL_THEME4 == -999)
+```
+
+* There are `r count` missing values in `RPL_THEMES`
+
+* There are `r count1` missing values in `RPL_THEME1`
+
+* There are `r count2` missing values in `RPL_THEME2`
+
+* There are `r count3` missing values in `RPL_THEME3`
+
+* There are `r count4` missing values in `RPL_THEME4`
+
+## {-}
+
+
+## Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+### Maps
+It is interesting to examine the spatial distribution of this dataset, given that it looks across census tracts, a geographic scale. This portion of the analysis examines the spatial distribution of SVI and demographic variables.
+
+First the data had to be prepped for spatial analysis.
+*Note, when conducting the spatial join between `ca_tracts` and `CA_SVI`, there were 20 tracts present in `ca_tracts` not identified in `CA_SVI`.*
+
+```{r echo=T, results='hide'}
+#Load 2020 Census Tract shapefile for California
+ca_tracts <- tracts(state = "CA", year = 2020)
+
+#add 0 to FIPS variable in CA_SVI to merge with ca_tracts (on GEOID)
+CA_SVI$FIPS <- paste0("0", CA_SVI$FIPS)
+
+#Join CA_SVI and ca_tracts based on FIPS and GEOID
+CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
+
+#for mapping, convert CA_SVI to a Simple Features (map object)
+ca_svi_sf <- st_as_sf(CA_SVI)
+
+#remove missing values from our variables:
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
+
+```
+
+#### Maps {.tabset .tabset-fade .tabset-pills}
+
+##### RPL_THEMES
+
+aaa
+
+##### RPL_THEME1
+
+aaa
+
+##### RPL_THEME2
+
+```{r}
+
+```
+
+
+##### RPL_THEME3
+
+a
+
+##### RPL_THEME4
+
+a
+
+### Histogram
+
+#### Histograms {.tabset .tabset-fade .tabset-pills}
+
+##### HISTOGRAM #1
+
+##### HISTOGRAM #2
+
+##### HISTOGRAM #3
+
+### Scatterplots 
+
+#### Scatterplots {.tabset .tabset-fade .tabset-pills}
+
+##### Scatterplots #1
+A scatterplot comparing "RPL_THEMES" to "RPL_THEME1" offers valuable insights into the interplay of various social vulnerability factors. By examining this relationship, we can uncover how "Socioeconomic Status" (RPL_THEME1) influences the broader composite of social vulnerability (RPL_THEMES).
+
+```{r}
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+CA_SVI<-subset(head(CA_SVI,4000))
+CA_SVI1 <- subset(head(CA_SVI, 8000))
+
+
+
+
+ggplot(CA_SVI, aes(x = RPL_THEMES, y = RPL_THEME1, color=COUNTY)) +
+  geom_point() +
+  labs(x = " Total Svi score", y = "RPL_THEME1(Socioeconomic Status)") +
+  ggtitle("SPL_THEMES VS SPL_THEME1")
+
+```
+
+The scatter plot shows the relationship between the total SVI score (RPL_THEMES) and the socioeconomic status theme score (RPL_THEME1). The graph is colored by county, which allows us to see how the relationship between the two variables varies across different counties in California.
+
+The graph shows a positive correlation between the total SVI score and the socioeconomic status theme score. This means that counties with higher socioeconomic status scores also tend to have higher total SVI scores. This is likely because the socioeconomic status theme includes measures of poverty, unemployment, education, and housing, all of which are important factors that contribute to the overall SVI score. counties like Los Angles and Madera tend to have higher total SVI scores than counties in other parts of the state.
+
+However, there is also some variation in the relationship between the two variables across different counties. For example, some counties with high socioeconomic status (like LA) scores have relatively low total SVI scores, and vice versa. This suggests that there are other factors, in addition to socioeconomic status, that also contribute to the overall SVI score.
+
+
+##### Scatterplots #2
+"RPL_THEMES" vs "EP_AGE65" provides insights into the influence of age demographics on social vulnerability. This analysis helps us understand how the percentage of the population aged 65 and older affects overall social vulnerability, contributing to more informed community resilience and public health planning.
+
+```{r}
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EP_AGE65!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+
+
+
+ggplot(CA_SVI, aes(y = EP_AGE65, x = RPL_THEMES)) +
+  geom_point(color='red') +
+  labs(x = "Percent of population Age 65 or older", x = "RPL_THEMES(Total SVI)") +
+  ggtitle("Social Vulnerability vs Hispanic Population")
+
+
+```
+
+This graph shows the relationship between total SVI score (RPL_THEMES) and percent of population Age 65 or Older (EP_AGE65). In this scatter plot, data points are mostly concentrated along the x-axis (RPL_THEMES). This concentration near the x-axis suggests that there is little variation in the Total SVI (RPL_THEMES) with respect to the percentage of the population aged 65 or older (EP_AGE65).
+
+The horizontal distribution of data points indicates that there is no strong linear correlation between EP_AGE65 and RPL_THEMES. In other words, changes in the percentage of the population aged 65 or older do not appear to correspond to significant changes in the Total SVI score.
+
+This could indicate that other factors or variables may be influencing the Total SVI more significantly than age alone. The relationship might be more complex or influenced by multiple factors.
+
+The lack of a clear linear relationship between age and Total SVI suggests that age alone may not be a strong predictor of social vulnerability in this context. This insight is valuable for public health officials and emergency planners, as it may guide resource allocation and intervention strategies that consider a broader set of determinants.
+
+
+
+
+##### Scatterplots #3
+
+"EP_NOHSDP" vs "RPL_THEME3" unveils the dynamic link between education and social vulnerability. This analysis elucidates how the percentage of the population with no high school diploma influences vulnerability related to "Race and Ethnicity" (RPL_THEME3)
+```{r}
+
+library(ggplot2)
+
+
+CA_SVI <- subset(CA_SVI,  EP_NOHSDP!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
+
+
+ggplot(CA_SVI, aes(x = EP_NOHSDP, y = RPL_THEME3, color=COUNTY)) +
+  geom_point(color='blue') +
+  labs(x = "  Percent of the population with no high school diploma", y = "RPL_THEME3(Race and Ethnicity )") +
+  ggtitle("Scatterplot of Education and SVI")
+
+
+
+
+```
+
+In this scatter plot, most data points are concentrated near the y-axis, particularly up to 20% of "Percent of the population with no high school diploma" (EP_NOHSDP). This concentration suggests that there is little variation in the "RPL_THEME3" (Race and Ethnicity) score in this range of EP_NOHSDP.
+
+The scatter plot demonstrates that there isn't a linear relationship between EP_NOHSDP and RPL_THEME3. Instead, it shows a clear threshold effect or an abrupt change in RPL_THEME3 scores once EP_NOHSDP crosses the 20% mark.
+This pattern suggests that up to 20% of the population with no high school diploma, the impact on RPL_THEME3 is relatively minimal. However, beyond this threshold, there appears to be a significant increase in social vulnerability related to "Race and Ethnicity" (RPL_THEME3).
+
+The threshold effect implies that a specific level of education attainment (or lack thereof) may significantly influence the social vulnerability as measured by RPL_THEME3. It's essential to understand the reasons behind this threshold and how it relates to the SVI's focus on "Race and Ethnicity."
+
+For policymakers and public health officials, this graph highlights the importance of focusing on interventions and support programs for populations with educational attainment levels below 20%, as these individuals may face a different level of vulnerability related to race and ethnicity compared to those above the threshold.
+
+
+##### Scatterplots #4
+"EP_HISP" vs "RPL_THEME1" uncovers the influence of the Hispanic population on socioeconomic vulnerability. This analysis provides critical insights into how changes in the percentage of Hispanic residents impact the broader socioeconomic aspect of social vulnerability.
+```{r}
+library(ggplot2)
+
+CA_SVI <- subset(CA_SVI, EP_HISP != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
+ggplot(CA_SVI, aes(x = EP_HISP, y = RPL_THEME1)) +
+  geom_point(color = 'skyblue') +
+  labs(x = "Percentage of Hispanic population", y = "RPL_THEME1 (Socioeconomic Status)") +ggtitle("Race VS RPL_THEME1(socioeconmic Status)")
+
+```
+
+The scatter plot reveals a distinct pattern in the data distribution. Up to around 60% of the Hispanic population (EP_HISP), there is no clear correlation between EP_HISP and RPL_THEME1. Data points appear to be randomly distributed.
+
+Beyond the 65% mark of EP_HISP, there is a noticeable shift in the data distribution. Most data points cluster between SVI of 0.75 and 1, indicating a more consistent relationship between EP_HISP and RPL_THEME1.
+
+This pattern hints at a potential threshold effect, where the Hispanic population percentage may not significantly impact socioeconomic status (RPL_THEME1) below a certain level, but above this threshold, there is a more consistent impact.
+
+For policymakers and public health officials, this graph suggests that interventions and policies may have a more pronounced effect on socio-economic status if the Hispanic population is above 65%.
+
+
+
+### Correlation Heatmap
+
+```{r}
+library(dplyr)
+# creating correlation matrix
+correlation_matrix <- cor(CA_SVI[, c("EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EP_NOHSDP", "EPL_UNINSUR","EP_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG","EPL_MINRTY", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH","EP_HISP", "EP_ASIAN", "EP_AIAN","RPL_THEME1", "RPL_THEME2", "RPL_THEME3", "RPL_THEME4")])
+
+correlation_melted <- melt(correlation_matrix)
+
+ggplot(correlation_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "red", high = "green") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + # Rotate x-axis labels
+  labs(title = "Correlation Heatmap of SVI Variables and Demographics")
+
+
+```
+
+The correlation matrix shows the strength and direction of the relationship between each pair of variables. 1 indicates a perfect positive correlation (Green), a correlation coefficient of -1 indicates a perfect negative correlation (RED), and a correlation coefficient of 0 indicates no correlation (Orange).
+
+As we can see, most of the variables have no correlation, close to 0. But there are some variables with little positive Correlation. For example, EPL_POV150 and EPL_NOHBURD have some positive correlation with most of the variables. Understanding these positive correlations can inform policy and intervention strategies.
+
+There are also some strong negative correlations between some of the variables. For example, AGE_65 is negatively correlated with RPL_THEME1 and RPL_THEME3. The negative correlation suggests that there is an inverse relationship between the percentage of elderly residents and the socio-economic status (RPL_THEME1) and the vulnerability related to race and ethnicity (RPL_THEME3). As the elderly population increases, these aspects of social vulnerability tend to decrease.
+
+EP_ASIAN is litte negatively correlated with RPL_THEME1 and RPL_THEME2. This suggests that as the percentage of the Asian population (EP_ASIAN) increases in a particular area, the RPL_THEME1 and RPL_THEME2 scores tend to decrease.
+
+Like the previous scenario with the elderly population, a higher percentage of Asian residents may act as protective factors against certain social vulnerabilities. This could be due to factors such as economic stability, community support, and educational attainment.
+
+
+
+
+### Hypothesis Testing
+
+#### Hypothesis Tests {.tabset .tabset-fade .tabset-pills}
+
+
+##### RPL_THEME1
+
+aaa
+
+##### RPL_THEME2
+
+aa
+
+##### RPL_THEME3
+
+a
+
+##### RPL_THEME4
+
+a
 
 ## Conclusion
 
