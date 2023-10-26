@@ -42,6 +42,9 @@ library(tmap)
 library(viridis)
 #install.packages("stargazer")
 library(stargazer)
+library(extrafont)
+font_import(pattern = "Avenir")
+
 ```
 
 ## Introduction
@@ -49,12 +52,15 @@ library(stargazer)
 ### Research Topic 
 The aim of the project was to identify areas of vulnerability for different demographic groups at the census tract level by examining trends in the variables comprising the Social Vulnerability Index (SVI) created by the CDC. SMART questions were identified to narrow the scope of the project. The project sought to address a series of questions, all attempting to identify if there was any correlation between individual census variables and the compiled Thematic SVI scores, to illuminate any possible underrepresented groups across the indexes. 
 
-*1*: Does breaking down the SVI by different demographics, such as elderly populations, minority group populations, sex, income impact the vulnerability scores of the census tracts?
-*2*: Is there significance in identifying areas of population vulnerability based on different demographics compared to the overall population of each tract? 
-*3*: Do specific demographics’ vulnerability ratings have a higher impact on the overall SVI score of the census tract? 
-Can we visualize the different vulnerability scores based on demographic in an impactful way for public health officials and emergency planners? 
-*4*: With the available data and resources (R scripting and visualizations), is it possible to conduct this analysis within the class project deadlines? 
-*5*: Can we provide relevant/significant findings to public health and emergency planning officials (in terms of emergency response and social justice issues)? 
+**1**: Does breaking down the SVI by different demographics, such as elderly populations, minority group populations, sex, income impact the vulnerability scores of the census tracts?
+
+**2**: Is there significance in identifying areas of population vulnerability based on different demographics compared to the overall population of each tract? 
+
+**3**: Do specific demographics’ vulnerability ratings have a higher impact on the overall SVI score of the census tract? 
+
+**4**: Can we visualize the different vulnerability scores based on demographic in an impactful way for public health officials and emergency planners? 
+
+**5**: Can we provide relevant/significant findings to public health and emergency planning officials (in terms of emergency response and social justice issues)? 
 
 ### Social Vulnerability Index (SVI) 
 
@@ -62,17 +68,7 @@ According to the [CDC](https://www.atsdr.cdc.gov/placeandhealth/svi/index.html),
 To address social vulnerability, the CDC has compiled the SVI as a tool to help public health officials and emergency response planners identify communities that may need support before, during, or after disasters. It is provided at the state, county, and census tract level. It is comprised of 16 census variables. 
 By assessing trends in the variables used to create the SVI, the project will examine how splitting the population by different demographics such as race or age affects each census tract’s vulnerability across the 5 compiled themes. This could help identify if there are systemic injustices or inequities, as well as where different vulnerable groups are located. 
 
-###
-Tracts with zero estimates for total population (N = 645 for the U.S.) were removed during the ranking
-process. These tracts were added back to the SVI databases after ranking. The TOTPOP field value is 0,
-but the percentile ranking fields (RPL_THEME1, RPL_THEME2, RPL_THEME3, RPL_THEME4, and
-RPL_THEMES) were set to -999.
-▪ For tracts with > 0 TOTPOP, a value of -999 in any field either means the value was unavailable from the
-original census data or we could not calculate a derived value because of unavailable census data.
-▪ Any cells with a -999 were not used for further calculations. For example, total flags do not include fields
-with a -999 value.
-▪ Whenever available, w
-###
+
 ## Data Set and Variables 
 
 ### SVI Data 
@@ -84,6 +80,7 @@ The CDC states: "For each tract, we generated its percentile rank among all trac
 Then, these percentiles were summed for each of the four themes, and then ordered to determine theme-specific percentile rankings.
 
 **Socioeconomic Status**: `RPL_THEME1`
+
 * Below 150% Poverty
 
 * Unemployed
@@ -95,6 +92,7 @@ Then, these percentiles were summed for each of the four themes, and then ordere
 * No Health Insurance
 
 **Household Characteristics**: `RPL_THEME2`
+
 * Aged 65 & Older
  
 * Aged 17 & Younger	
@@ -107,6 +105,7 @@ Then, these percentiles were summed for each of the four themes, and then ordere
 
 
 **Racial & Ethnic Minority Status**:`RPL_THEME3`
+
 * Hispanic or Latino (of any race); Black and African American, Not Hispanic or Latino; American Indian and Alaska Native, Not Hispanic or Latino; Asian, Not Hispanic or Latino; Native Hawaiian and Other Pacific Islander, Not Hispanic or Latino; Two or More Races, Not Hispanic or Latino; Other Races, Not Hispanic or Latino
 
 **Housing Type & Transportation**: `RPL_THEME4`
@@ -122,13 +121,16 @@ Then, these percentiles were summed for each of the four themes, and then ordere
 * Group Quarters
 
 **Overall**: `RPL_THEMES`
+
 * CDC then sums the sums for each theme, orders the tracts, and then calculates overall percentile rankings.
+
+*Note: The dataset uses the value `-999` for tracts with zero estimates for total population or other census data. These tracts were then added back to the SVI databases after rankin, and were nit used for calculations.*
 
 ### Spatial Data
 
 The geographic scale of the data is limited to California census tracts, which allows a detailed analysis of over 9,000 census tracts, hopefully enabling more tailored actions and responses. CA is a state that is prone to natural disasters such as earthquakes, wildfires, and has a very high population, making it an important case study. 
 
-## Clean the Data
+## Cleaning the Data
 
 **We performed the following steps to clean the SVI dataset**
 
@@ -229,10 +231,12 @@ count4 <- sum(CA_SVI$RPL_THEME4 == -999)
 ### Maps
 It is interesting to examine the spatial distribution of this dataset, given that it looks across census tracts, a geographic scale. This portion of the analysis examines the spatial distribution of SVI and demographic variables.
 
+In addition to mapping the various SVI scores, it was also deemed important to map the spatial distribution of these demographic variables used to comprise the indexes. This way, it is possible to compare the spatial distribution of demographic data to where high risk scores are located. This analysis was done on the county level scale, to understand an overall picture of demographics. 
+
 First the data had to be prepped for spatial analysis.
 *Note, when conducting the spatial join between `ca_tracts` and `CA_SVI`, there were 20 tracts present in `ca_tracts` not identified in `CA_SVI`.*
 
-```{r echo=T, results='hide'}
+```{r spatialewa, echo=T, results='hide'}
 #Load 2020 Census Tract shapefile for California
 ca_tracts <- tracts(state = "CA", year = 2020)
 
@@ -245,13 +249,6 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 #for mapping, convert CA_SVI to a Simple Features (map object)
 ca_svi_sf <- st_as_sf(CA_SVI)
 
-#remove missing values from our variables:
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME3 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
-ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
-
 
 ```
 
@@ -259,51 +256,26 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
 
 ##### RPL_THEMES
 
-```{r}
-<<<<<<< HEAD
-map0 = 
-  ggplot(data = ca_svi_sf_clean) +
-=======
+```{r themes, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
+
 map0= 
+  
 ggplot(data = ca_svi_sf_clean) +
 >>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
   geom_sf(aes(fill = RPL_THEMES)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Overall SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
+  theme_void()
 map0 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
 
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
 
-=======
-<<<<<<< Updated upstream
-map0 
-=======
-map0
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
 ```
 
 ##### RPL_THEME1
 
-```{r}
-<<<<<<< HEAD
-<<<<<<< HEAD
-map1 = 
-=======
-<<<<<<< Updated upstream
-=======
-map1 = 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
->>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
-=======
+```{r theme1, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 
 map1 = 
 >>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
@@ -314,25 +286,14 @@ ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME1)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
+  theme_void()
 map1
 
 ```
 
 ##### RPL_THEME2
-```{r}
-<<<<<<< HEAD
-<<<<<<< HEAD
-map2 = 
-=======
-<<<<<<< Updated upstream
-=======
-map2 = 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
->>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
-=======
+```{r theme2, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
 
 map2 = 
 >>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
@@ -343,24 +304,21 @@ ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME2)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
+  theme_void()
 map2
 ```
 
 ##### RPL_THEME3
-```{r}
+
+```{r theme3, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME3 != -999)
+
 map3 = 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME3)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 3 (Racial & Ethnic Minority Status) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
-<<<<<<< HEAD
-map3
-
-=======
+  theme_void()
 
 map3
 >>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
@@ -368,15 +326,8 @@ map3
 
 ##### RPL_THEME4
 
-<<<<<<< HEAD
-
-map4 =
-  ggplot(data = ca_svi_sf_clean) +
->>>>>>> Stashed changes
->>>>>>> Stashed changes
->>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
-=======
-```{r}
+```{r theme4, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
 
 map4 =
   
@@ -385,46 +336,63 @@ ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME4)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
+  theme_void()
 
 <<<<<<< HEAD
 =======
 map4
 
 ```
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
-
-##### Demographic Maps 
-In addition to mapping the various SVI scores, it was also deemed important to map the spatial distribution of these demographic variables used to comprise the indexes. This way, it is possible to compare the spatial distribution of demographic data to where high risk scores are located. This analysis was done on the county level scale, to understand an overall picture of demographics. 
-
-### E_MINRTY Map (estimate of minority population)
 
 
-```{r}
+##### E_MINRTY Map
 
+```{r minority, echo=T, results='hide'}
 ca_svi_sf_clean <- subset(ca_svi_sf, EPL_MINRTY != -999)
 
-EPL_MINRTY_map =
-  
+EPL_MINRTY_map = 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = EPL_MINRTY)) +
   scale_fill_viridis(option = "C", direction = 1) +
-  labs(title = "Estimate of Minority Population by CA Census Tracts") +
-  theme_void()+
-  theme(text = element_text(family = "Avenir"))
+  labs(title = "Estimate of Minority Population by CA Census Tracts", fill = "Estimate of Minority Population" ) +
+  theme_void()
 
 EPL_MINRTY_map
+```
+
+
+##### EP_AGE65 Map 
+
+```{r age, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_AGE65 != -999)
+
+EP_AGE65_map =
+  ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = EP_AGE65)) +
+  scale_fill_viridis(option = "C", direction = 1) +
+  labs(title = "Estimate of Elderly Population by CA Census Tracts", fill = "Estimate of Persons aged 65+")+
+theme_void()
+
+EP_AGE65_map
 
 ```
 
 
-### EP_AGE65 Map (Percentage of persons aged 65 and older estimate, 2016-2020 ACS)
+##### EP_POV150 Map 
 
+```{r pov, echo=T, results='hide'}
+ca_svi_sf_clean <- subset(ca_svi_sf, EP_POV150 != -999)
 
+EP_AGE65_map =
 
-### EP_POV150 Map (Persons below 150% poverty estimate)
+ggplot(data = ca_svi_sf_clean) +
+geom_sf(aes(fill = EP_POV150)) +
+scale_fill_viridis(option = "C", direction = 1) +
+labs(title = "Estimate of Persons Below 150% povertyby CA Census Tracts", fill = "Estimate of Persons in Poverty") +
+theme_void()
 
+EP_AGE65_map
+```
 
 
 ### Histogram
@@ -462,6 +430,7 @@ histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_S
 print(histogram_plot)
 
 ```
+
 The histogram visualizes the distribution of mean SVI (mean of RPL_THEMES) scores across different counties. The height of each bar represents the mean SVI for a specific county. Higher bar heights indicate higher mean SVI scores. From the histogram its evident that the highest mean SVI in California is > 0.8 (Imperial county)
 
 This histogram serves as a valuable visualization for decision-makers, emergency planners, and policymakers. It highlights the areas that might require special attention and resources to address social vulnerability effectively. Targeting these counties for disaster preparedness, healthcare support, or socioeconomic initiatives can contribute to enhancing resilience and reducing vulnerability.
@@ -731,6 +700,9 @@ Like the previous scenario with the elderly population, a higher percentage of A
 #### Hypothesis Tests {.tabset .tabset-fade .tabset-pills}
 
 ##### RPL_THEMES and RPL_THEME1
+
+**RPL_THEMES and RPL_THEME1**
+
 ```{r}
 CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
@@ -761,6 +733,9 @@ The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is eviden
 
 
 ##### RPL_THEMES and RPL_THEME2
+
+**RPL_THEMES and RPL_THEME2**
+
 ```{r}
 CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
 
@@ -783,8 +758,11 @@ print(t_test_result2)
 
 
 ##### RPL_THEMES and RPL_THEME3
+
+**RPL_THEMES and RPL_THEME3**
+
 ```{r}
-CA_SVI <- subset(CA_SVI,  RPL_THEME!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
 print(t_test_result3)
@@ -804,7 +782,12 @@ print(t_test_result3)
 **Results**: Overall SVI is between 0.138 and 0.124 *lower* than the mean of Ethnic Minority Status. The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME3` have different means. 
 
 ##### RPL_THEMES and RPL_THEME4
+
+**RPL_THEMES and RPL_THEME4** 
+
 ```{r}
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+
 t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
 print(t_test_result4)
 ```
@@ -824,13 +807,15 @@ print(t_test_result4)
 **Results**: Overall SVI is between 0.0028 and 0.0195 higher than the mean of  Housing Type & Transportation. The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME4` have different means. 
 
 ##### Conclusion
-This was an interesting analysis because it illuminated that it is likely that`RPL_THEME3`: Ethnic Minority Status brings up the Sum SVI score, while the other three themes' means are lower than overall SVI. It would be interesting analysis to identify those census tracts that have the highest `RPL_THEME3` scores and compare them to the other themes. 
+This was an interesting analysis because it illuminated that it is likely that`RPL_THEME3`: Ethnic Minority Status brings up the Sum SVI score, while the other three themes' means are lower than overall SVI. It would be interesting analysis to identify those census tracts that have the highest `RPL_THEME3` scores and do further quantitative and qualitative analysis.
 
 
 ## Results
-The results of the analysis may have shown little correlation between variables and SVI themes, but this is still an interesting finding. 
-While there is variation between the means of SVI scores, they are similar, which would be interesting to see if is true across all states or just california.
-Additionally, these results could indicate that the SVI compiled by the CDC provides a comprehensive and holistic representation of vulnerability for each theme. Nothing really gets left out, each theme addresses important vulnerabilities. 
+The results of the analysis may have shown little *new* correlation between variables and SVI themes, but this is still an interesting finding. 
+
+While there is variation between the means of SVI scores, they are still very similar and close in range. This would be interesting to test if this is true across all states or just California, a high risk state. Additionally, it could benefit future analysis to filter the dataset to most at risk or areas of particular interest to compare the means of SVI themes across those areas.  
+
+Additionally, these results could indicate that the SVI compiled by the CDC provides a comprehensive and holistic representation of vulnerability for each theme. Nothing really gets left out, each theme addresses important vulnerabilities. This is a fair assumption considering the SVI is carefully crafted to ensure that each demographic group is considered and covered in the emergency response efforts. 
 
 
 
@@ -839,7 +824,11 @@ Additionally, these results could indicate that the SVI compiled by the CDC prov
 
 **Aggregate data by county/regions**
 
+Following the project presentation, the group was able to further filter the data and aggregate by county or top ten most vulnerable tracts. Any further filtering or grouping of the dataset by specific locations/regions/areas could provide helpful insights into where to respond to different kinds of emergencies and where different kinds of vulnerability is distributed. 
+
 **Find spatial autocorrelation of demographic variables**
+
+It could be interesting to map and visualize other correlation using spatial methods, such as utilizing neighborhood comparisons such as Average Nearest Neighbor, to identify areas of high risk in comparison to those areas around them. This type of analysis could also help identify areas of high SVI risk **AND** have significant demographic trends. 
 
 **Find correlation with other datasets **
 
