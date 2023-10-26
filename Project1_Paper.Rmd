@@ -607,29 +607,77 @@ Like the previous scenario with the elderly population, a higher percentage of A
 
 ##### RPL_THEMES and RPL_THEME1
 ```{r}
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+
 t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
 
-# Create a nicely formatted table
-stargazer(t_test_result1, type = "text")
+print(t_test_result1)
 
 ```
+
+**Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME1` are the same
+
+**Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME1` are not the same
+
+**Significance level** ($\alpha$): 0.05
+
+**\(p\)-value**: <2e-16
+
+**Mean of Overall SVI**: 0.588
+
+**Mean of Theme 1**: 0.547
+
+**Results**: Overall SVI is between 0.0329 and 0.0500 higher than the mean of Socioeconomic Status theme
+The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME1` have different means. 
 
 
 ##### RPL_THEMES and RPL_THEME2
 ```{r}
+CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
+
 t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
 
 # Print the results
 print(t_test_result2)
 ```
+**Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME2` are the same
+
+**Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME2` are not the same
+
+**Significance level** ($\alpha$): 0.05
+
+**\(p\)-value**: <2e-16
+
+**Mean of Overall SVI**: 0.588
+
+**Mean of Theme 2**:  0.538
+
+**Results**: Overall SVI is between 0.0418 and 0.0584 higher than the mean of Household Characteristics theme. The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME2` have different means. 
+
 
 ##### RPL_THEMES and RPL_THEME3
 ```{r}
+CA_SVI <- subset(CA_SVI,  RPL_THEME!= -999 )
+
 t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
 
 # Print the results
 print(t_test_result3)
 ```
+**Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME3` are the same
+
+**Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME3` are not the same
+
+**Significance level** ($\alpha$): 0.05
+
+**\(p\)-value**: <2e-16
+
+**Mean of Overall SVI**: 0.588
+
+**Mean of Theme 3**:  0.720
+
+**Results**: Overall SVI is between 0.138 and 0.124 *lower* than the mean of Ethnic Minority Status. The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME3` have different means. 
 
 ##### RPL_THEMES and RPL_THEME4
 ```{r}
@@ -639,10 +687,33 @@ t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
 print(t_test_result4)
 ```
 
+**Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME4` are the same
 
-## Conclusion
+**Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME3` are not the same
+
+**Significance level** ($\alpha$): 0.05
+
+**\(p\)-value**: <2e-16
+
+**Mean of Overall SVI**: 0.588
+
+**Mean of Theme 4**:  0.577
+
+**Results**: Overall SVI is between 0.0028 and 0.0195 higher than the mean of  Housing Type & Transportation. The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is evidence to support that the variables `RPL_THEMES` and `RPL_THEME4` have different means. 
+
+##### Conclusion
+This was an interesting analysis because it illuminated that it is likely that`RPL_THEME3`: Ethnic Minority Status brings up the Sum SVI score, while the other three themes' means are lower than overall SVI. It would be interesting analysis to identify those census tracts that have the highest `RPL_THEME3` scores and compare them to the other themes. 
+
+
+## Results
+The results of the analysis may have shown little correlation between variables and SVI themes, but this is still an interesting finding. 
+While there is variation between the means of SVI scores, they are similar, which would be interesting to see if is true across all states or just california.
+Additionally, these results could indicate that the SVI compiled by the CDC provides a comprehensive and holistic representation of vulnerability for each theme. Nothing really gets left out, each theme addresses important vulnerabilities. 
+
+
 
 ## Future Work
+
 
 **Aggregate data by county/regions**
 
@@ -660,5 +731,6 @@ We could use the SVI and predictive modelling techinques in disaster preparednes
 **Predict future SVI across themes based on projected demographic data**
 
 We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions.  
+
 
 
