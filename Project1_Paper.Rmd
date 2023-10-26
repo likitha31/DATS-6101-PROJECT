@@ -266,7 +266,6 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
 map0= 
   
 ggplot(data = ca_svi_sf_clean) +
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
   geom_sf(aes(fill = RPL_THEMES)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Overall SVI Score by CA Census Tracts") +
@@ -285,11 +284,7 @@ The spatial distribution of `Overall SVI` is shown here, with areas in the cente
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 
 map1 = 
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
 ggplot(data = ca_svi_sf_clean) +
-=======
-  ggplot(data = ca_svi_sf_clean) +
->>>>>>> Stashed changes
   geom_sf(aes(fill = RPL_THEME1)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
@@ -305,11 +300,7 @@ A similar spatial distribution is seen in `Theme 1` as `Overall SVI`, but toggli
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
 
 map2 = 
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
 ggplot(data = ca_svi_sf_clean) +
-=======
-  ggplot(data = ca_svi_sf_clean) +
->>>>>>> Stashed changes
   geom_sf(aes(fill = RPL_THEME2)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
@@ -332,7 +323,6 @@ ggplot(data = ca_svi_sf_clean) +
   theme_void()
 
 map3
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
 ```
 
 Mapping `Theme 3` shows the distribution of Racial & Ethnic Minority groups in the state. This indicates that the groups that would be vulnerable under Theme 3 are located in the Southwest portion of the state. 
@@ -345,14 +335,12 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
 map4 =
   
 ggplot(data = ca_svi_sf_clean) +
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
   geom_sf(aes(fill = RPL_THEME4)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
   theme_void()
 
-<<<<<<< HEAD
-=======
+
 map4
 
 ```
@@ -846,10 +834,7 @@ CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
 
 t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
-<<<<<<< HEAD
-=======
 
->>>>>>> fa93bf6b99cd694db651dca85935b1e4e3a08b71
 print(t_test_result1)
 
 ```
