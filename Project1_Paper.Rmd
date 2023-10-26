@@ -315,11 +315,11 @@ map4
 
 #### Histograms {.tabset .tabset-fade .tabset-pills}
 
-*We harnessed the power of histograms to pinpoint the counties within different California regions that could be particularly vulnerable to the effects of disasters or health crises. Our analysis successfully unveiled the top 10 counties characterized by the highest Social Vulnerability Index (SVI) scores, elevated poverty rates, increased unemployment levels, and a notable population lacking insurance coverage.*
+We harnessed the power of histograms to pinpoint the counties within different California regions that could be particularly vulnerable to the effects of disasters or health crises. Our analysis successfully unveiled the top 10 counties characterized by the highest Social Vulnerability Index (SVI) scores, elevated poverty rates, increased unemployment levels, and a notable population lacking insurance coverage.
 
 ##### HISTOGRAM #1
 
-The below histogram displays the counties with the highest SVI index. 
+This visualization showcases the counties most susceptible to social vulnerability, highlighting the top 10 counties with the highest mean SVI scores. 
 
 ```{r Histogram1}
 county_svi <- CA_SVI %>%
@@ -346,10 +346,14 @@ histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_S
 print(histogram_plot)
 
 ```
+The histogram visualizes the distribution of mean SVI (mean of RPL_THEMES) scores across different counties. The height of each bar represents the mean SVI for a specific county. Higher bar heights indicate higher mean SVI scores. From the histogram its evident that the highest mean SVI in California is > 0.8 (Imperial county)
+
+This histogram serves as a valuable visualization for decision-makers, emergency planners, and policymakers. It highlights the areas that might require special attention and resources to address social vulnerability effectively. Targeting these counties for disaster preparedness, healthcare support, or socioeconomic initiatives can contribute to enhancing resilience and reducing vulnerability.
+
 
 ##### HISTOGRAM #2
 
-The below histogram displays the counties with the highest Poverty. 
+The below histogram displays the top 10 counties in California with the highest levels of poverty based on the EPL_POV150 (Percentage of the population living below the poverty line) indicator. These counties are characterized by a significant percentage of their population living below the poverty line, indicating economic vulnerability. 
 
 ```{r}
 county_svi <- CA_SVI %>%
@@ -376,9 +380,13 @@ print(histogram_plot)
 
 ```
 
+The histogram visually represents the distribution of mean EPL_POV150 (Poverty) scores across different counties in California. Each bar in the histogram corresponds to a specific county, and the height of the bar indicates the mean poverty level in that county. Taller bars represent counties with higher mean poverty rates.
+
+This histogram can be a valuable visualization for social planners, and organizations working on poverty alleviation. It identifies areas with the most pressing poverty-related challenges, guiding resource allocation, social support programs, and initiatives aimed at reducing poverty and improving the well-being of residents.
+
 ##### HISTOGRAM #3
 
-The below histogram displays the counties with the highest Unemployment. 
+The below histogram displays the top 10 counties in California with the highest levels of unemployment based on the EPL_UNEMP (Percentage of the population unemployed) indicator. These counties experience a substantial percentage of their population facing unemployment, indicating economic and workforce vulnerability.
 
 ```{r}
 county_svi <- CA_SVI %>%
@@ -405,9 +413,14 @@ print(histogram_plot)
 
 ```
 
+The histogram visually represents the distribution of mean EPL_UNEMP (Unemployment) scores across various counties in California. Each bar in the histogram corresponds to a specific county, and the height of the bar indicates the mean unemployment rate in that county. Taller bars represent counties with higher mean unemployment rates.
+
+This histogram serves as a valuable visualization for workforce development agencies, and organizations involved in employment and economic growth. It highlights regions where unemployment is a significant concern, providing insights for resource allocation, job creation initiatives, and unemployment reduction programs.
+
+
 ##### HISTOGRAM #4
 
-The below histogram displays the counties with the highest uninsured population. 
+The below histogram highlights the top 10 counties in California with the highest levels of people without health insurance, as measured by the EPL_UNINSUR (Percentage of the population without health insurance) indicator. These counties have a significant portion of their population lacking health insurance coverage, indicating potential vulnerabilities in accessing healthcare services.
 
 ```{r}
 county_svi <- CA_SVI %>%
@@ -434,7 +447,11 @@ print(histogram_plot)
 
 ```
 
-*What stands out in these plots is the consistent presence of certain counties like Madera, Fresno, Merced and Mendocino among the top 10 counties for all four of these critical variables. This highlights that these counties could be potential focal points for targeted interventions and disaster preparedness efforts.*
+The histogram visually represents the distribution of mean EPL_UNINSUR (Uninsured) scores across various counties in California. Each bar in the histogram corresponds to a specific county, and the height of the bar indicates the mean percentage of the population without health insurance in that county. Taller bars represent counties with a higher percentage of uninsured residents.
+
+This histogram provides valuable insights for healthcare providers, and organizations working to improve access to healthcare services. It highlights regions where a substantial population lacks health insurance, guiding initiatives for expanding healthcare coverage and addressing healthcare disparities.
+
+What is striking in all four of these visualizations is the consistent presence of specific counties, namely Madera, Fresno, Merced, and Mendocino, consistently appearing among the top 10 counties for all four critical variables. This noteworthy pattern underscores the potential significance of these counties as focal points for targeted interventions and disaster preparedness initiatives. Additionally we could also focus on these counties while working on future projects and perform comparitive or Root cause analysis to determine why certain areas have higher SVI compared to others. 
 
 ### Scatterplots 
 
@@ -697,8 +714,23 @@ Additionally, these results could indicate that the SVI compiled by the CDC prov
 
 ## Future Work
 
-Aggregate the data further by regions of the state so results could be more interpretable
-We could also consider spatial autocorrelation of these tracts and their SVI scores to see if there are trends in geographic distribution of types of social vulnerability. Analysis such as hotspots and nearest neighbor could provide powerful visual EDA. 
+
+**Aggregate data by county/regions**
+
+**Find spatial autocorrelation of demographic variables**
+
+**Find correlation with other datasets **
+
+Working with the Social Vulnerability Index (SVI) dataset and finding correlations with other datasets can provide valuable insights into social vulnerability factors and their relationships with various other factors.
+A few of the datasets that we could work on with the SVI dataset are: COVID-19 dataset, the Natural Disasters dataset related to wildfire and earthquake, Economic and Income Datasets etc 
+
+**Predict which communities are vulnerable after natural disaster/disease outbreak**
+
+We could use the SVI and predictive modelling techinques in disaster preparedness and response, through this we can better allocate resources, save lives, and reduce the impact of disasters and disease outbreaks on vulnerable communities. Additionally, this approach can help us to prioritize interventions and support the goal of achieving equitable disaster resilience.
+
+**Predict future SVI across themes based on projected demographic data**
+
+We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions.  
 
 
 
