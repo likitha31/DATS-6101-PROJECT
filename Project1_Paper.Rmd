@@ -249,13 +249,35 @@ map0 =
   theme_void()+
   theme(text = element_text(family = "Avenir"))
 map0 
+=======
+<<<<<<< Updated upstream
+
+=======
+<<<<<<< Updated upstream
+map0 
+=======
+map0
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
+>>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
 ```
 
 ##### RPL_THEME1
 
 ```{r}
+<<<<<<< HEAD
 map1 = 
+=======
+<<<<<<< Updated upstream
+=======
+map1 = 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+>>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
 ggplot(data = ca_svi_sf_clean) +
+=======
+  ggplot(data = ca_svi_sf_clean) +
+>>>>>>> Stashed changes
   geom_sf(aes(fill = RPL_THEME1)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
@@ -267,8 +289,19 @@ map1
 
 ##### RPL_THEME2
 ```{r}
+<<<<<<< HEAD
 map2 = 
+=======
+<<<<<<< Updated upstream
+=======
+map2 = 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+>>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
 ggplot(data = ca_svi_sf_clean) +
+=======
+  ggplot(data = ca_svi_sf_clean) +
+>>>>>>> Stashed changes
   geom_sf(aes(fill = RPL_THEME2)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
@@ -292,15 +325,17 @@ map3
 
 ##### RPL_THEME4
 
-```{r}
-map4 = ggplot(data = ca_svi_sf_clean) +
+
+map4 =
+  ggplot(data = ca_svi_sf_clean) +
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
+>>>>>>> d39b17bff91504ad7a3c6a8b6637aa55eb8a011e
   geom_sf(aes(fill = RPL_THEME4)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
-map4
-```
 
 
 ### Histogram
