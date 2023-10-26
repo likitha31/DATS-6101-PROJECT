@@ -219,7 +219,12 @@ CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
 ca_svi_sf <- st_as_sf(CA_SVI)
 
 #remove missing values from our variables:
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME3 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME4 != -999)
+ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEMES != -999)
+
 
 ```
 
@@ -227,26 +232,65 @@ ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
 
 ##### RPL_THEMES
 
-aaa
-
-##### RPL_THEME1
-
-aaa
-
-##### RPL_THEME2
-
 ```{r}
+
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEMES)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Overall SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
 
 ```
 
+##### RPL_THEME1
+
+```{r}
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME1)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 1 (Socioeconomic Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+
+```
+
+##### RPL_THEME2
+```{r}
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME2)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 2 (Household Characteristics) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+```
 
 ##### RPL_THEME3
+```{r}
 
-a
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME3)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 3 (Racial & Ethnic Minority Status) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+
+```
 
 ##### RPL_THEME4
 
-a
+```{r}
+ggplot(data = ca_svi_sf_clean) +
+  geom_sf(aes(fill = RPL_THEME4)) +
+  scale_fill_viridis(option = "D", direction = 1) +
+  labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
+  theme_void()+
+  theme(text = element_text(family = "Avenir"))
+
+```
 
 ### Histogram
 
@@ -410,22 +454,40 @@ Like the previous scenario with the elderly population, a higher percentage of A
 
 #### Hypothesis Tests {.tabset .tabset-fade .tabset-pills}
 
+##### RPL_THEMES and RPL_THEME1
+```{r}
+t_test_result1 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME1)
 
-##### RPL_THEME1
+# Create a nicely formatted table
+stargazer(t_test_result1, type = "text")
 
-aaa
+```
 
-##### RPL_THEME2
 
-aa
+##### RPL_THEMES and RPL_THEME2
+```{r}
+t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
 
-##### RPL_THEME3
+# Print the results
+print(t_test_result2)
+```
 
-a
+##### RPL_THEMES and RPL_THEME3
+```{r}
+t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
 
-##### RPL_THEME4
+# Print the results
+print(t_test_result3)
+```
 
-a
+##### RPL_THEMES and RPL_THEME4
+```{r}
+t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
+
+# Print the results
+print(t_test_result4)
+```
+
 
 ## Conclusion
 
