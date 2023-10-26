@@ -111,14 +111,20 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 
 ## Clean the Data
 
-**Load the data file**
+**We performed the following steps to clean the SVI dataset**
+
+**Extract the data file**
+
+As mentioned before the dataset was sourced directly from the CDC website. The dataset was downloaded in the form of CSV file and integrated into the project. 
 
 ```{r Load the data file, echo=T, results='hide'}
 SVI_Data <- read.csv("SVI_2020_US.csv")
 head(SVI_Data)
 ```
 
-**Keep relevant columns**
+**Subset the columns**
+
+The SVI dataset has close to 138 columns. However, for our specific analysis, we don't require all of 138 columns. Hence we subsetted the dataset by carefully selecting the 40 most pertinent and crucial columns for our analysis.
 
 ```{r select columns, echo=T, results='hide'}
 #selecting the required columns by subset function
@@ -131,7 +137,10 @@ head(Clean_data)
 
 ```
 
-**Subset to just CA tracts** 
+**Subset the rows**
+
+Additionally, the dataset comprises of substantial 84,000 rows. Again to tailor our analysis, we opted to narrow our scope to a specific area of interest, so we performed a row subsetting operation to include data exclusively related to California.
+
 ```{r CA tracts, echo=T, results='hide'}
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
