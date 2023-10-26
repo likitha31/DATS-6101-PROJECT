@@ -817,7 +817,7 @@ While there is variation between the means of SVI scores, they are still very si
 
 Additionally, these results could indicate that the SVI compiled by the CDC provides a comprehensive and holistic representation of vulnerability for each theme. Nothing really gets left out, each theme addresses important vulnerabilities. This is a fair assumption considering the SVI is carefully crafted to ensure that each demographic group is considered and covered in the emergency response efforts. 
 
-
+In this study, we have employed various data visualization techniques, including Maps, Histograms, and Scatterplots, to present the social vulnerability data. A discernible insight derived from our visualizations is the enhanced efficacy of utilizing maps for visualizing the SVI dataset, given its inherently spatial nature. Our analysis has yielded informative visual representations that can empower decision-makers to make more objective resource allocation decisions based on identified needs.
 
 ## Future Work
 
