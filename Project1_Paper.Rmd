@@ -577,8 +577,7 @@ a
 
 **Find correlation with other datasets **
 
-Working with the Social Vulnerability Index (SVI) dataset and finding correlations with other datasets can provide valuable insights into social vulnerability factors and their relationships with various other factors.
-A few of the datasets that we could work on with the SVI dataset are: COVID-19 dataset, the Natural Disasters dataset related to wildfire and earthquake, Economic and Income Datasets etc 
+Since we did not find any significant correlation in the current dataset we can work on finding correlations with other datasets. This can provide valuable insights into social vulnerability factors and their relationships with various other factors. A few of the datasets that we could work on with the SVI dataset are: COVID-19 dataset, the Natural Disasters dataset related to wildfire and earthquake, Economic and Income Datasets etc 
 
 **Predict which communities are vulnerable after natural disaster/disease outbreak**
 
@@ -586,6 +585,5 @@ We could use the SVI and predictive modelling techinques in disaster preparednes
 
 **Predict future SVI across themes based on projected demographic data**
 
-We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions.  
-
+We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions. A predictive model, such as linear regression or machine learning, can be built, trained, and validated to forecast future SVI scores. We can also use feature engineering to capture demographic trends effectively.
 
