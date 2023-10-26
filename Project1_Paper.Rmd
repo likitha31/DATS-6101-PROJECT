@@ -111,17 +111,23 @@ The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summa
 
 ## Clean the Data
 
-**Load the data file**
+**We performed the following steps to clean the SVI dataset**
+
+**Extract the data file**
+
+As mentioned before the dataset was sourced directly from the CDC website. The dataset was downloaded in the form of CSV file and integrated into the project.
+
 
 ```{r Load the data file, echo=T, results='hide'}
 SVI_Data <- read.csv("SVI_2020_US.csv")
 head(SVI_Data)
 ```
 
-**Keep relevant columns**
+**Subset the columns**
+
+The SVI dataset has close to 138 columns. However, for our specific analysis, we don't require all of 138 columns. Hence we subsetted the dataset by carefully selecting the 40 most pertinent and crucial columns for our analysis.
 
 ```{r select columns, echo=T, results='hide'}
-
 #selecting the required columns by subset function
 
 Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
@@ -132,11 +138,13 @@ head(Clean_data)
 
 ```
 
-**Subset to just CA tracts** 
+**Subset the rows**
+
+Additionally, the dataset comprises of substantial 84,000 rows. Again to tailor our analysis, we opted to narrow our scope to a specific area of interest, so we performed a row subsetting operation to include data exclusively related to California.
+
 ```{r CA tracts, echo=T, results='hide'}
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 ```
-
 
 ## Outliers {.tabset}
 
@@ -252,11 +260,126 @@ a
 
 #### Histograms {.tabset .tabset-fade .tabset-pills}
 
+*We harnessed the power of histograms to pinpoint the counties within different California regions that could be particularly vulnerable to the effects of disasters or health crises. Our analysis successfully unveiled the top 10 counties characterized by the highest Social Vulnerability Index (SVI) scores, elevated poverty rates, increased unemployment levels, and a notable population lacking insurance coverage.*
+
 ##### HISTOGRAM #1
+
+The below histogram displays the counties with the highest SVI index. 
+
+```{r Histogram1}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_SVI = mean(RPL_THEMES)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean SVI
+top_10_counties <- county_svi %>%
+  top_n(10, wt = mean_SVI)
+
+# Create a histogram of the mean SVI for the top 10 counties
+histogram_plot <- ggplot(data = top_10_counties, aes(x = reorder(COUNTY, -mean_SVI), y = mean_SVI)) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean SPL_THEMES (SVI)", title = "Top 10 Counties with High SVI") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
 
 ##### HISTOGRAM #2
 
+The below histogram displays the counties with the highest Poverty. 
+
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_POV = mean(EPL_POV150)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean EPL_POV
+top_10_counties_POV150 <- county_svi %>%
+  top_n(10, wt = mean_POV)
+
+histogram_plot <- ggplot(data = top_10_counties_POV150, aes(x = reorder(COUNTY, -mean_POV), y = mean_POV)) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean EPL_POV (Poverty)", title = "Top 10 Counties with High Povery") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+
 ##### HISTOGRAM #3
+
+The below histogram displays the counties with the highest Unemployment. 
+
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_UNE = mean(EPL_UNEMP)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean EPL_UNEMP
+top_10_counties_UNEMP <- county_svi %>%
+  top_n(10, wt = mean_UNE)
+
+histogram_plot <- ggplot(data = top_10_counties_UNEMP, aes(x = reorder(COUNTY, -mean_UNE), y = mean_UNE)) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean mean_UNE (Unemployment)", title = "Top 10 Counties with High unemployment") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+
+##### HISTOGRAM #4
+
+The below histogram displays the counties with the highest uninsured population. 
+
+```{r}
+county_svi <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(mean_UNINSUR = mean(EPL_UNINSUR)) %>%
+  ungroup()
+
+# Select the top 10 counties with the highest mean mean_UNINSUR
+top_10_counties_UNINSUR <- county_svi %>%
+  top_n(10, wt = mean_UNINSUR)
+
+histogram_plot <- ggplot(data = top_10_counties_UNINSUR, aes(x = reorder(COUNTY, -mean_UNINSUR), y = mean_UNINSUR)) +
+  geom_bar(stat = "identity", fill = "darkgreen", color = "yellow", alpha = 0.7) +
+  
+  # Label the axes and add a title
+  labs(x = "County", y = "Mean mean_UNINSUR (Uninsured)", title = "Top 10 Counties with people without Insurance") +
+  
+  # Customize the appearance
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))  # Rotate x-axis labels for better readability
+
+# Display the histogram
+print(histogram_plot)
+
+```
+
+*What stands out in these plots is the consistent presence of certain counties like Madera, Fresno, Merced and Mendocino among the top 10 counties for all four of these critical variables. This highlights that these counties could be potential focal points for targeted interventions and disaster preparedness efforts.*
 
 ### Scatterplots 
 
