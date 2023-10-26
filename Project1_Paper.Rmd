@@ -248,12 +248,16 @@ ggplot(data = ca_svi_sf_clean) +
   labs(title = "Overall SVI Score by CA Census Tracts") +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
+map0 
+
 
 ```
 
 ##### RPL_THEME1
 
 ```{r}
+
+map1 = 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME1)) +
   scale_fill_viridis(option = "D", direction = 1) +
@@ -266,6 +270,8 @@ ggplot(data = ca_svi_sf_clean) +
 
 ##### RPL_THEME2
 ```{r}
+
+map2 = 
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME2)) +
   scale_fill_viridis(option = "D", direction = 1) +
@@ -291,12 +297,17 @@ ggplot(data = ca_svi_sf_clean) +
 ##### RPL_THEME4
 
 ```{r}
+
+map4 =
+  
 ggplot(data = ca_svi_sf_clean) +
   geom_sf(aes(fill = RPL_THEME4)) +
   scale_fill_viridis(option = "D", direction = 1) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
   theme_void()+
   theme(text = element_text(family = "Avenir"))
+
+map4
 
 ```
 
