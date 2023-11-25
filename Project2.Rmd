@@ -54,19 +54,28 @@ head(us_deaths)
 
 ```
 
+
+
 ```{r}
-
 # Selecting columns
-svi <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150, EP_LIMENG, EP_AGE65, EP_MINRTY, EP_UNEMP, EP_NOHSDP, EP_AGE17, EP_DISABL, EP_SNGPNT, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH, EP_GROUPQ, RPL_THEMES))
-
+svi <- subset(SVI_Data, select = c(STATE, ST_ABBR,STCNTY,COUNTY,FIPS,EP_POV150, EP_LIMENG, EP_AGE65, EP_MINRTY, EP_UNEMP, EP_NOHSDP, EP_AGE17, EP_DISABL, EP_SNGPNT, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH, EP_GROUPQ, RPL_THEMES))
 # Renaming columns
 colnames(svi)[colnames(svi) == 'STCNTY'] <- 'county_fips'
-
-# Drop all -999/NaN columns in the dataframe
-svi <- svi[svi != -999]
-svi <- na.omit(svi)
+svi <- subset(svi, ST_ABBR == "CA")
 head(svi)
 
 ```
 
 
+
+
+```{r}
+nrow(us_cases)
+nrow(svi)
+#merging
+covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
+
+nrow(covid_svi)
+
+
+```
