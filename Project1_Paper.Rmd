@@ -340,6 +340,7 @@ ggplot(data = ca_svi_sf_clean) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
   theme_void()
 
+
 map4
 
 ```
@@ -862,8 +863,6 @@ The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is eviden
 CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
 
 t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
-
-# Print the results
 print(t_test_result2)
 ```
 
@@ -890,8 +889,6 @@ print(t_test_result2)
 CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
-
-# Print the results
 print(t_test_result3)
 ```
 
@@ -917,8 +914,6 @@ print(t_test_result3)
 CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
 
 t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
-
-# Print the results
 print(t_test_result4)
 ```
 
@@ -947,7 +942,7 @@ While there is variation between the means of SVI scores, they are still very si
 
 Additionally, these results could indicate that the SVI compiled by the CDC provides a comprehensive and holistic representation of vulnerability for each theme. Nothing really gets left out, each theme addresses important vulnerabilities. This is a fair assumption considering the SVI is carefully crafted to ensure that each demographic group is considered and covered in the emergency response efforts. 
 
-
+In this study, we have employed various data visualization techniques, including Maps, Histograms, and Scatterplots, to present the social vulnerability data. A discernible insight derived from our visualizations is the enhanced efficacy of utilizing maps for visualizing the SVI dataset, given its inherently spatial nature. Our analysis has yielded informative visual representations that can empower decision-makers to make more objective resource allocation decisions based on identified needs.
 
 ## Future Work
 
@@ -962,8 +957,7 @@ It could be interesting to map and visualize other correlation using spatial met
 
 **Find correlation with other datasets **
 
-Working with the Social Vulnerability Index (SVI) dataset and finding correlations with other datasets can provide valuable insights into social vulnerability factors and their relationships with various other factors.
-A few of the datasets that we could work on with the SVI dataset are: COVID-19 dataset, the Natural Disasters dataset related to wildfire and earthquake, Economic and Income Datasets etc 
+Since we did not find any significant correlation in the current dataset we can work on finding correlations with other datasets. This can provide valuable insights into social vulnerability factors and their relationships with various other factors. A few of the datasets that we could work on with the SVI dataset are: COVID-19 dataset, the Natural Disasters dataset related to wildfire and earthquake, Economic and Income Datasets etc 
 
 **Predict which communities are vulnerable after natural disaster/disease outbreak**
 
@@ -971,7 +965,6 @@ We could use the SVI and predictive modelling techinques in disaster preparednes
 
 **Predict future SVI across themes based on projected demographic data**
 
-We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions.  
-
+We could use the SVI dataset from previous years to build a predictive model that can be used to determine the SVI score for different regions. A predictive model, such as linear regression or machine learning, can be built, trained, and validated to forecast future SVI scores. We can also use feature engineering to capture demographic trends effectively.
 
 
