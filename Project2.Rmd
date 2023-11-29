@@ -72,7 +72,7 @@ CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
 CA_SVI <- na.omit(CA_SVI)
 
 head(CA_SVI)
-head(us_cases)
+
 
 ```
 ```{r}
@@ -110,3 +110,15 @@ head(us_cases_ca)
 
 
 
+
+
+```{r}
+nrow(us_cases)
+nrow(svi)
+#merging
+covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
+
+nrow(covid_svi)
+
+
+```
