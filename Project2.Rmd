@@ -54,20 +54,26 @@ head(us_deaths)
 
 ```
 
+
+
 ```{r}
-Clean_data <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
-
+# Selecting columns
+svi <- subset(SVI_Data, select = c(STATE, ST_ABBR,STCNTY,COUNTY,FIPS,EP_POV150, EP_LIMENG, EP_AGE65, EP_MINRTY, EP_UNEMP, EP_NOHSDP, EP_AGE17, EP_DISABL, EP_SNGPNT, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH, EP_GROUPQ, RPL_THEMES))
 # Renaming columns
-colnames(Clean_data)[colnames(Clean_data) == 'STCNTY'] <- 'county_fips'
 
-# Filter out rows with any value equal to -999
-Clean_data <- Clean_data[rowSums(Clean_data == -999, na.rm = TRUE) == 0, ]
-
-# Drop rows with missing values
-Clean_data <- na.omit(Clean_data)
-
-head(Clean_data)
 
 ```
 
 
+
+
+```{r}
+nrow(us_cases)
+nrow(svi)
+#merging
+covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
+
+nrow(covid_svi)
+
+
+```
