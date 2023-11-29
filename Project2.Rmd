@@ -44,11 +44,11 @@ library(stargazer)
 
 ```{r}
 
-svi <- read.csv('SVI_2020_US.csv')
+SVI_Data <- read.csv("SVI_2020_US.csv")
 us_cases <- read.csv('USAFacts/confirmed-covid-19-cases-in-us-by-state-and-county.csv')
 us_deaths <- read.csv('USAFacts/confirmed-covid-19-deaths-in-us-by-state-and-county.csv')
 
-head(svi)
+head(SVI_Data)
 head(us_cases)
 head(us_deaths)
 
@@ -60,9 +60,7 @@ head(us_deaths)
 # Selecting columns
 svi <- subset(SVI_Data, select = c(STATE, ST_ABBR,STCNTY,COUNTY,FIPS,EP_POV150, EP_LIMENG, EP_AGE65, EP_MINRTY, EP_UNEMP, EP_NOHSDP, EP_AGE17, EP_DISABL, EP_SNGPNT, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH, EP_GROUPQ, RPL_THEMES))
 # Renaming columns
-colnames(svi)[colnames(svi) == 'STCNTY'] <- 'county_fips'
-svi <- subset(svi, ST_ABBR == "CA")
-head(svi)
+
 
 ```
 
