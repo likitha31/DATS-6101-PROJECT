@@ -69,5 +69,33 @@ Clean_data <- na.omit(Clean_data)
 head(Clean_data)
 
 ```
+```{r}
+
+# subset to california
+
+CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
+
+
+```
+
+```{r}
+# Load the 2020 Census Tract shapefile for California
+ca_tracts <- tracts(state = "CA", year = 2020)
+
+```
+
+```{r}
+
+#add 0 to FIPS in CA_SVI to merge with ca_tracts
+
+CA_SVI$FIPS <- paste0("0", CA_SVI$FIPS)
+
+```
+
+```{r}
+#make a join of CA_SVI and ca_tracts based on FIPS and GEOID
+CA_SVI <- inner_join(CA_SVI, ca_tracts, by = c("FIPS" = "GEOID"))
+
+```
 
 
