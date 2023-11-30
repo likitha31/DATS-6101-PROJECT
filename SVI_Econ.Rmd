@@ -5,26 +5,94 @@ date: "2023-11-29"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r Load the data file, echo=T, results='hide'}
+SVI_Data <- read.csv("SVI_2020_US.csv")
+head(SVI_Data)
+
+econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
+head(econ)
+
 ```
 
-## R Markdown
+#subset to CA tracts
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r CA tracts, echo=T, results='hide'}
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
+) )
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 
-```{r cars}
-summary(cars)
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#remove first row of headers 
+
+```{r}
+#clean data for economic
+econ <- subset(econ, select = c(GEO_ID, NAME,B19013_001E))
+econ <- econ[-c(1, 2), ] 
+head(econ)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#rename columns
+
+```{r}
+names_to_change <- c("GEO_ID", "NAME", "B19013_001E")
+new_names <- c("GEO_ID", "tract", "income")
+
+econ <- setNames(econ, new_names)
+```
+
+# edit GEO_ID to isolate just the number after 1400000US06001400100
+
+```{r}
+# Assuming 'econ' is your data frame
+econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
+
+```
+
+#now join the datasets based on GEO_ID
+```{r}
+# Assuming 'econ' and 'CA_SVI' are your data frames
+svi_econ <- merge(econ, CA_SVI, by.x = "GEO_ID", by.y = "FIPS", all.x = TRUE, all.y = TRUE)
+
+```
+
+#count how many NA 
+```{r}
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+#remove NA
+
+svi_econ <- na.omit(svi_econ)
+svi_econ <- svi_econ[svi_econ$income != "-", , drop = FALSE]
+
+
+#leaves us with 9001 rows 
+str(svi_econ$income)
+svi_econ$income <- as.numeric(as.character(svi_econ$income))
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+svi_econ <- na.omit(svi_econ)
+#8956
+
+```
+
+#plot histogram of income variable 
+```{r}
+# Assuming 'merged_data' is your data frame and 'B19013_001E' is the income variable
+library(ggplot2)
+
+ggplot(svi_econ, aes(x = income)) +
+  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Income Histogram", x = "Income", y = "Frequency")
+
+#data is skewed right 
+```
+
