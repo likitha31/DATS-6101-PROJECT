@@ -91,18 +91,66 @@ svidata<-CA_SVI
 ```
 
 ```{r}
+covid19_cases<-us_cases
+covid19_deaths<-us_deaths
 
-# Convert FIPS to character and ensure consistency in formatting
-svidata$FIPS <- as.character(svidata$FIPS)
+covid19_cases<-subset(covid19_cases, state_name=='CA')
+covid19_deaths<-subset(covid19_deaths, state_name=='CA')
+
+
+
+```
+
+
+
+```{r}
+
+# Load the dplyr package
+library(dplyr)
+
+# Calculate total cases and deaths for each county
+covid19 <- covid19 %>%
+  group_by(county_fips) %>%
+  mutate(total_cases = sum(confirmed_cases),
+         total_deaths = sum(deaths)) %>%
+  ungroup()
+
+
+```
+
+
+```{r}
+
+tail(covid19)
+
+```
+
+```{r}
+
+
+# Create a new dataframe with total cases and deaths for each county
+summary_data <- covid19 %>%
+  group_by(county_fips) %>%
+  summarize(total_cases = sum(confirmed_cases),
+            total_deaths = sum(deaths))
+
+# Display the new dataframe
+print(summary_data)
 
 
 ```
 
 ```{r}
-svidata_2018 <- subset(svidata, RPL_THEMES == 2018)
-svidata_2020 <- subset(svidata, RPL_THEMES == 2020)
-svidata_2022 <- subset(svidata, RPL_THEMES == 2022)
+#merging svi and summary_data
+svi_covid <- merge(svidata, summary_data, by = "county_fips", all.x = TRUE)
 
 
 ```
 
+
+
+```{r}
+
+
+
+```
