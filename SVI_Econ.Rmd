@@ -96,3 +96,148 @@ ggplot(svi_econ, aes(x = income)) +
 #data is skewed right 
 ```
 
+```{r}
+# Assuming 'merged_data' is your data frame and 'B19013_001E' is the income variable
+library(ggplot2)
+
+ggplot(svi_econ, aes(x = RPL_THEMES)) +
+  geom_histogram(binwidth = 0.01, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Income Histogram", x = "Income", y = "Frequency")
+
+#data is skewed left  
+
+
+```
+```{r}
+library(ggplot2)
+
+ggplot(svi_econ, aes(x = "", y = RPL_THEMES)) +
+  geom_boxplot(fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Boxplot of SVI Score", x = "", y = "Overall SVI")
+
+```
+In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest.
+
+```{r}
+#The interactive map uses these values:
+# Assuming svi_econ is your data frame
+
+# Create quartiles and labels
+svi_econ$risk <- cut(svi_econ$RPL_THEMES, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
+
+# Plot the data with quartile labels
+library(ggplot2)
+
+ggplot(svi_econ, aes(x = risk, fill = risk)) +
+  geom_bar() +
+  labs(title = "Bar Plot of RPL_THEMES with Quartiles", x = "Quartiles", y = "Count") +
+  scale_fill_manual(values = c("low" = "lightblue", "lowmed" = "blue", "medhigh" = "darkblue", "high" = "purple"))
+
+```
+
+Now lets do a ligstic regression on income and svi 
+```{r}
+# Assuming svi_econ is your data frame
+
+
+# Split the data into training and testing sets
+set.seed(123)  # for reproducibility
+train_indices <- sample(seq_len(nrow(svi_econ)), 0.8 * nrow(svi_econ))
+train_data <- svi_econ[train_indices, ]
+test_data <- svi_econ[-train_indices, ]
+
+# Build logistic regression model
+logit_model <- glm(risk ~ income, data = train_data, family = "binomial")
+
+# Summary of the model
+summary(logit_model)
+
+# Predict on the test set
+logit_predictions <- predict(logit_model, test_data, type = "response")
+
+# Convert logistic regression probabilities to predicted classes
+logit_predictions_class <- cut(logit_predictions, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
+
+# Evaluate the model (e.g., confusion matrix, accuracy, etc.)
+conf_matrix <- table(logit_predictions_class, test_data$risk)
+print(conf_matrix)
+
+```
+
+ok but now lets also see what other features are relevant to us in this dataset in predicting svi 
+
+first lets select the variables we should look at/consider 
+
+```{r}
+# Assuming svi_econ is your data frame
+
+# Specify the features you want to evaluate
+features_to_evaluate <- c("income", "COUNTY", "LOCATION", "EPL_POV150", "EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR", "EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG", "EPL_MINRTY", "E_MINRTY", "EP_HISP", "EP_ASIAN", "EP_AIAN", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH", "EPL_GROUPQ", "E_AGE65", "EP_POV150", "EP_AGE65", "EP_NOHSDP", "risk")
+
+# Create a subset of the data with only the specified features
+svi_predict <- svi_econ[, features_to_evaluate]
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### dont run 
+
+```{r}
+# Install and load necessary packages
+install.packages("rpart")
+library(rpart)
+
+
+# Split the data into training and testing sets
+set.seed(123)  # for reproducibility
+train_indices <- sample(seq_len(nrow(svi_econ)), 0.8 * nrow(svi_econ))
+train_data <- svi_econ[train_indices, ]
+test_data <- svi_econ[-train_indices, ]
+
+# Classification Tree Model
+tree_model <- rpart(risk ~ income, data = train_data, method = "class")
+
+# Plot the tree
+plot(tree_model)
+text(tree_model)
+
+# Predict on the test set
+tree_predictions <- predict(tree_model, test_data, type = "class")
+
+
+```
+```{r}
+
+# Logistic Regression Model
+logit_model <- glm(risk ~ income, data = train_data, family = "binomial")
+
+# Predict on the test set
+logit_predictions <- predict(logit_model, test_data, type = "response")
+
+# Convert logistic regression probabilities to predicted classes
+logit_predictions_class <- ifelse(logit_predictions > 0.5, "high", "low")
+
+# Evaluate the models (e.g., confusion matrix, accuracy, etc.)
+```
+
