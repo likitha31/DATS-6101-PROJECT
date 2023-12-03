@@ -1,0 +1,108 @@
+
+
+
+
+
+
+
+```{r, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+options(scientific=T, digits = 3) 
+library(ezids)
+library(ggplot2)
+#install.packages("tigris")
+library(tigris)
+#install.packages("sf")
+library(sf)
+#install.packages("here")
+library(here)
+#install.packages("dplyr")
+library(dplyr)
+#install.packages("leaflet")
+library(leaflet)
+#install.packages("reshape2")
+library(reshape2)
+#install.packages("tmap")
+library(tmap)
+#install.packages("viridis")
+library(viridis)
+#install.packages("stargazer")
+library(stargazer)
+
+
+```
+
+
+
+
+```{r}
+
+SVI_Data <- read.csv("SVI_2020_US.csv")
+us_cases <- read.csv('USAFacts/confirmed-covid-19-cases-in-us-by-state-and-county.csv')
+us_deaths <- read.csv('USAFacts/confirmed-covid-19-deaths-in-us-by-state-and-county.csv')
+
+head(SVI_Data)
+head(us_cases)
+head(us_deaths)
+
+```
+
+
+```{r}
+library(dplyr)
+Clean_data <- subset(SVI_Data, ST_ABBR == "CA")
+CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
+
+# Renaming columns
+colnames(CA_SVI)[colnames(CA_SVI) == 'STCNTY'] <- 'county_fips'
+us_cases <- rename(us_cases, confirmed_cases = confirmed)
+
+
+# Filter out rows with any value equal to -999
+CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
+
+# Drop rows with missing values
+CA_SVI <- na.omit(CA_SVI)
+
+
+
+
+```
+
+
+
+
+```{r}
+# Filter out rows with any value equal to -999
+CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
+
+# Drop rows with missing values
+CA_SVI <- na.omit(CA_SVI)
+
+head(CA_SVI)
+head(CA_SVI)
+svidata<-CA_SVI
+
+
+
+
+
+```
+
+```{r}
+
+# Convert FIPS to character and ensure consistency in formatting
+svidata$FIPS <- as.character(svidata$FIPS)
+
+
+```
+
+```{r}
+svidata_2018 <- subset(svidata, RPL_THEMES == 2018)
+svidata_2020 <- subset(svidata, RPL_THEMES == 2020)
+svidata_2022 <- subset(svidata, RPL_THEMES == 2022)
+
+
+```
+
