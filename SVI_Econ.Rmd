@@ -134,8 +134,45 @@ ggplot(svi_econ, aes(x = risk, fill = risk)) +
   scale_fill_manual(values = c("low" = "lightblue", "lowmed" = "blue", "medhigh" = "darkblue", "high" = "purple"))
 
 ```
+lets look at income on a map
+```{r}
+#for mapping, convert CA_SVI to a Simple Features (map object)
+library(sf)
+library(tigris)
+library(dplyr)
+library(viridis)
 
-Now lets do a ligstic regression on income and svi 
+#Load 2020 Census Tract shapefile for California
+ca_tracts <- tracts(state = "CA", year = 2020)
+
+# Assuming svi_econ is your data frame
+ca_tracts$GEOID <- sub("^\\d", "", ca_tracts$GEOID)
+
+#Join CA_SVI and ca_tracts based on FIPS and GEOID
+svi_econ_map <- inner_join(svi_econ, ca_tracts, by = c("GEO_ID" = "GEOID"))
+
+econmap <- st_as_sf(svi_econ_map)
+
+map1 = 
+ggplot(data = econmap) +
+  geom_sf(aes(fill = income)) +
+  labs(title = "Income") +
+  theme_void()
+map1
+
+```
+Map risk by levels
+
+```{r}
+map1 = 
+ggplot(data = econmap) +
+  geom_sf(aes(fill = risk)) +
+  labs(title = "Risk") +
+  theme_void()
+map1
+```
+
+Now lets do a logstic regression on income and svi 
 ```{r}
 # Assuming svi_econ is your data frame
 
@@ -166,78 +203,53 @@ print(conf_matrix)
 
 ok but now lets also see what other features are relevant to us in this dataset in predicting svi 
 
-first lets select the variables we should look at/consider 
+first lets select the variables we should look at/consider because not all of them are relevant + processing takes a while
+
 
 ```{r}
 # Assuming svi_econ is your data frame
+# Assuming RPL_THEMES is the variable you want to include in the correlation matrix
 
-# Specify the features you want to evaluate
-features_to_evaluate <- c("income", "COUNTY", "LOCATION", "EPL_POV150", "EPL_POV150", "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP", "EPL_UNINSUR", "EPL_AGE65", "EPL_AGE17", "EPL_DISABL", "EPL_SNGPNT", "EPL_LIMENG", "EPL_MINRTY", "E_MINRTY", "EP_HISP", "EP_ASIAN", "EP_AIAN", "EPL_MUNIT", "EPL_MOBILE", "EPL_CROWD", "EPL_NOVEH", "EPL_GROUPQ", "E_AGE65", "EP_POV150", "EP_AGE65", "EP_NOHSDP", "risk")
+# Load the dplyr package
+library(dplyr)
 
-# Create a subset of the data with only the specified features
-svi_predict <- svi_econ[, features_to_evaluate]
+# Convert selected columns to numeric
+svi_select <- mutate_all(svi_econ, as.numeric)
+
+# Drop columns with NA values
+svi_select <- svi_select %>%
+  select(everything(), -where(~any(is.na(.))))
+
+# Create the correlation matrix
+cor_matrix <- cor(svi_select, use = "complete.obs")
+
+# Print the correlation matrix
+print(cor_matrix)
+
+
+# Variable of interest
+target_variable <- "RPL_THEMES"
+
+# Extract the correlations with the target variable
+cor_with_target <- cor_matrix[target_variable, ]
+
+# Select variables with high correlation (you can adjust the threshold)
+high_correlation_vars <- names(cor_with_target[abs(cor_with_target) > 0.70])
+
+# Print the variables with high correlation
+print(high_correlation_vars)
 
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#### dont run 
+further narrow down
 
 ```{r}
-# Install and load necessary packages
-install.packages("rpart")
-library(rpart)
+library(dplyr)
 
-
-# Split the data into training and testing sets
-set.seed(123)  # for reproducibility
-train_indices <- sample(seq_len(nrow(svi_econ)), 0.8 * nrow(svi_econ))
-train_data <- svi_econ[train_indices, ]
-test_data <- svi_econ[-train_indices, ]
-
-# Classification Tree Model
-tree_model <- rpart(risk ~ income, data = train_data, method = "class")
-
-# Plot the tree
-plot(tree_model)
-text(tree_model)
-
-# Predict on the test set
-tree_predictions <- predict(tree_model, test_data, type = "class")
-
-
+# Assuming svi_econ is your data frame
+predict_svi <- svi_econ %>%
+  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP, EP_POV150, EP_NOHSDP)
 ```
-```{r}
 
-# Logistic Regression Model
-logit_model <- glm(risk ~ income, data = train_data, family = "binomial")
 
-# Predict on the test set
-logit_predictions <- predict(logit_model, test_data, type = "response")
-
-# Convert logistic regression probabilities to predicted classes
-logit_predictions_class <- ifelse(logit_predictions > 0.5, "high", "low")
-
-# Evaluate the models (e.g., confusion matrix, accuracy, etc.)
-```
 
