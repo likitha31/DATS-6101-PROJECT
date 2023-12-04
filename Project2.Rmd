@@ -12,7 +12,6 @@ output:
 ---
 
 
-
 ```{r, include=FALSE}
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -77,7 +76,7 @@ us_cases[is.na(us_cases$confirmed_cases), ]
 
 
 head(CA_SVI)
-head(us_cases)
+
 
 ```
 
@@ -174,3 +173,20 @@ theme(legend.position = "right")
 
 
 
+<<<<<<< HEAD
+=======
+
+
+
+
+```{r}
+nrow(us_cases)
+nrow(svi)
+#merging
+covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
+
+nrow(covid_svi)
+
+
+```
+>>>>>>> 5397221cb8486660c48784029f794a7b309ba6a1
