@@ -116,24 +116,6 @@ ggplot(svi_econ, aes(x = "", y = RPL_THEMES)) +
   labs(title = "Boxplot of SVI Score", x = "", y = "Overall SVI")
 
 ```
-In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest.
-
-```{r}
-#The interactive map uses these values:
-# Assuming svi_econ is your data frame
-
-# Create quartiles and labels
-svi_econ$risk <- cut(svi_econ$RPL_THEMES, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
-
-# Plot the data with quartile labels
-library(ggplot2)
-
-ggplot(svi_econ, aes(x = risk, fill = risk)) +
-  geom_bar() +
-  labs(title = "Bar Plot of RPL_THEMES with Quartiles", x = "Quartiles", y = "Count") +
-  scale_fill_manual(values = c("low" = "lightblue", "lowmed" = "blue", "medhigh" = "darkblue", "high" = "purple"))
-
-```
 lets look at income on a map
 ```{r}
 #for mapping, convert CA_SVI to a Simple Features (map object)
@@ -152,7 +134,7 @@ ca_tracts$GEOID <- sub("^\\d", "", ca_tracts$GEOID)
 svi_econ_map <- inner_join(svi_econ, ca_tracts, by = c("GEO_ID" = "GEOID"))
 
 econmap <- st_as_sf(svi_econ_map)
-
+#!!! CHANGE COLOR RAMP
 map1 = 
 ggplot(data = econmap) +
   geom_sf(aes(fill = income)) +
@@ -161,45 +143,8 @@ ggplot(data = econmap) +
 map1
 
 ```
-Map risk by levels
-
-```{r}
-map1 = 
-ggplot(data = econmap) +
-  geom_sf(aes(fill = risk)) +
-  labs(title = "Risk") +
-  theme_void()
-map1
-```
-
-Now lets do a logstic regression on income and svi 
-```{r}
-# Assuming svi_econ is your data frame
 
 
-# Split the data into training and testing sets
-set.seed(123)  # for reproducibility
-train_indices <- sample(seq_len(nrow(svi_econ)), 0.8 * nrow(svi_econ))
-train_data <- svi_econ[train_indices, ]
-test_data <- svi_econ[-train_indices, ]
-
-# Build logistic regression model
-logit_model <- glm(risk ~ income, data = train_data, family = "binomial")
-
-# Summary of the model
-summary(logit_model)
-
-# Predict on the test set
-logit_predictions <- predict(logit_model, test_data, type = "response")
-
-# Convert logistic regression probabilities to predicted classes
-logit_predictions_class <- cut(logit_predictions, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
-
-# Evaluate the model (e.g., confusion matrix, accuracy, etc.)
-conf_matrix <- table(logit_predictions_class, test_data$risk)
-print(conf_matrix)
-
-```
 
 ok but now lets also see what other features are relevant to us in this dataset in predicting svi 
 
@@ -248,7 +193,7 @@ library(dplyr)
 
 # Assuming svi_econ is your data frame
 predict_svi <- svi_econ %>%
-  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP, EP_POV150, EP_NOHSDP)
+  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP)
 ```
 
 
@@ -287,70 +232,96 @@ data.frame(vif(model_test))
 
 ```
 
+VIF all good
+
+now lets to stepwise 
+
 
 
 ```{r}
-# Fit Ridge regression model
-fit_ridge <- cv.glmnet(x, y, alpha = 0)
 
-# Plot the Ridge path
-plot(fit_ridge, xvar = "lambda", label = TRUE)
 
-# Display coefficients of the Ridge model
-coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
-print(coef_ridge)
+# Assuming your data frame is named 'your_data'
+
+# Create the initial model
+initial_model2 <- lm(RPL_THEMES ~ income + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
+
+# Perform stepwise selection (both directions)
+stepwise_model2 <- step(initial_model2, direction = "both")
+
+# Display the summary of the selected model
+summary(stepwise_model2)
 
 ```
 
 ```{r}
-# Continue from where you left off
-# Assuming x, y, and fit_ridge are already defined
+# Assuming svi_econ is your data frame
+selected_columns <- c("RPL_THEMES", "income", "EPL_POV150", "EPL_UNINSUR", 
+                       "EPL_AGE65", "EPL_AGE17", "EPL_DISABL", 
+                       "EPL_SNGPNT", "EPL_LIMENG", "EPL_MINRTY", 
+                       "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP")
 
-# Display coefficients of the Ridge model
-coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
-print(coef_ridge)
+# Filter the data frame
+trim_svi <- svi_econ %>%
+  select(all_of(selected_columns))
 
-# Plot the cross-validated Ridge results
-plot(fit_ridge)
+```
 
-# Evaluate model performance (you need a test set for this)
-# test_preds <- predict(fit_ridge, newx = test_data)
-# test_rmse <- sqrt(mean((test_preds - test_data$RPL_THEMES)^2))
-# print(paste("Test RMSE: ", test_rmse))
+```{r}
+# Load the glmnet package
+library(glmnet)
 
-# Optionally, fit a LASSO regression model
+# Prepare data
+x <- model.matrix(RPL_THEMES ~ . - 1, data = trim_svi)
+y <- svi_econ$RPL_THEMES
+
+# Fit LASSO regression model
 fit_lasso <- cv.glmnet(x, y, alpha = 1)
-
-# Plot the LASSO path
-plot(fit_lasso, xvar = "lambda", label = TRUE)
-
-# Plot the cross-validated LASSO results
-plot(fit_lasso)
 
 # Display coefficients of the LASSO model
 coef_lasso <- coef(fit_lasso, s = fit_lasso$lambda.min)
 print(coef_lasso)
 
-# Residual Analysis (once you have predictions and true values)
-# residuals <- test_data$RPL_THEMES - test_preds
-# plot(test_preds, residuals)
+# Fit Ridge regression model
+fit_ridge <- cv.glmnet(x, y, alpha = 0)
 
-# Further analysis as needed
-
-# Document and Report your findings
-# Write a summary or report detailing your analysis and decisions
+# Display coefficients of the Ridge model
+coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
+print(coef_ridge)
 
 ```
-The values are very small, and in Ridge regression, coefficients are shrunk toward zero. The regularization helps prevent overfitting, and the strength of this regularization is controlled by the lambda parameter. In your output, it seems that the coefficients are relatively small, indicating that regularization is influencing the model.
-
-Based on the magnitude of coefficients, you might consider variables with larger absolute values as more influential in the model. In this case, "EPL_NOHSDP" appears to have the largest coefficient, followed by "EPL_POV150" and "EP_POV150." However, the decision to include or exclude variables should also consider domain knowledge and the specific goals of your analysis.
-
 ```{r}
-optimal_lambda <- fit_ridge$lambda.min
-coefficients_at_optimal_lambda <- coef(fit_ridge, s = optimal_lambda)
+# Assuming fit_lasso is your cv.glmnet object
+optimal_lambda <- fit_lasso$lambda.min
+coefficients_at_optimal_lambda <- coef(fit_lasso, s = optimal_lambda)
 print(coefficients_at_optimal_lambda)
-```
 
+```
+Income: The coefficient is -3.103e-07. This suggests that a one-unit increase in income is associated with a decrease of approximately 3.103e-07 units in the response variable, holding other variables constant.
+
+EPL_POV150: The coefficient is 0.1949. This suggests that a one-unit increase in EPL_POV150 is associated with an increase of approximately 0.1949 units in the response variable, holding other variables constant.
+
+EPL_UNINSUR: The coefficient is 0.1209. This suggests that a one-unit increase in EPL_UNINSUR is associated with an increase of approximately 0.1209 units in the response variable, holding other variables constant.
+
+EPL_AGE65: The coefficient is 0.0933. This suggests that a one-unit increase in EPL_AGE65 is associated with an increase of approximately 0.0933 units in the response variable, holding other variables constant.
+
+EPL_AGE17: The coefficient is 0.0216. This suggests that a one-unit increase in EPL_AGE17 is associated with an increase of approximately 0.0216 units in the response variable, holding other variables constant.
+
+EPL_DISABL: The coefficient is 0.1503. This suggests that a one-unit increase in EPL_DISABL is associated with an increase of approximately 0.1503 units in the response variable, holding other variables constant.
+
+EPL_SNGPNT: The coefficient is 0.1396. This suggests that a one-unit increase in EPL_SNGPNT is associated with an increase of approximately 0.1396 units in the response variable, holding other variables constant.
+
+EPL_LIMENG: The coefficient is 0.1879. This suggests that a one-unit increase in EPL_LIMENG is associated with an increase of approximately 0.1879 units in the response variable, holding other variables constant.
+
+EPL_MINRTY: The coefficient is 0.1249. This suggests that a one-unit increase in EPL_MINRTY is associated with an increase of approximately 0.1249 units in the response variable, holding other variables constant.
+
+EPL_UNEMP: The coefficient is 0.0956. This suggests that a one-unit increase in EPL_UNEMP is associated with an increase of approximately 0.0956 units in the response variable, holding other variables constant.
+
+EPL_HBURD: The coefficient is 0.1938. This suggests that a one-unit increase in EPL_HBURD is associated with an increase of approximately 0.1938 units in the response variable, holding other variables constant.
+
+EPL_NOHSDP: The coefficient is 0.1919. This suggests that a one-unit increase in EPL_NOHSDP is associated with an increase of approximately 0.1919 units in the response variable, holding other variables constant.
+
+all of them are non zero....
 
 
 dont run this yet 
@@ -359,15 +330,133 @@ dont run this yet
 
 
 ```{r}
-library(randomForest)
+# Assuming your data frame is named 'your_data'
+your_data <- predict_svi  # Replace with your actual data frame name
 
-# Assuming svi_econ is your data frame
-predict_svi <- svi_econ %>%
-  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP, EP_POV150, EP_NOHSDP)
+# Create the initial model
 
-# Fit Random Forest model
-model <- randomForest(RPL_THEMES ~ ., data = predict_svi)
-importance(model)
+initial_model <- lm(RPL_THEMES ~ income + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = your_data)
+
+# Perform stepwise selection (both directions)
+stepwise_model <- step(initial_model, direction = "both")
+
+# Display the summary of the selected model
+summary(stepwise_model)
 
 ```
+
+The results of the stepwise feature selection indicate that the model with all the variables (income, EPL_POV150, EPL_HBURD, EPL_NOHSDP) is preferred as it has the lowest AIC (Akaike Information Criterion). The selected model is:
+
+all features stay relevant.
+
+ok so lets see if model 1 or model 2 is best. 
+
+```{r}
+
+# Assessment for initial_model
+summary(initial_model)
+plot(initial_model)
+
+# Assessment for initial_model2
+summary(initial_model2)
+plot(initial_model2)
+
+# Calculate AIC for initial_model
+aic_initial_model <- AIC(initial_model)
+
+# Calculate AIC for initial_model2
+aic_initial_model2 <- AIC(initial_model2)
+
+# Compare AIC values
+cat("AIC for initial_model:", aic_initial_model, "\n")
+cat("AIC for initial_model2:", aic_initial_model2, "\n")
+
+# Choose the model with the lower AIC
+if (aic_initial_model < aic_initial_model2) {
+  cat("Choose initial_model\n")
+} else {
+  cat("Choose initial_model2\n")
+}
+
+```
+
+
+AIC for initial_model: -13891.99 
+AIC for initial_model2: -18331.04 
+Choose initial_model2
+The model with the lower AIC is considered a better fit.
+```{r}
+# Calculate Adjusted R-squared for initial_model
+adj_rsq_initial_model <- summary(initial_model)$adj.r.squared
+
+# Calculate Adjusted R-squared for initial_model2
+adj_rsq_initial_model2 <- summary(initial_model2)$adj.r.squared
+
+# Compare Adjusted R-squared values
+cat("Adjusted R-squared for initial_model:", adj_rsq_initial_model, "\n")
+cat("Adjusted R-squared for initial_model2:", adj_rsq_initial_model2, "\n")
+
+```
+Adjusted R-squared for initial_model2: 0.9065885 
+
+model 2 is better
+
+```{r}
+# Calculate VIF for initial_model
+vif_initial_model <- car::vif(initial_model)
+
+# Calculate VIF for initial_model2
+vif_initial_model2 <- car::vif(initial_model2)
+
+# Compare VIF values
+cat("VIF for initial_model:", vif_initial_model, "\n")
+cat("VIF for initial_model2:", vif_initial_model2, "\n")
+
+```
+
+ok lets use the model 2, all of the predictors... to get into using our model with all the features to then see if we can predict SVI risk into 4 groups: 
+
+In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest.
+
+```{r}
+#The interactive map uses these values:
+# Assuming svi_econ is your data frame
+
+# Create quartiles and labels
+trim_svi$risk <- cut(trim_svi$RPL_THEMES, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
+
+# Plot the data with quartile labels
+library(ggplot2)
+
+ggplot(trim_svi, aes(x = risk, fill = risk)) +
+  geom_bar() +
+  labs(title = "Bar Plot of RPL_THEMES with Quartiles", x = "Quartiles", y = "Count") +
+  scale_fill_manual(values = c("low" = "lightblue", "lowmed" = "blue", "medhigh" = "darkblue", "high" = "purple"))
+
+```
+
+
+
+```{r}
+# Install and load required packages
+install.packages("rpart")
+library(rpart)
+
+# Fit the classification tree model
+tree_model <- rpart(risk ~ ., data = trim_svi, subset = !is.na(risk), method = "class")
+
+# Plot the tree
+plot(tree_model)
+text(tree_model, pretty = 0)
+
+# Make predictions
+tree_predictions <- predict(tree_model, svi_econ, type = "class")
+
+# Add predictions to the dataset
+svi_econ$tree_predictions <- tree_predictions
+
+```
+
+
+
 
