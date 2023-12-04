@@ -240,9 +240,6 @@ now lets to stepwise
 
 ```{r}
 
-
-# Assuming your data frame is named 'your_data'
-
 # Create the initial model
 initial_model2 <- lm(RPL_THEMES ~ income + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
 
@@ -265,9 +262,6 @@ selected_columns <- c("RPL_THEMES", "income", "EPL_POV150", "EPL_UNINSUR",
 trim_svi <- svi_econ %>%
   select(all_of(selected_columns))
 
-```
-
-```{r}
 # Load the glmnet package
 library(glmnet)
 
@@ -414,9 +408,6 @@ ok lets use the model 2, all of the predictors... to get into using our model wi
 In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest.
 
 ```{r}
-#The interactive map uses these values:
-# Assuming svi_econ is your data frame
-
 # Create quartiles and labels
 trim_svi$risk <- cut(trim_svi$RPL_THEMES, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
 
