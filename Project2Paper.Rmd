@@ -1,0 +1,574 @@
+---
+title: "Project 2:Write Up"
+author: "Likhitha, Paulina, Shrihan"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: cosmo
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+# Load packages
+library(ezids)
+library(tigris)
+library(sf)
+library(here)
+library(dplyr)
+library(leaflet)
+library(reshape2)
+library(tmap)
+library(viridis)
+library(stargazer)
+library(maps)
+library(ggplot2)
+library(extrafont)
+#font_import(pattern = "Avenir")
+loadfonts()
+# Set the default font for ggplot2
+theme_set(theme_minimal(base_family = "Avenir"))
+
+```
+
+## Introduction
+
+Building off of the first project's exploratory data analysis findings, this project will aim to produce regression and machine learning modeling. From the findings of the first project, several conclusions were drawn that shaped the scope of this project:
+The results of the analysis may have shown little *new* correlation between variables and SVI themes, but this is still an interesting finding. 
+
+**1**: The means of SVI scores across themes are similar and close in range.
+
+**2**: Each theme addresses important vulnerabilities.
+
+**3**: Little new correlation was found.
+
+Thus, this project brings in two additional datasets to examine new correlations and identify if they could be effective predictors in SVI scores. 
+
+During the project's initial phase, limited novel correlations between demographic variables and SVI themes were identified at the census tract level. There were no demographic variables that were left out of SVI themed groupings, thus indicating that the CDC compiled SVI is a well represented and holistic representation of vulnerability assessment. In the second phase of the project, the goal is to utilize the themed and overall SVI scores in combination with additional datasets to see if predictions can be made about census tract or county vulnerability scores. Specifically, correlations between COVID-19 data, median income, and the SVI dataset will be examined. The objective extends to the development of predictive models designed to pinpoint vulnerable communities in events of external stressors (such as a disease outbreak). The temporal scale of the dataset examines SVI scores prior to and after the COVID-19 pandemic. 
+
+
+**1**: Can we explore the presence of correlations between COVID-19 mortality and elevated Social Vulnerability Index (SVI) scores across SVI themes?
+
+**2**: Is it possible to assess the influence of COVID-19 on SVI scores (before and after the pandemic)?
+
+**3**: Does median income impact the SVI scores in a significant way? 
+
+**4**: Can we develop predictive models to identify vulnerable communities following external stressors? 
+
+**5**: Which features are imporant/significant in predicting SVI? 
+
+The focus of the economic variable dataset use will be to add in another variable reported by the census as a metric of economic status. Then, it will be combined with other variables selected through feature selection to create a logistic regression model. This model will then be used to create a classification tree algorithm that will predict if a tract is Low risk, Medium-Low risk, Medium-High risk, or High risk. By breaking it down into a category with 4 levels, it can help officials, planners, and responders focus attention to those classified as the highest risk, as well as see the demographic breakdown at a quick glance from the nodes on the tree. 
+
+The focus of the COVID variable dataset use will be to _ _ _ ???? _ _ _ 
+
+
+### Research Topic 
+
+## Data Set and Variables 
+
+### SVI Data 
+The SVI is comprised of 5 total SVI calculations: 4 thematic and 1 overall summary composed by the sum of the themes. 
+
+It is constructed by selecting the specific indicator variables within different themes that are chosen to represent the various aspects of vulnerability, enabling this project to examine if any themes leave out variable that could be important. Then Census tracts are ranked within each state, as well as against other states, creating tract rankings ranging from 0 to 1, with higher values indicating greater vulnerability.
+The CDC states: "For each tract, we generated its percentile rank among all tracts for 1) the 16 individual variables, 2) the four themes, and 3) its overall position."
+
+Then, these percentiles were summed for each of the four themes, and then ordered to determine theme-specific percentile rankings.
+
+### Spatial Data
+
+The geographic scale of the data is limited to California census tracts, which allows a detailed analysis of over 9,000 census tracts, hopefully enabling more tailored actions and responses. CA is a state that is prone to natural disasters such as earthquakes, wildfires, and has a very high population, making it an important case study. 
+
+### Economic Data 
+
+The economic data used in this project is **Median Income of Households in 2019** acquired from the [US Census Bureau](https://data.census.gov/table/DECENNIALDPVI2020.DP3?q=per%20capita%20income%20by%20census%20tract) for the California Census Tract level. 
+
+### COVID Data
+
+## Cleaning the Data
+
+**Information on cleaning the SVI dataset can be found in Project 1 write-up**
+
+**Cleaning Economic Data**
+
+```{r}
+econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
+econ <- subset(econ, select = c(GEO_ID, NAME,B19013_001E))
+econ <- econ[-c(1, 2), ] 
+#rename columns
+names_to_change <- c("GEO_ID", "NAME", "B19013_001E")
+new_names <- c("GEO_ID", "tract", "income")
+econ <- setNames(econ, new_names)
+# edit GEO_ID to isolate just the number after 1400000US06001400100
+econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
+```
+
+**Cleaning COVID Data**
+
+```{r}
+
+```
+
+## Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+### Economic 
+
+#### Data Processing & EDA {.tabset .tabset-fade .tabset-pills}
+
+##### Data Cleaning & EDA 
+```{r, warning=FALSE}
+#Import SVI
+SVI_Data <- read.csv("SVI_2020_US.csv")
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
+) )
+
+CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+
+#Join SVI to econ based on GEO_ID
+# Assuming 'econ' and 'CA_SVI' are your data frames
+svi_econ <- merge(econ, CA_SVI, by.x = "GEO_ID", by.y = "FIPS", all.x = TRUE, all.y = TRUE)
+
+#count outliers 
+total_na_count <- sum(is.na(svi_econ))
+#print(total_na_count)
+#remove NA
+svi_econ <- na.omit(svi_econ)
+svi_econ <- svi_econ[svi_econ$income != "-", , drop = FALSE]
+svi_econ$income <- as.numeric(as.character(svi_econ$income))
+svi_econ <- na.omit(svi_econ)
+
+
+```
+
+**Histogram of Median Income** 
+```{r}
+ggplot(svi_econ, aes(x = income)) +
+  geom_histogram(binwidth = 1000, fill = "seagreen", color = "palegreen3", alpha = 0.7) +
+  labs(title = "Histogram of Median Income of Census Tracts in 2019", x = "Meidan Income", y = "Frequency")
+```
+
+From this plot, we can see that the `income` data is skewed right, there are more lower median incomes.
+
+Looking back at our `RPL_THEMES`, we can observe its distribution as well.
+
+```{r}
+
+ggplot(svi_econ, aes(x = RPL_THEMES)) +
+  geom_histogram(binwidth = 0.01, fill = "tomato1", color = "tomato4", alpha = 0.7) +
+  labs(title = "Histogram of SVI Score of Census Tracts in 2020", x = "SVI Score", y = "Frequency")
+
+
+
+```
+
+It is seen that the distribution is skewed left. 
+
+In the original project variables were mapped by county. Examining the Income distribution by county:
+
+```{r maps, include=FALSE}
+#for mapping, convert CA_SVI to a Simple Features (map object)
+library(sf)
+library(tigris)
+library(dplyr)
+library(viridis)
+
+#Load 2020 Census Tract shapefile for California
+ca_tracts <- tracts(state = "CA", year = 2020)
+
+# Assuming svi_econ is your data frame
+ca_tracts$GEOID <- sub("^\\d", "", ca_tracts$GEOID)
+
+#Join CA_SVI and ca_tracts based on FIPS and GEOID
+svi_econ_map <- inner_join(svi_econ, ca_tracts, by = c("GEO_ID" = "GEOID"))
+
+econmap <- st_as_sf(svi_econ_map)
+
+```
+
+```{r mapping}
+map1 = 
+ggplot(data = econmap) +
+  geom_sf(aes(fill = income)) +
+  labs(title = "Median Income by Census Tract: 2019") +
+  scale_fill_viridis_c() +  # Use Viridis color palette
+  theme_void()
+map1
+
+```
+
+It is seen that the majority of census tracts fall in a lower range, with a clustering of higher incomes in the coastal region in the middle of the state. 
+
+Examining income's effect on the SVI score can be done using linear regression to interpret these effects.
+
+```{r}
+
+# Scale or normalize the variables
+svi_econ$income_scaled <- svi_econ$income / 100000  # Scale income to be between 0 and 1
+
+model_econ <- lm(income_scaled ~ RPL_THEMES, data = svi_econ)
+
+# Print a summary of the linear regression model
+summary(model_econ)
+
+```
+
+##### Feature Selection
+
+Numerous methodologies were used to select relevant and significant features for the linear regression and classification model. This part of the project will walk through this selection process. 
+
+**Correlation Matrix**
+
+```{r corr matrix}
+# Convert selected columns to numeric
+svi_select <- mutate_all(svi_econ, as.numeric)
+# Drop columns with NA values
+svi_select <- svi_select %>%
+  select(everything(), -where(~any(is.na(.))))
+# Create the correlation matrix
+cor_matrix <- cor(svi_select, use = "complete.obs")
+# Print the correlation matrix
+#print(cor_matrix)
+# Variable of interest
+target_variable <- "RPL_THEMES"
+# Extract the correlations with the target variable
+cor_with_target <- cor_matrix[target_variable, ]
+# Select variables with high correlation (you can adjust the threshold)
+high_correlation_vars <- names(cor_with_target[abs(cor_with_target) > 0.70])
+# Print the variables with high correlation
+print(high_correlation_vars)
+
+
+# Select the relevant columns for correlation
+correlation_matrix1 <- svi_select %>%
+  select(income, EPL_POV150, EPL_HBURD, EPL_NOHSDP)
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(correlation_matrix1)
+
+loadPkg("corrplot")
+
+
+# Assuming you have already created your correlation plot
+corrplot(correlation_matrix, method = "square", type = "upper", col = colorRampPalette((c("#B2182B", "#FDDBC7", "#2166AC")))(100))
+
+
+```
+
+**ADD IN RESULTS DISUCSSION**
+
+From assessing correlation of variables, only 4 variables: `income`, `EPL_POV150`, `EPL_HBURD`, `EPL_NOHSDP` had a correlation of 0.70  or higher with the `RPL_THEMES` variable. This might suggest that these variables are likely predictors of the outcome SVI score, but later on it will be important to assess multicolinearity. 
+
+```{r}
+predict_svi <- svi_econ %>%
+  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP)
+
+
+model <- lm(RPL_THEMES ~ ., data = predict_svi)
+
+# Check the distribution of residuals
+residuals <- residuals(model)
+
+# Residual Plot
+par(mfrow = c(2, 2))
+plot(model)
+
+# Q-Q Plot
+qqnorm(residuals)
+qqline(residuals)
+
+
+# Kernel Density Plot
+plot(density(residuals))
+```
+
+The residuals appear to be normally distributed. 
+
+VIF assessment:
+
+```{r}
+library(car)
+
+model_test <- glm(RPL_THEMES ~ ., data = predict_svi)
+summary(model_test)
+
+data.frame(vif(model_test))
+
+```
+
+VIF values all below 5
+
+From this assessment of correlation 4 variables were selected.
+
+Next stepwise in both directions was assessed. 
+
+```{r}
+
+# Create the initial model
+initial_model2 <- lm(RPL_THEMES ~ income + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
+
+# Perform stepwise selection (both directions)
+stepwise_model2 <- step(initial_model2, direction = "both")
+
+# Display the summary of the selected model
+summary(stepwise_model2)
+
+
+
+```
+
+All of them are significant 
+
+LASSO technique: 
+
+```{r LASSO}
+# Assuming svi_econ is your data frame
+selected_columns <- c("RPL_THEMES", "income", "EPL_POV150", "EPL_UNINSUR", 
+                       "EPL_AGE65", "EPL_AGE17", "EPL_DISABL", 
+                       "EPL_SNGPNT", "EPL_LIMENG", "EPL_MINRTY", 
+                       "EPL_UNEMP", "EPL_HBURD", "EPL_NOHSDP")
+
+# Filter the data frame
+trim_svi <- svi_econ %>%
+  select(all_of(selected_columns))
+
+# Load the glmnet package
+library(glmnet)
+
+# Prepare data
+x <- model.matrix(RPL_THEMES ~ . - 1, data = trim_svi)
+y <- svi_econ$RPL_THEMES
+
+# Fit LASSO regression model
+fit_lasso <- cv.glmnet(x, y, alpha = 1)
+
+# Display coefficients of the LASSO model
+coef_lasso <- coef(fit_lasso, s = fit_lasso$lambda.min)
+print(coef_lasso)
+
+# Fit Ridge regression model
+fit_ridge <- cv.glmnet(x, y, alpha = 0)
+
+# Display coefficients of the Ridge model
+coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
+print(coef_ridge)
+
+
+# Assuming fit_lasso is your cv.glmnet object
+optimal_lambda <- fit_lasso$lambda.min
+coefficients_at_optimal_lambda <- coef(fit_lasso, s = optimal_lambda)
+print(coefficients_at_optimal_lambda)
+
+```
+
+Income: The coefficient is -3.103e-07. This suggests that a one-unit increase in income is associated with a decrease of approximately 3.103e-07 units in the response variable, holding other variables constant.
+
+EPL_POV150: The coefficient is 0.1949. This suggests that a one-unit increase in EPL_POV150 is associated with an increase of approximately 0.1949 units in the response variable, holding other variables constant.
+
+EPL_UNINSUR: The coefficient is 0.1209. This suggests that a one-unit increase in EPL_UNINSUR is associated with an increase of approximately 0.1209 units in the response variable, holding other variables constant.
+
+EPL_AGE65: The coefficient is 0.0933. This suggests that a one-unit increase in EPL_AGE65 is associated with an increase of approximately 0.0933 units in the response variable, holding other variables constant.
+
+EPL_AGE17: The coefficient is 0.0216. This suggests that a one-unit increase in EPL_AGE17 is associated with an increase of approximately 0.0216 units in the response variable, holding other variables constant.
+
+EPL_DISABL: The coefficient is 0.1503. This suggests that a one-unit increase in EPL_DISABL is associated with an increase of approximately 0.1503 units in the response variable, holding other variables constant.
+
+EPL_SNGPNT: The coefficient is 0.1396. This suggests that a one-unit increase in EPL_SNGPNT is associated with an increase of approximately 0.1396 units in the response variable, holding other variables constant.
+
+EPL_LIMENG: The coefficient is 0.1879. This suggests that a one-unit increase in EPL_LIMENG is associated with an increase of approximately 0.1879 units in the response variable, holding other variables constant.
+
+EPL_MINRTY: The coefficient is 0.1249. This suggests that a one-unit increase in EPL_MINRTY is associated with an increase of approximately 0.1249 units in the response variable, holding other variables constant.
+
+EPL_UNEMP: The coefficient is 0.0956. This suggests that a one-unit increase in EPL_UNEMP is associated with an increase of approximately 0.0956 units in the response variable, holding other variables constant.
+
+EPL_HBURD: The coefficient is 0.1938. This suggests that a one-unit increase in EPL_HBURD is associated with an increase of approximately 0.1938 units in the response variable, holding other variables constant.
+
+EPL_NOHSDP: The coefficient is 0.1919. This suggests that a one-unit increase in EPL_NOHSDP is associated with an increase of approximately 0.1919 units in the response variable, holding other variables constant.
+
+all of them are non zero...
+
+It appears that LASSO and Stepwise both selected the full model as the best model. It will be necessary to compare the simpler model and the full model. 
+
+##### Linear Regression
+
+
+```{r}
+simple_model <- lm(RPL_THEMES ~ income + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = predict_svi)
+
+full_model <- lm(RPL_THEMES ~ income + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
+ 
+```
+
+```{r}
+# Assessment for initial_model
+summary(simple_model)
+plot(simple_model)
+
+# Assessment for initial_model2
+summary(full_model)
+plot(full_model)
+
+# Calculate AIC for initial_model
+aic_simple_model <- AIC(simple_model)
+
+# Calculate AIC for initial_model2
+aic_full_model <- AIC(full_model)
+
+# Compare AIC values
+cat("AIC for initial_model:", aic_simple_model, "\n")
+cat("AIC for initial_model2:", aic_full_model, "\n")
+
+# Choose the model with the lower AIC
+if (aic_simple_model < aic_full_model) {
+  cat("Choose aic_simple_model\n")
+} else {
+  cat("Choose aic_full_model\n")
+}
+
+```
+
+Choose aic_full_model
+
+
+R-Squared
+
+```{r}
+# Calculate Adjusted R-squared for initial_model
+adj_rsq_simple_model <- summary(simple_model)$adj.r.squared
+
+# Calculate Adjusted R-squared for initial_model2
+adj_rsq_full_model2 <- summary(full_model)$adj.r.squared
+
+# Compare Adjusted R-squared values
+cat("Adjusted R-squared for simple:", adj_rsq_simple_model, "\n")
+cat("Adjusted R-squared for full:", adj_rsq_full_model2, "\n")
+```
+
+
+VIFS:
+
+
+```{r}
+# Calculate VIF for initial_model
+vif_simple_model <- car::vif(simple_model)
+
+# Calculate VIF for initial_model2
+vif_full_model <- car::vif(full_model)
+
+# Compare VIF values
+cat("VIF for simple_model:", vif_simple_model, "\n")
+cat("VIF for full_model:", vif_full_model, "\n")
+
+```
+
+Use the model 2
+
+
+##### Predictive Modeling
+
+"In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest."
+
+```{r}
+# Create quartiles and labels
+trim_svi$risk <- cut(trim_svi$RPL_THEMES, breaks = c(0, 0.25, 0.5, 0.75, 1.0), labels = c("low", "lowmed", "medhigh", "high"))
+
+# Plot the data with quartile labels
+library(ggplot2)
+
+ggplot(trim_svi, aes(x = risk, fill = risk)) +
+  geom_bar() +
+  labs(title = "Bar Plot of RPL_THEMES with Quartiles", x = "Quartiles", y = "Count") +
+  scale_fill_manual(values = c("low" = "lightblue", "lowmed" = "blue", "medhigh" = "darkblue", "high" = "purple"))
+
+```
+
+```{r}
+install.packages("rpart")
+library(rpart)
+
+set.seed(1)
+svi_econ_tree <- rpart(risk ~ income + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = 4) )
+printcp(svi_econ_tree) # display the results 
+plotcp(svi_econ_tree) # visualize cross-validation results 
+
+#summary(svi_econ_tree) # detailed summary of splits
+
+# plot tree 
+#plot(svi_econ_tree, uniform=TRUE, main="Classification Tree for svi_econ_tree")
+#text(svi_econ_tree, use.n=TRUE, all=TRUE, cex=.8)
+```
+
+```{r}
+# Generate predictions on the training data
+train_predictions <- predict(svi_econ_tree, trim_svi, type = "class")
+
+# Create a confusion matrix
+conf_matrix_train <- table(train_predictions, trim_svi$risk)
+
+# Display the confusion matrix
+conf_matrix_train
+
+
+xkabledply(conf_matrix_train, "confusion matrix")
+
+```
+
+
+```{r}
+loadPkg("rpart")
+loadPkg("caret")
+
+# create an empty dataframe to store the results from confusion matrices
+confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
+
+for (deep in 2:6) {
+   kfit  <- rpart(risk ~ income + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = deep) )
+  # 
+  cm = confusionMatrix( predict(kfit, type = "class"), reference = trim_svi[, "risk"] ) # from caret library
+  # 
+  cmaccu = cm$overall['Accuracy']
+  # print( paste("Total Accuracy = ", cmaccu ) )
+  # 
+  cmt = data.frame(Depth=deep, Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
+  cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
+  confusionMatrixResultDf = rbind(confusionMatrixResultDf, cmt)
+  # print("Other metrics : ")
+}
+
+unloadPkg("caret")
+```
+
+
+```{r}
+xkabledply(confusionMatrixResultDf, title="SVI econ Classification Trees summary with varying MaxDepth")
+```
+
+```{r}
+#loadPkg("rpart.plot")
+#rpart.plot(svi_econ_tree)
+```
+
+```{r}
+loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(svi_econ_tree)
+```
+
+
+### Covid
+
+
+#### Big tab {.tabset .tabset-fade .tabset-pills}
+
+
+##### inner tabs 

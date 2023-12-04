@@ -16,31 +16,25 @@ output:
 
 knitr::opts_chunk$set(echo = TRUE)
 options(scientific=T, digits = 3) 
-library(ezids)
-library(ggplot2)
-#install.packages("tigris")
-library(tigris)
-#install.packages("sf")
-library(sf)
-#install.packages("here")
-library(here)
-#install.packages("dplyr")
-library(dplyr)
-#install.packages("leaflet")
-library(leaflet)
-#install.packages("reshape2")
-library(reshape2)
-#install.packages("tmap")
-library(tmap)
-#install.packages("viridis")
-library(viridis)
-#install.packages("stargazer")
-library(stargazer)
+# Restart R session
 
+# Load necessary packages
+library(ezids)
+library(tigris)
+library(sf)
+library(here)
+library(dplyr)
+library(leaflet)
+library(reshape2)
+library(tmap)
+library(viridis)
+library(stargazer)
+library(maps)
+library(ggplot2)
 
 ```
 
-
+**First Look at Dataset**
 
 ```{r}
 
@@ -54,38 +48,47 @@ head(us_deaths)
 
 ```
 
-```{r}
-library(dplyr)
+**Column Subsetting and Renaming**
 
-Clean_data <- subset(SVI_Data, ST_ABBR == "CA")
-CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
+
+```{r}
+
+SVI <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
 
 # Renaming columns
-colnames(CA_SVI)[colnames(CA_SVI) == 'STCNTY'] <- 'county_fips'
+colnames(SVI)[colnames(SVI) == 'STCNTY'] <- 'county_fips'
 us_cases <- rename(us_cases, confirmed_cases = confirmed)
 
 
+
+```
+
+
+
+**Missing values removal**
+```{r}
 # Filter out rows with any value equal to -999
-CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
+SVI <- SVI[rowSums(SVI == -999, na.rm = TRUE) == 0, ]
 
 # Drop rows with missing values
-CA_SVI <- na.omit(CA_SVI)
+SVI <- na.omit(SVI)
 
+us_cases[is.na(us_cases$confirmed_cases), ]
+
+
+head(SVI)
+
+
+```
+
+**Row Subsetting**
+```{r}
+CA_SVI <- subset(SVI, STATE == "California")
 head(CA_SVI)
 
-
-```
-```{r}
-
-# subset to california
-
-us_cases_ca <- subset(us_cases, state_name == "CA")
-head(us_cases_ca)
-
-
-
 ```
 
+**Formatting**
 
 ```{r}
 library(dplyr)
@@ -93,10 +96,12 @@ library(dplyr)
 format_str <- '%Y-%m-%d'
 
 # Convert the 'date' column to datetime and create a new 'datetime' column
-us_cases_ca$datetime <- as.POSIXct(us_cases_ca$date, format = format_str)
+us_cases$datetime <- as.POSIXct(us_cases$date, format = format_str)
 
 # Drop rows that do not refer to a specific county ('Statewide Unallocated')
-us_cases_ca <- us_cases_ca[us_cases_ca$county_name != 'Statewide Unallocated', ]
+us_cases <- us_cases[us_cases$county_name != 'Statewide Unallocated', ]
+
+us_cases_ca <- subset(us_cases, state_name == "CA")
 
 # Display the first few rows of the resulting data frame
 head(us_cases_ca)
@@ -104,21 +109,226 @@ head(us_cases_ca)
 ```
 
 
+```{r}
+# Install and load necessary packages
+us_cases_grouping_fips <- us_cases_ca %>%
+  group_by(county_fips, state_name) %>%
+  summarise(max_confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(max_confirmed_cases))
 
+us_cases_grouping_county <- us_cases_ca %>%
+  group_by(county_name, state_name) %>%
+  summarise(max_confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(max_confirmed_cases))
 
+result <- bind_cols(us_cases_grouping_fips, us_cases_grouping_county)
+Summarized_cases<-result[, 1:4]
+new_col_names <- c("fips", "state", "confirmed", "county")
+names(Summarized_cases) <- new_col_names
 
+```
 
-
-
-
+**Map of CA colored by confirmed cases**
 
 ```{r}
-nrow(us_cases)
-nrow(svi)
-#merging
-covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
 
-nrow(covid_svi)
+# Install and load the usmap package
+library(usmap)
+library(plotly)
+
+
+# Plot the choropleth map
+plot_usmap(
+  data = Summarized_cases,
+  values = "confirmed",
+  include = c("CA"),
+  labels = TRUE
+) + 
+scale_fill_gradient(
+  low = "lightblue", high = "darkblue", name = "Confirmed Cases", label = scales::comma) + 
+labs(title = "COVID-19 Confirmed Cases in California Counties") +
+theme(legend.position = "right")
+
+```
+
+```{r}
+us_cases_all_counties <- us_cases_ca %>%
+  group_by(county_fips, county_name, state_name) %>%
+  summarise(confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(confirmed_cases))
+
+# Group by Fips, County, and State, and calculate the mean of selected indicators
+svi_all_counties <- SVI %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EP_POV150 = mean(EP_POV150),
+    EP_LIMENG = mean(EP_LIMENG),
+    EP_AGE65 = mean(EP_AGE65),
+    EP_MINRTY = mean(EP_MINRTY),
+    EP_UNEMP = mean(EP_UNEMP),
+    EP_NOHSDP = mean(EP_NOHSDP),
+    EP_AGE17 = mean(EP_AGE17),
+    EP_DISABL = mean(EP_DISABL),
+    EP_SNGPNT = mean(EP_SNGPNT),
+    EP_MUNIT = mean(EP_MUNIT),
+    EP_MOBILE = mean(EP_MOBILE),
+    EP_CROWD = mean(EP_CROWD),
+    EP_NOVEH = mean(EP_NOVEH),
+    EP_GROUPQ = mean(EP_GROUPQ),
+    RPL_THEMES = mean(RPL_THEMES)
+  )
+svi_all_counties_ca <- subset(svi_all_counties, STATE == "California")
+# Merge with us_cases_all_counties and sort by confirmed_cases
+svi_all_counties_cases <- merge(svi_all_counties_ca, us_cases_all_counties, by = 'county_fips') %>%
+  arrange(desc(confirmed_cases))
+
+# Remove unnecessary columns
+svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_name)
+
+# Display the result
+head(svi_all_counties_cases)
+
+```
+
+**Corelation matrix between confirmed cases and all variables**
+```{r}
+# Plot the correlation matrix
+library(corrplot)
+# Select relevant columns
+svi_all_counties_cases_corr <- svi_all_counties_cases[c('confirmed_cases', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY', 'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT', 'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES')]
+
+# Calculate correlation matrix
+corr <- cor(svi_all_counties_cases_corr)
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
 
 
 ```
+```{r}
+
+# Which are the 10 most affected US counties?
+ca_cases_top_10 <- head(us_cases_all_counties, 10)
+print(ca_cases_top_10)
+
+# Preparing a list with the 10 most affected counties:
+top_10_cases_fips_list <- ca_cases_top_10$county_fips
+
+ca_cases_top_10_datetime <- subset(us_cases_ca, county_fips %in% top_10_cases_fips_list)
+head(ca_cases_top_10_datetime)
+
+
+
+```
+
+
+
+
+
+**Create timeline of covid**
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Plot Timeline of cases
+ca_cases_top_10_datetime$datetime <- as.Date(ca_cases_top_10_datetime$datetime)  # Make sure datetime is in Date format
+head(ca_cases_top_10_datetime)
+
+f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, color = county_name)) +
+  geom_line() +
+  labs(x = 'Timeline', y = 'Confirmed Cases', title = 'Confirmed cases in CA counties') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_discrete(name = 'County Name')+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")   # Format the x-axis with month and year
+
+
+print(f)
+
+
+
+
+```
+
+
+**Create correlation matrix for just the most affected counties**
+```{r}
+
+# Select the rows in the SVI dataframe that contain the ten counties with most confirmed cases.
+svi_top_10_counties_cases <- SVI[SVI$county_fips %in% top_10_cases_fips_list, ]
+
+# Group by county, COUNTY, and STATE, and calculate the mean values for selected indicators.
+svi_top_10_counties_cases <- svi_top_10_counties_cases %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EP_POV150 = mean(EP_POV150),
+    EP_LIMENG = mean(EP_LIMENG),
+    EP_AGE65 = mean(EP_AGE65),
+    EP_MINRTY = mean(EP_MINRTY),
+    EP_UNEMP = mean(EP_UNEMP),
+    EP_NOHSDP = mean(EP_NOHSDP),
+    EP_AGE17 = mean(EP_AGE17),
+    EP_DISABL = mean(EP_DISABL),
+    EP_SNGPNT = mean(EP_SNGPNT),
+    EP_MUNIT = mean(EP_MUNIT),
+    EP_MOBILE = mean(EP_MOBILE),
+    EP_CROWD = mean(EP_CROWD),
+    EP_NOVEH = mean(EP_NOVEH),
+    EP_GROUPQ = mean(EP_GROUPQ),
+    RPL_THEMES = mean(RPL_THEMES)
+  ) %>%
+  ungroup()
+
+# Merge county SVI with confirmed cases of Covid-19
+svi_top_10_counties_cases <- merge(svi_top_10_counties_cases, ca_cases_top_10, by = 'county_fips') %>%
+  arrange(desc(confirmed_cases)) %>%
+  select(-county_name, -state_name)
+
+# Select columns for correlation analysis
+svi_top_10_counties_cases_corr <- svi_top_10_counties_cases[c(
+  'confirmed_cases', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY',
+  'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT',
+  'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES'
+)]
+
+# Calculate correlation matrix
+corr <- cor(svi_top_10_counties_cases_corr)
+
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
+
+
+
+```
+
+**Initial MLR for confirmed cases**
+```{r}
+library(caret)
+# Preparing the independent variable (X) and the dependent variable (y)
+y <- svi_all_counties_cases$confirmed_cases
+X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
+
+
+# Splitting the data into train and test data
+set.seed(42)  # For reproducibility
+train_indices <- createDataPartition(y, p = 0.8, list = FALSE)
+X_train <- X[train_indices, ]
+X_test <- X[-train_indices, ]
+y_train <- y[train_indices]
+y_test <- y[-train_indices]
+
+# Initiate the model
+lm_model <- lm(y_train ~ ., data = cbind(y_train, X_train))
+
+# Predictions on the test set
+y_predict <- predict(lm_model, newdata = X_test)
+summary(lm_model)
+
+# Score (R-squared)
+print(summary(lm_model)$r.squared)
+
+# Coefficients
+confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+
+```
+
+
