@@ -102,7 +102,7 @@ library(ggplot2)
 
 ggplot(svi_econ, aes(x = RPL_THEMES)) +
   geom_histogram(binwidth = 0.01, fill = "blue", color = "black", alpha = 0.7) +
-  labs(title = "Income Histogram", x = "Income", y = "Frequency")
+  labs(title = "RPL_THEMES Histogram", x = "Income", y = "Frequency")
 
 #data is skewed left  
 
@@ -252,4 +252,122 @@ predict_svi <- svi_econ %>%
 ```
 
 
+```{r}
+# Fit a linear regression model
+model <- lm(RPL_THEMES ~ ., data = predict_svi)
+
+# Check the distribution of residuals
+residuals <- residuals(model)
+
+# Residual Plot
+par(mfrow = c(2, 2))
+plot(model)
+
+# Q-Q Plot
+qqnorm(residuals)
+qqline(residuals)
+
+
+# Kernel Density Plot
+plot(density(residuals))
+
+```
+
+
+https://wavedatalab.github.io/machinelearningwithr/post4.html
+
+```{r}
+library(car)
+
+model_test <- glm(RPL_THEMES ~ ., data = predict_svi)
+summary(model_test)
+
+data.frame(vif(model_test))
+
+
+```
+
+
+
+```{r}
+# Fit Ridge regression model
+fit_ridge <- cv.glmnet(x, y, alpha = 0)
+
+# Plot the Ridge path
+plot(fit_ridge, xvar = "lambda", label = TRUE)
+
+# Display coefficients of the Ridge model
+coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
+print(coef_ridge)
+
+```
+
+```{r}
+# Continue from where you left off
+# Assuming x, y, and fit_ridge are already defined
+
+# Display coefficients of the Ridge model
+coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
+print(coef_ridge)
+
+# Plot the cross-validated Ridge results
+plot(fit_ridge)
+
+# Evaluate model performance (you need a test set for this)
+# test_preds <- predict(fit_ridge, newx = test_data)
+# test_rmse <- sqrt(mean((test_preds - test_data$RPL_THEMES)^2))
+# print(paste("Test RMSE: ", test_rmse))
+
+# Optionally, fit a LASSO regression model
+fit_lasso <- cv.glmnet(x, y, alpha = 1)
+
+# Plot the LASSO path
+plot(fit_lasso, xvar = "lambda", label = TRUE)
+
+# Plot the cross-validated LASSO results
+plot(fit_lasso)
+
+# Display coefficients of the LASSO model
+coef_lasso <- coef(fit_lasso, s = fit_lasso$lambda.min)
+print(coef_lasso)
+
+# Residual Analysis (once you have predictions and true values)
+# residuals <- test_data$RPL_THEMES - test_preds
+# plot(test_preds, residuals)
+
+# Further analysis as needed
+
+# Document and Report your findings
+# Write a summary or report detailing your analysis and decisions
+
+```
+The values are very small, and in Ridge regression, coefficients are shrunk toward zero. The regularization helps prevent overfitting, and the strength of this regularization is controlled by the lambda parameter. In your output, it seems that the coefficients are relatively small, indicating that regularization is influencing the model.
+
+Based on the magnitude of coefficients, you might consider variables with larger absolute values as more influential in the model. In this case, "EPL_NOHSDP" appears to have the largest coefficient, followed by "EPL_POV150" and "EP_POV150." However, the decision to include or exclude variables should also consider domain knowledge and the specific goals of your analysis.
+
+```{r}
+optimal_lambda <- fit_ridge$lambda.min
+coefficients_at_optimal_lambda <- coef(fit_ridge, s = optimal_lambda)
+print(coefficients_at_optimal_lambda)
+```
+
+
+
+dont run this yet 
+
+
+
+
+```{r}
+library(randomForest)
+
+# Assuming svi_econ is your data frame
+predict_svi <- svi_econ %>%
+  select(RPL_THEMES, income, EPL_POV150, EPL_HBURD, EPL_NOHSDP, EP_POV150, EP_NOHSDP)
+
+# Fit Random Forest model
+model <- randomForest(RPL_THEMES ~ ., data = predict_svi)
+importance(model)
+
+```
 
