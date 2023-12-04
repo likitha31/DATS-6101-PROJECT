@@ -155,9 +155,6 @@ us_cases_all_counties <- us_cases_ca %>%
   summarise(confirmed_cases = sum(confirmed_cases)) %>%
   arrange(desc(confirmed_cases))
 
-# Display the result
-head(us_cases_all_counties)
-
 # Group by Fips, County, and State, and calculate the mean of selected indicators
 svi_all_counties <- SVI %>%
   group_by(county_fips, COUNTY, STATE) %>%
@@ -190,6 +187,19 @@ svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_na
 head(svi_all_counties_cases)
 
 ```
+```{r}
+# Plot the correlation matrix
+library(corrplot)
+# Select relevant columns
+svi_all_counties_cases_corr <- svi_all_counties_cases[c('confirmed_cases', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY', 'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT', 'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES')]
+
+# Calculate correlation matrix
+corr <- cor(svi_all_counties_cases_corr)
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
+
+
+```
+
 
 **Create timeline of covid**
 ```{r}
