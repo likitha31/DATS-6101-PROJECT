@@ -32,7 +32,7 @@ library(stargazer)
 library(maps)
 library(ggplot2)
 library(extrafont)
-font_import(pattern = "Avenir")
+#font_import(pattern = "Avenir")
 loadfonts()
 # Set the default font for ggplot2
 theme_set(theme_minimal(base_family = "Avenir"))
@@ -208,7 +208,21 @@ map1
 
 ```
 
-It is seen that the majority of census tracts fall in a lower range, with a clustering of hugher incomes in the coastal region in the middle of the state. 
+It is seen that the majority of census tracts fall in a lower range, with a clustering of higher incomes in the coastal region in the middle of the state. 
+
+Examining income's effect on the SVI score can be done using linear regression to interpret these effects.
+
+```{r}
+
+# Scale or normalize the variables
+svi_econ$income_scaled <- svi_econ$income / 100000  # Scale income to be between 0 and 1
+
+model_econ <- lm(income_scaled ~ RPL_THEMES, data = svi_econ)
+
+# Print a summary of the linear regression model
+summary(model_econ)
+
+```
 
 ##### Feature Selection
 
@@ -387,6 +401,7 @@ all of them are non zero...
 It appears that LASSO and Stepwise both selected the full model as the best model. It will be necessary to compare the simpler model and the full model. 
 
 ##### Linear Regression
+
 
 ```{r}
 simple_model <- lm(RPL_THEMES ~ income + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = predict_svi)
