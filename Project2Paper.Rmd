@@ -1,0 +1,41 @@
+---
+title: "Project 2:Write Up"
+author: "Likhitha, Paulina, Shrihan"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: cosmo
+    code_folding: hide
+    number_sections: false
+    toc: yes
+    toc_depth: 3
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+# Load packages
+library(ezids)
+library(tigris)
+library(sf)
+library(here)
+library(dplyr)
+library(leaflet)
+library(reshape2)
+library(tmap)
+library(viridis)
+library(stargazer)
+library(maps)
+library(ggplot2)
+library(extrafont)
+font_import(pattern = "Avenir")
+
+```
+
+## Introduction
+
+### Research Topic 
