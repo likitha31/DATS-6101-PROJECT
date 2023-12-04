@@ -53,12 +53,13 @@ head(us_deaths)
 
 ```{r}
 
-Clean_data <- subset(SVI_Data, ST_ABBR == "CA")
-CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
+SVI <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
 
 # Renaming columns
-colnames(CA_SVI)[colnames(CA_SVI) == 'STCNTY'] <- 'county_fips'
+colnames(SVI)[colnames(SVI) == 'STCNTY'] <- 'county_fips'
 us_cases <- rename(us_cases, confirmed_cases = confirmed)
+
+
 
 ```
 
@@ -67,16 +68,23 @@ us_cases <- rename(us_cases, confirmed_cases = confirmed)
 **Missing values removal**
 ```{r}
 # Filter out rows with any value equal to -999
-CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
+SVI <- SVI[rowSums(SVI == -999, na.rm = TRUE) == 0, ]
 
 # Drop rows with missing values
-CA_SVI <- na.omit(CA_SVI)
+SVI <- na.omit(SVI)
 
 us_cases[is.na(us_cases$confirmed_cases), ]
 
 
-head(CA_SVI)
+head(SVI)
 
+
+```
+
+**Row Subsetting**
+```{r}
+CA_SVI <- subset(SVI, STATE == "California")
+head(CA_SVI)
 
 ```
 
@@ -141,7 +149,47 @@ theme(legend.position = "right")
 
 ```
 
+```{r}
+us_cases_all_counties <- us_cases_ca %>%
+  group_by(county_fips, county_name, state_name) %>%
+  summarise(confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(confirmed_cases))
 
+# Display the result
+head(us_cases_all_counties)
+
+# Group by Fips, County, and State, and calculate the mean of selected indicators
+svi_all_counties <- SVI %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EP_POV150 = mean(EP_POV150),
+    EP_LIMENG = mean(EP_LIMENG),
+    EP_AGE65 = mean(EP_AGE65),
+    EP_MINRTY = mean(EP_MINRTY),
+    EP_UNEMP = mean(EP_UNEMP),
+    EP_NOHSDP = mean(EP_NOHSDP),
+    EP_AGE17 = mean(EP_AGE17),
+    EP_DISABL = mean(EP_DISABL),
+    EP_SNGPNT = mean(EP_SNGPNT),
+    EP_MUNIT = mean(EP_MUNIT),
+    EP_MOBILE = mean(EP_MOBILE),
+    EP_CROWD = mean(EP_CROWD),
+    EP_NOVEH = mean(EP_NOVEH),
+    EP_GROUPQ = mean(EP_GROUPQ),
+    RPL_THEMES = mean(RPL_THEMES)
+  )
+svi_all_counties_ca <- subset(svi_all_counties, STATE == "California")
+# Merge with us_cases_all_counties and sort by confirmed_cases
+svi_all_counties_cases <- merge(svi_all_counties_ca, us_cases_all_counties, by = 'county_fips') %>%
+  arrange(desc(confirmed_cases))
+
+# Remove unnecessary columns
+svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_name)
+
+# Display the result
+head(svi_all_counties_cases)
+
+```
 
 **Create timeline of covid**
 ```{r}
