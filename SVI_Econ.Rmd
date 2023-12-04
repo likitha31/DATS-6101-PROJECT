@@ -148,7 +148,7 @@ map1
 
 ok but now lets also see what other features are relevant to us in this dataset in predicting svi 
 
-first lets select the variables we should look at/consider because not all of them are relevant + processing takes a while
+first lets select the variables we should look at/consider because not all of them are relevant + processing takes a while..?
 
 
 ```{r}
@@ -324,18 +324,13 @@ EPL_NOHSDP: The coefficient is 0.1919. This suggests that a one-unit increase in
 all of them are non zero....
 
 
-dont run this yet 
-
-
 
 
 ```{r}
-# Assuming your data frame is named 'your_data'
-your_data <- predict_svi  # Replace with your actual data frame name
 
 # Create the initial model
 
-initial_model <- lm(RPL_THEMES ~ income + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = your_data)
+initial_model <- lm(RPL_THEMES ~ income + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = predict_svi)
 
 # Perform stepwise selection (both directions)
 stepwise_model <- step(initial_model, direction = "both")
@@ -442,21 +437,78 @@ ggplot(trim_svi, aes(x = risk, fill = risk)) +
 install.packages("rpart")
 library(rpart)
 
-# Fit the classification tree model
-tree_model <- rpart(risk ~ ., data = trim_svi, subset = !is.na(risk), method = "class")
+set.seed(1)
+svi_econ_tree <- rpart(risk ~ income + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = 4) )
+# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = {rpart.control list} )
+# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
+printcp(svi_econ_tree) # display the results 
+plotcp(svi_econ_tree) # visualize cross-validation results 
 
-# Plot the tree
-plot(tree_model)
-text(tree_model, pretty = 0)
+```
 
-# Make predictions
-tree_predictions <- predict(tree_model, svi_econ, type = "class")
+```{r}
+summary(svi_econ_tree) # detailed summary of splits
 
-# Add predictions to the dataset
-svi_econ$tree_predictions <- tree_predictions
+# plot tree 
+plot(svi_econ_tree, uniform=TRUE, main="Classification Tree for svi_econ_tree")
+text(svi_econ_tree, use.n=TRUE, all=TRUE, cex=.8)
+```
+
+```{r}
+# Generate predictions on the training data
+train_predictions <- predict(svi_econ_tree, trim_svi, type = "class")
+
+# Create a confusion matrix
+conf_matrix_train <- table(train_predictions, trim_svi$risk)
+
+# Display the confusion matrix
+conf_matrix_train
+
+
+xkabledply(conf_matrix_train, "confusion matrix")
 
 ```
 
 
+```{r}
+loadPkg("rpart")
+loadPkg("caret")
 
+# kyphosisfit <- rpart(Kyphosis ~ Age + Number + Start, data=kyphosis, method="class", control = {rpart.control list} )
+# rpart.control(maxdepth = 30, minsplit = 20, minbucket = round(minsplit/3), cp = 0.01, maxcompete = 4, maxsurrogate = 5, usesurrogate = 2, xval = 10, surrogatestyle = 0, ...)
+
+# create an empty dataframe to store the results from confusion matrices
+confusionMatrixResultDf = data.frame( Depth=numeric(0), Accuracy= numeric(0), Sensitivity=numeric(0), Specificity=numeric(0), Pos.Pred.Value=numeric(0), Neg.Pred.Value=numeric(0), Precision=numeric(0), Recall=numeric(0), F1=numeric(0), Prevalence=numeric(0), Detection.Rate=numeric(0), Detection.Prevalence=numeric(0), Balanced.Accuracy=numeric(0), row.names = NULL )
+
+for (deep in 2:6) {
+   kfit  <- rpart(risk ~ income + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = deep) )
+  # 
+  cm = confusionMatrix( predict(kfit, type = "class"), reference = trim_svi[, "risk"] ) # from caret library
+  # 
+  cmaccu = cm$overall['Accuracy']
+  # print( paste("Total Accuracy = ", cmaccu ) )
+  # 
+  cmt = data.frame(Depth=deep, Accuracy = cmaccu, row.names = NULL ) # initialize a row of the metrics 
+  cmt = cbind( cmt, data.frame( t(cm$byClass) ) ) # the dataframe of the transpose, with k valued added in front
+  confusionMatrixResultDf = rbind(confusionMatrixResultDf, cmt)
+  # print("Other metrics : ")
+}
+
+unloadPkg("caret")
+```
+
+
+```{r}
+xkabledply(confusionMatrixResultDf, title="SVI econ Classification Trees summary with varying MaxDepth")
+```
+
+```{r}
+loadPkg("rpart.plot")
+rpart.plot(svi_econ_tree)
+```
+
+```{r}
+loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(svi_econ_tree)
+```
 
