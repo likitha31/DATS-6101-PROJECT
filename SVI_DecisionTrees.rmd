@@ -215,30 +215,24 @@ head(svi_covid)
 library(rpart)
 library(caret)
 
-# Assuming your dataset is named 'svi_covid'
-# Replace 'your_data.csv' with the actual file name or provide the data directly if it's in a different format
 
-# Example if the data is in a CSV file
-# your_data <- read.csv("your_data.csv")
 
-# Example if the data is already loaded
-your_data <- svi_covid
 
-# Assuming you want to predict 'RPL_THEMES' based on 'total_cases' and 'total_deaths'
+
 formula <- RPL_THEMES ~ total_cases + total_deaths+ EP_POV150 + EP_AGE65 
 
 # Convert categorical variables to factors with consistent levels
-your_data$STATE <- as.factor(your_data$STATE)
-your_data$COUNTY <- as.factor(your_data$COUNTY)
+svi_covid$STATE <- as.factor(svi_covid$STATE)
+svi_covid$COUNTY <- as.factor(svi_covid$COUNTY)
 
 # Ensure 'RPL_THEMES' is a numeric variable
-your_data$RPL_THEMES <- as.numeric(your_data$RPL_THEMES)
+svi_covid$RPL_THEMES <- as.numeric(svi_covid$RPL_THEMES)
 
 # Split the data into training and testing sets
 set.seed(123)
-train_indices <- createDataPartition(your_data$RPL_THEMES, p = 0.7, list = FALSE)
-train_data <- your_data[train_indices, ]
-test_data <- your_data[-train_indices, ]
+train_indices <- createDataPartition(svi_covid$RPL_THEMES, p = 0.7, list = FALSE)
+train_data <- svi_covid[train_indices, ]
+test_data <- svi_covid[-train_indices, ]
 
 # Build the decision tree regression model
 tree_model <- rpart(formula, data = train_data, method = "anova")
