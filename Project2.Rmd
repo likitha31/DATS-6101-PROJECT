@@ -145,7 +145,7 @@ plot_usmap(
   labels = TRUE
 ) + 
 scale_fill_gradient(
-  low = "white", high = "red", name = "Confirmed Cases", label = scales::comma) + 
+  low = "lightblue", high = "darkblue", name = "Confirmed Cases", label = scales::comma) + 
 labs(title = "COVID-19 Confirmed Cases in California Counties") +
 theme(legend.position = "right")
 
@@ -250,9 +250,50 @@ print(f)
 ```
 
 
-**Create correlation matrix**
+**Create correlation matrix for just the most affected counties**
 ```{r}
 
+# Select the rows in the SVI dataframe that contain the ten counties with most confirmed cases.
+svi_top_10_counties_cases <- SVI[SVI$county_fips %in% top_10_cases_fips_list, ]
+
+# Group by county, COUNTY, and STATE, and calculate the mean values for selected indicators.
+svi_top_10_counties_cases <- svi_top_10_counties_cases %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EP_POV150 = mean(EP_POV150),
+    EP_LIMENG = mean(EP_LIMENG),
+    EP_AGE65 = mean(EP_AGE65),
+    EP_MINRTY = mean(EP_MINRTY),
+    EP_UNEMP = mean(EP_UNEMP),
+    EP_NOHSDP = mean(EP_NOHSDP),
+    EP_AGE17 = mean(EP_AGE17),
+    EP_DISABL = mean(EP_DISABL),
+    EP_SNGPNT = mean(EP_SNGPNT),
+    EP_MUNIT = mean(EP_MUNIT),
+    EP_MOBILE = mean(EP_MOBILE),
+    EP_CROWD = mean(EP_CROWD),
+    EP_NOVEH = mean(EP_NOVEH),
+    EP_GROUPQ = mean(EP_GROUPQ),
+    RPL_THEMES = mean(RPL_THEMES)
+  ) %>%
+  ungroup()
+
+# Merge county SVI with confirmed cases of Covid-19
+svi_top_10_counties_cases <- merge(svi_top_10_counties_cases, ca_cases_top_10, by = 'county_fips') %>%
+  arrange(desc(confirmed_cases)) %>%
+  select(-county_name, -state_name)
+
+# Select columns for correlation analysis
+svi_top_10_counties_cases_corr <- svi_top_10_counties_cases[c(
+  'confirmed_cases', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY',
+  'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT',
+  'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES'
+)]
+
+# Calculate correlation matrix
+corr <- cor(svi_top_10_counties_cases_corr)
+
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
 
 
 
@@ -267,24 +308,3 @@ print(f)
 ```
 
 
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
-```{r}
-nrow(us_cases)
-nrow(svi)
-#merging
-covid_svi <- merge(svi, us_cases, by.svi = "state_fips")
-
-nrow(covid_svi)
-
-
-```
->>>>>>> 5397221cb8486660c48784029f794a7b309ba6a1
