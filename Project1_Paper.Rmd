@@ -670,17 +670,138 @@ EP_ASIAN is litte negatively correlated with RPL_THEME1 and RPL_THEME2. This sug
 
 Like the previous scenario with the elderly population, a higher percentage of Asian residents may act as protective factors against certain social vulnerabilities. This could be due to factors such as economic stability, community support, and educational attainment.
 
-### Charts
+### Additional Figures
 
 #### Charts {.tabset .tabset-fade .tabset-pills}
 
-##### Most At-Risk Tracts
+##### Chart of Mean SVIs
 
 ```{r}
 
+
+CA_SVI <- subset(CA_SVI, RPL_THEMES != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME2 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME3 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME4 != -999)
+
+#this removed 65 rows
+
+#lets find the avg SVI scores by theme and by county to make into a table
+county_svi2 <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(
+    mean_SVI = mean(RPL_THEMES),
+    mean_RPL_THEME1 = mean(RPL_THEME1),
+    mean_RPL_THEME2 = mean(RPL_THEME2),
+    mean_RPL_THEME3 = mean(RPL_THEME3),
+    mean_RPL_THEME4 = mean(RPL_THEME4)
+  ) %>%
+  ungroup()
+
+county_svi2_sorted <- county_svi2 %>%
+  arrange(desc(mean_SVI))
+
+top_10_vulnerable_counties <- head(county_svi2_sorted, n = 10)
+
+library(knitr)
+library(knitr)
+
+
+custom_labels <- c("County", "Overall SVI", "Theme 1", "Theme 2", "Theme 3", "Theme 4")
+
+table_top_10_vulnerable <- kable(top_10_vulnerable_counties, format = "html", 
+                                 caption = "Top 10 Most Vulnerable Counties",
+                                 col.names = custom_labels)
+table_top_10_vulnerable
+
 ```
 
+This chart depicts the top ten most vulnerable counties ranked by the **MEAN** of `RPL_THEMES` or Overall SVI. The mean of each theme's SVI is also displayed at the county level. This chart identifies the most vulnerable tracts, as well as enables a comparison of how the overall SVI compares to the specific themes. This can help identify if there is a higher specific type of vulnerability within a county, say one is less transit friendly, or one has more dense housing types, etc. From the chart, it is apparent that the counties' have different SVI scores depending on themes, but they do not differ greatly. 
 
+A correlation matrix can be viewed to compare how these themes all relate to the overall SVI in the next tab. 
+
+
+
+##### Correlation between SVI and Themed SVI
+
+```{r}
+library(ggplot2)
+library(ggcorrplot)
+
+CA_SVI <- subset(CA_SVI, RPL_THEMES != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME2 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME3 != -999)
+CA_SVI <- subset(CA_SVI, RPL_THEME4 != -999)
+
+#this removed 65 rows
+
+# Select the relevant columns for correlation
+correlation_data <- county_svi2 %>%
+  select(mean_SVI, mean_RPL_THEME1, mean_RPL_THEME2, mean_RPL_THEME3, mean_RPL_THEME4)
+
+# Calculate the correlation matrix
+correlation_matrix_counties <- cor(correlation_data)
+
+ggcorrplot(correlation_matrix_counties, 
+           type = "lower", 
+           lab = TRUE, 
+           method = "square",  # or method = "circle"
+           title = "Correlation Plot of Themes with Mean_SVI",
+           ggtheme = ggplot2::theme_minimal()
+           )
+
+```
+
+This correlation matrix identifies the correlations between mean SVI theme scores and the mean Overall SVI for the top ten most vulnerable counties in California. 
+Here it is seen that `Theme 1` and `Theme 2` have the strongest correlation to the `Overall SVI`. This is an interesting observation, and it could help guide future research or recommendations as to which SVI score to use when responding to emergency situations within each tract or county. This matrix also shows the correlation between the themes. It is seen that there is correlation between them, ranging from weak (0.28 `Theme 3` & `Theme 4`) to strong (0.76 `Theme1` & `Theme 2`) which could also inform how these demographic variables might have overlap/similar effects on social vulnerability. Diving deeper into the relationship of the variables of strongly correlated themes (the demographic variables that make up the themes) could be interesting analysis to conduct. 
+
+##### Mean SVI & Demographics
+
+```{r}
+library(ggplot2)
+library(ggcorrplot)
+
+#lets find the avg SVI scores by theme and by county to make into a table
+county_svi3 <- CA_SVI %>%
+  group_by(COUNTY) %>%
+  summarize(
+    mean_SVI = mean(RPL_THEMES),
+    mean_RPL_THEME1 = mean(RPL_THEME1),
+    mean_RPL_THEME2 = mean(RPL_THEME2),
+    mean_RPL_THEME3 = mean(RPL_THEME3),
+    mean_RPL_THEME4 = mean(RPL_THEME4),
+    mean_EPL_MINRTY = mean(EPL_MINRTY),
+    mean_EP_AGE65 = mean(EP_AGE65),
+    mean_EP_POV150 = mean(EP_POV150),
+    mean_EPL_UNEMP = mean(EPL_UNEMP),
+    mean_EPL_UNINSUR = mean(EPL_UNINSUR),
+    mean_EPL_DISABL = mean(EPL_DISABL),
+    mean_EPL_CROWD = mean(EPL_CROWD),
+    mean_EPL_NOVEH = mean(EPL_NOVEH)
+  
+  ) %>%
+  ungroup()
+
+# Select the relevant columns for correlation
+correlation_data2 <- county_svi3 %>%
+  select(mean_SVI, mean_RPL_THEME1, mean_RPL_THEME2, mean_RPL_THEME3, mean_RPL_THEME4, mean_EPL_MINRTY, mean_EP_AGE65,
+         mean_EP_POV150, mean_EPL_UNEMP, mean_EPL_UNINSUR, mean_EPL_DISABL,   mean_EPL_CROWD, mean_EPL_NOVEH)
+
+# Calculate the correlation matrix
+correlation_matrix_counties_demog <- cor(correlation_data2)
+loadPkg("corrplot")
+
+
+# Assuming you have already created your correlation plot
+corrplot(correlation_matrix_counties_demog, method = "square", type = "upper", col = colorRampPalette((c("#B2182B", "#FDDBC7", "#2166AC")))(100))
+
+```
+
+This figure shows the correlation between demographic variables selected in the analysis, however this is not a holistic look, more fine analysis should be conducted to examine the specific interactions of demographic variables that are significant versus those that are not significant by using linear regression models to select variables to compare. Here it is possible to see each individual SVI (Overall and Themes), as well as the demographic variables that make up these themes. Obviously, we are not interested in direct relationships like how `Percent Minority` correlates with the `Theme 3` score. Instead, this can allow observations about how **UNRELATED** variables affect an SVI score, such as how `Percent of People in Poverty` impacts all of the SVI scores highly,  but seemingly the `Percent Population with Disability` seems to have less of an impact on the scores across themes. 
+
+Additionally, it also enables thr visualization of the correlation between demographics, which could help identify groups that could be most at risk. This can be seen with the high correlation between the `Percent Age 65 and Over` and `Percent Minority` variables. This informs us about California's demographics, and what kind of overlapping demographic groups might need assistance in the case of an emergency. 
 
 ### Hypothesis Testing
 
