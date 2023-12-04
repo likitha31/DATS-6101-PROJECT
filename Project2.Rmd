@@ -299,11 +299,35 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```
 
-**Create MLR for confirmed cases**
+**Initial MLR for confirmed cases**
 ```{r}
+library(caret)
+# Preparing the independent variable (X) and the dependent variable (y)
+y <- svi_all_counties_cases$confirmed_cases
+X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
 
 
+# Splitting the data into train and test data
+set.seed(42)  # For reproducibility
+train_indices <- createDataPartition(y, p = 0.8, list = FALSE)
+X_train <- X[train_indices, ]
+X_test <- X[-train_indices, ]
+y_train <- y[train_indices]
+y_test <- y[-train_indices]
 
+# Initiate the model
+lm_model <- lm(y_train ~ ., data = cbind(y_train, X_train))
+
+# Predictions on the test set
+y_predict <- predict(lm_model, newdata = X_test)
+summary(lm_model)
+
+# Score (R-squared)
+print(summary(lm_model)$r.squared)
+
+# Coefficients
+confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
 
 ```
 
