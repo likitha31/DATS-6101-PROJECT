@@ -16,31 +16,25 @@ output:
 
 knitr::opts_chunk$set(echo = TRUE)
 options(scientific=T, digits = 3) 
-library(ezids)
-library(ggplot2)
-#install.packages("tigris")
-library(tigris)
-#install.packages("sf")
-library(sf)
-#install.packages("here")
-library(here)
-#install.packages("dplyr")
-library(dplyr)
-#install.packages("leaflet")
-library(leaflet)
-#install.packages("reshape2")
-library(reshape2)
-#install.packages("tmap")
-library(tmap)
-#install.packages("viridis")
-library(viridis)
-#install.packages("stargazer")
-library(stargazer)
+# Restart R session
 
+# Load necessary packages
+library(ezids)
+library(tigris)
+library(sf)
+library(here)
+library(dplyr)
+library(leaflet)
+library(reshape2)
+library(tmap)
+library(viridis)
+library(stargazer)
+library(maps)
+library(ggplot2)
 
 ```
 
-
+**First Look at Dataset**
 
 ```{r}
 
@@ -54,8 +48,10 @@ head(us_deaths)
 
 ```
 
+**Column Subsetting and Renaming**
+
+
 ```{r}
-library(dplyr)
 
 Clean_data <- subset(SVI_Data, ST_ABBR == "CA")
 CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
@@ -64,28 +60,27 @@ CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LI
 colnames(CA_SVI)[colnames(CA_SVI) == 'STCNTY'] <- 'county_fips'
 us_cases <- rename(us_cases, confirmed_cases = confirmed)
 
+```
 
+
+
+**Missing values removal**
+```{r}
 # Filter out rows with any value equal to -999
 CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
 
 # Drop rows with missing values
 CA_SVI <- na.omit(CA_SVI)
 
+us_cases[is.na(us_cases$confirmed_cases), ]
+
+
 head(CA_SVI)
 
 
 ```
-```{r}
 
-# subset to california
-
-us_cases_ca <- subset(us_cases, state_name == "CA")
-head(us_cases_ca)
-
-
-
-```
-
+**Formatting**
 
 ```{r}
 library(dplyr)
@@ -93,13 +88,83 @@ library(dplyr)
 format_str <- '%Y-%m-%d'
 
 # Convert the 'date' column to datetime and create a new 'datetime' column
-us_cases_ca$datetime <- as.POSIXct(us_cases_ca$date, format = format_str)
+us_cases$datetime <- as.POSIXct(us_cases$date, format = format_str)
 
 # Drop rows that do not refer to a specific county ('Statewide Unallocated')
-us_cases_ca <- us_cases_ca[us_cases_ca$county_name != 'Statewide Unallocated', ]
+us_cases <- us_cases[us_cases$county_name != 'Statewide Unallocated', ]
+
+us_cases_ca <- subset(us_cases, state_name == "CA")
 
 # Display the first few rows of the resulting data frame
 head(us_cases_ca)
+
+```
+
+
+```{r}
+# Install and load necessary packages
+us_cases_grouping_fips <- us_cases_ca %>%
+  group_by(county_fips, state_name) %>%
+  summarise(max_confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(max_confirmed_cases))
+
+us_cases_grouping_county <- us_cases_ca %>%
+  group_by(county_name, state_name) %>%
+  summarise(max_confirmed_cases = sum(confirmed_cases)) %>%
+  arrange(desc(max_confirmed_cases))
+
+result <- bind_cols(us_cases_grouping_fips, us_cases_grouping_county)
+Summarized_cases<-result[, 1:4]
+new_col_names <- c("fips", "state", "confirmed", "county")
+names(Summarized_cases) <- new_col_names
+
+```
+
+```{r}
+
+# Install and load the usmap package
+library(usmap)
+library(plotly)
+
+
+# Plot the choropleth map
+plot_usmap(
+  data = Summarized_cases,
+  values = "confirmed",
+  include = c("CA"),
+  labels = TRUE
+) + 
+scale_fill_gradient(
+  low = "white", high = "red", name = "Confirmed Cases", label = scales::comma) + 
+labs(title = "COVID-19 Confirmed Cases in California Counties") +
+theme(legend.position = "right")
+
+```
+
+
+
+**Create timeline of covid**
+```{r}
+
+
+
+
+```
+
+
+**Create correlation matrix**
+```{r}
+
+
+
+
+```
+
+**Create MLR for confirmed cases**
+```{r}
+
+
+
 
 ```
 
@@ -108,6 +173,8 @@ head(us_cases_ca)
 
 
 
+<<<<<<< HEAD
+=======
 
 
 
@@ -122,3 +189,4 @@ nrow(covid_svi)
 
 
 ```
+>>>>>>> 5397221cb8486660c48784029f794a7b309ba6a1

@@ -44,8 +44,6 @@ library(viridis)
 library(stargazer)
 library(extrafont)
 font_import(pattern = "Avenir")
-#install.packages("ggcorrplot")
-
 
 ```
 
@@ -204,7 +202,7 @@ Outliers = outlierKD2(CA_SVI, RPL_THEMES, rm = FALSE, qqplt = TRUE)
 
 ### Explanation
 
-Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of the analysis the missing values values were removed, but the outliers were not removed so it would be possible to identify any particular at risk census tracts in the analysis. These values were removed from further analysis case by case.  
+Here it is seen that there is a large number of missing values, represented by `-999`, but the number of missing values does not equal the number of outliers identified. Thus, for the purposes of the analysis the missing values values were removed, but the outliers were not removed so it would be possible to identify any particular at risk census tracts in the analysis. 
  
 **RPL_THEMES**
 ```{r}
@@ -231,11 +229,9 @@ count4 <- sum(CA_SVI$RPL_THEME4 == -999)
 ## Data Analysis {.tabset .tabset-fade .tabset-pills}
 
 ### Maps
-It is interesting to examine the spatial distribution of this dataset, given that it looks across census tracts, a geographic scale. This portion of the analysis examines the spatial distribution of SVI and demographic variables. **A high level overview of the results is provided on each tab. These maps also help visualize the correlation, or lack thereof, shown in the other types of data visaulization completed for the data analysis.** *For example, looking at the distirubtion of age can help us understand why age is not a great influence on SVI.*
+It is interesting to examine the spatial distribution of this dataset, given that it looks across census tracts, a geographic scale. This portion of the analysis examines the spatial distribution of SVI and demographic variables.
 
 In addition to mapping the various SVI scores, it was also deemed important to map the spatial distribution of these demographic variables used to comprise the indexes. This way, it is possible to compare the spatial distribution of demographic data to where high risk scores are located. This analysis was done on the county level scale, to understand an overall picture of demographics. 
-
-This was done at the census and county level scale. For the purposes of rendering HTML, the county level mapping was omitted. No new insights were gained and census tract data is at a finer scale, so it is more useful for analysis. Additionally, leaflet interactive maps were produced but not able to be rendered to HTML at such a scale at this time. Future applications could include the development of dashboards with interactive mapping, but this tool already exists, created by the [CDC](https://www.atsdr.cdc.gov/placeandhealth/svi/interactive_map.html). 
 
 First the data had to be prepped for spatial analysis.
 *Note, when conducting the spatial join between `ca_tracts` and `CA_SVI`, there were 20 tracts present in `ca_tracts` not identified in `CA_SVI`.*
@@ -275,10 +271,7 @@ map0
 
 ```
 
-The spatial distribution of `Overall SVI` is shown here, with areas in the center of the state showing up as higher in vulnerability. In depth research into the demographics of these counties can be viewed in the Charts tab. 
-
 ##### RPL_THEME1
-
 
 ```{r theme1, echo=T, results='hide'}
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME1 != -999)
@@ -293,8 +286,6 @@ map1
 
 ```
 
-A similar spatial distribution is seen in `Theme 1` as `Overall SVI`, but toggling back and forth can be helpful to identify the differences in the maps. 
-
 ##### RPL_THEME2
 ```{r theme2, echo=T, results='hide'}
 ca_svi_sf_clean <- subset(ca_svi_sf, RPL_THEME2 != -999)
@@ -307,8 +298,6 @@ ggplot(data = ca_svi_sf_clean) +
   theme_void()
 map2
 ```
-
-This shows a slightly different distribution, with less high vulnerable tracts in the center, and more so concentrated in the Norther part of the state. It also appears there are less high risk `Theme2` tracts overall. 
 
 ##### RPL_THEME3
 
@@ -325,8 +314,6 @@ ggplot(data = ca_svi_sf_clean) +
 map3
 ```
 
-Mapping `Theme 3` shows the distribution of Racial & Ethnic Minority groups in the state. This indicates that the groups that would be vulnerable under Theme 3 are located in the Southwest portion of the state. 
-
 ##### RPL_THEME4
 
 ```{r theme4, echo=T, results='hide'}
@@ -340,12 +327,10 @@ ggplot(data = ca_svi_sf_clean) +
   labs(title = "Theme 4 (Housing Type & Transportation) SVI Score by CA Census Tracts") +
   theme_void()
 
-
 map4
 
 ```
 
-Interestingly, the `Theme 4` map shows a different distribution with not much apparent clustering, but rather a decent number of vulnerable tracts scattered throughout the state. 
 
 ##### E_MINRTY Map
 
@@ -362,7 +347,6 @@ ggplot(data = ca_svi_sf_clean) +
 EPL_MINRTY_map
 ```
 
-This map and the map of `Theme 3` are very similar, as they both map the percentile of minority groups residing in those tracts, thus they will create the same output. 
 
 ##### EP_AGE65 Map 
 
@@ -380,14 +364,13 @@ EP_AGE65_map
 
 ```
 
-Just as the results showed in the scatterplot analysis and correlation plot analysis, there is not too much correlation between Age and SVI. This is seen by a nearly universal distribution of the `Age 65+` variable across the state. 
 
 ##### EP_POV150 Map 
 
 ```{r pov, echo=T, results='hide'}
 ca_svi_sf_clean <- subset(ca_svi_sf, EP_POV150 != -999)
 
-EP_POV150 =
+EP_AGE65_map =
 
 ggplot(data = ca_svi_sf_clean) +
 geom_sf(aes(fill = EP_POV150)) +
@@ -395,10 +378,9 @@ scale_fill_viridis(option = "C", direction = 1) +
 labs(title = "Estimate of Persons Below 150% povertyby CA Census Tracts", fill = "Estimate of Persons in Poverty") +
 theme_void()
 
-EP_POV150
+EP_AGE65_map
 ```
 
-The results of this map point to interesting results, identifying those tracts experiencing severe poverty. The tracts in the South would be interesting observations to look into as to why they differ so greatly from the rest. A concentration of higher vulnerability can be seen in the center of the state.
 
 ### Histogram
 
@@ -688,138 +670,17 @@ EP_ASIAN is litte negatively correlated with RPL_THEME1 and RPL_THEME2. This sug
 
 Like the previous scenario with the elderly population, a higher percentage of Asian residents may act as protective factors against certain social vulnerabilities. This could be due to factors such as economic stability, community support, and educational attainment.
 
-### Additional Figures
+### Charts
 
 #### Charts {.tabset .tabset-fade .tabset-pills}
 
-##### Chart of Mean SVIs
+##### Most At-Risk Tracts
 
 ```{r}
 
-
-CA_SVI <- subset(CA_SVI, RPL_THEMES != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME2 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME3 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME4 != -999)
-
-#this removed 65 rows
-
-#lets find the avg SVI scores by theme and by county to make into a table
-county_svi2 <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(
-    mean_SVI = mean(RPL_THEMES),
-    mean_RPL_THEME1 = mean(RPL_THEME1),
-    mean_RPL_THEME2 = mean(RPL_THEME2),
-    mean_RPL_THEME3 = mean(RPL_THEME3),
-    mean_RPL_THEME4 = mean(RPL_THEME4)
-  ) %>%
-  ungroup()
-
-county_svi2_sorted <- county_svi2 %>%
-  arrange(desc(mean_SVI))
-
-top_10_vulnerable_counties <- head(county_svi2_sorted, n = 10)
-
-library(knitr)
-library(knitr)
-
-
-custom_labels <- c("County", "Overall SVI", "Theme 1", "Theme 2", "Theme 3", "Theme 4")
-
-table_top_10_vulnerable <- kable(top_10_vulnerable_counties, format = "html", 
-                                 caption = "Top 10 Most Vulnerable Counties",
-                                 col.names = custom_labels)
-table_top_10_vulnerable
-
 ```
 
-This chart depicts the top ten most vulnerable counties ranked by the **MEAN** of `RPL_THEMES` or Overall SVI. The mean of each theme's SVI is also displayed at the county level. This chart identifies the most vulnerable tracts, as well as enables a comparison of how the overall SVI compares to the specific themes. This can help identify if there is a higher specific type of vulnerability within a county, say one is less transit friendly, or one has more dense housing types, etc. From the chart, it is apparent that the counties' have different SVI scores depending on themes, but they do not differ greatly. 
 
-A correlation matrix can be viewed to compare how these themes all relate to the overall SVI in the next tab. 
-
-
-
-##### Correlation between SVI and Themed SVI
-
-```{r}
-library(ggplot2)
-library(ggcorrplot)
-
-CA_SVI <- subset(CA_SVI, RPL_THEMES != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME1 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME2 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME3 != -999)
-CA_SVI <- subset(CA_SVI, RPL_THEME4 != -999)
-
-#this removed 65 rows
-
-# Select the relevant columns for correlation
-correlation_data <- county_svi2 %>%
-  select(mean_SVI, mean_RPL_THEME1, mean_RPL_THEME2, mean_RPL_THEME3, mean_RPL_THEME4)
-
-# Calculate the correlation matrix
-correlation_matrix_counties <- cor(correlation_data)
-
-ggcorrplot(correlation_matrix_counties, 
-           type = "lower", 
-           lab = TRUE, 
-           method = "square",  # or method = "circle"
-           title = "Correlation Plot of Themes with Mean_SVI",
-           ggtheme = ggplot2::theme_minimal()
-           )
-
-```
-
-This correlation matrix identifies the correlations between mean SVI theme scores and the mean Overall SVI for the top ten most vulnerable counties in California. 
-Here it is seen that `Theme 1` and `Theme 2` have the strongest correlation to the `Overall SVI`. This is an interesting observation, and it could help guide future research or recommendations as to which SVI score to use when responding to emergency situations within each tract or county. This matrix also shows the correlation between the themes. It is seen that there is correlation between them, ranging from weak (0.28 `Theme 3` & `Theme 4`) to strong (0.76 `Theme1` & `Theme 2`) which could also inform how these demographic variables might have overlap/similar effects on social vulnerability. Diving deeper into the relationship of the variables of strongly correlated themes (the demographic variables that make up the themes) could be interesting analysis to conduct. 
-
-##### Mean SVI & Demographics
-
-```{r}
-library(ggplot2)
-library(ggcorrplot)
-
-#lets find the avg SVI scores by theme and by county to make into a table
-county_svi3 <- CA_SVI %>%
-  group_by(COUNTY) %>%
-  summarize(
-    mean_SVI = mean(RPL_THEMES),
-    mean_RPL_THEME1 = mean(RPL_THEME1),
-    mean_RPL_THEME2 = mean(RPL_THEME2),
-    mean_RPL_THEME3 = mean(RPL_THEME3),
-    mean_RPL_THEME4 = mean(RPL_THEME4),
-    mean_EPL_MINRTY = mean(EPL_MINRTY),
-    mean_EP_AGE65 = mean(EP_AGE65),
-    mean_EP_POV150 = mean(EP_POV150),
-    mean_EPL_UNEMP = mean(EPL_UNEMP),
-    mean_EPL_UNINSUR = mean(EPL_UNINSUR),
-    mean_EPL_DISABL = mean(EPL_DISABL),
-    mean_EPL_CROWD = mean(EPL_CROWD),
-    mean_EPL_NOVEH = mean(EPL_NOVEH)
-  
-  ) %>%
-  ungroup()
-
-# Select the relevant columns for correlation
-correlation_data2 <- county_svi3 %>%
-  select(mean_SVI, mean_RPL_THEME1, mean_RPL_THEME2, mean_RPL_THEME3, mean_RPL_THEME4, mean_EPL_MINRTY, mean_EP_AGE65,
-         mean_EP_POV150, mean_EPL_UNEMP, mean_EPL_UNINSUR, mean_EPL_DISABL,   mean_EPL_CROWD, mean_EPL_NOVEH)
-
-# Calculate the correlation matrix
-correlation_matrix_counties_demog <- cor(correlation_data2)
-loadPkg("corrplot")
-
-
-# Assuming you have already created your correlation plot
-corrplot(correlation_matrix_counties_demog, method = "square", type = "upper", col = colorRampPalette((c("#B2182B", "#FDDBC7", "#2166AC")))(100))
-
-```
-
-This figure shows the correlation between demographic variables selected in the analysis, however this is not a holistic look, more fine analysis should be conducted to examine the specific interactions of demographic variables that are significant versus those that are not significant by using linear regression models to select variables to compare. Here it is possible to see each individual SVI (Overall and Themes), as well as the demographic variables that make up these themes. Obviously, we are not interested in direct relationships like how `Percent Minority` correlates with the `Theme 3` score. Instead, this can allow observations about how **UNRELATED** variables affect an SVI score, such as how `Percent of People in Poverty` impacts all of the SVI scores highly,  but seemingly the `Percent Population with Disability` seems to have less of an impact on the scores across themes. 
-
-Additionally, it also enables thr visualization of the correlation between demographics, which could help identify groups that could be most at risk. This can be seen with the high correlation between the `Percent Age 65 and Over` and `Percent Minority` variables. This informs us about California's demographics, and what kind of overlapping demographic groups might need assistance in the case of an emergency. 
 
 ### Hypothesis Testing
 
@@ -863,9 +724,10 @@ The p-value < $\alpha$ so we reject the null hypothesis ($H_0$). There is eviden
 CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
 
 t_test_result2 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME2)
+
+# Print the results
 print(t_test_result2)
 ```
-
 **Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME2` are the same
 
 **Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME2` are not the same
@@ -889,9 +751,10 @@ print(t_test_result2)
 CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 
 t_test_result3 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME3)
+
+# Print the results
 print(t_test_result3)
 ```
-
 **Null hypothesis** ($H_0$): The means of `RPL_THEMES` and `RPL_THEME3` are the same
 
 **Alternative hypothesis** ($H_1$): The means variables `RPL_THEMES` and `RPL_THEME3` are not the same
@@ -914,6 +777,8 @@ print(t_test_result3)
 CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
 
 t_test_result4 <- t.test(CA_SVI$RPL_THEMES, CA_SVI$RPL_THEME4)
+
+# Print the results
 print(t_test_result4)
 ```
 
