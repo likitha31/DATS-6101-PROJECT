@@ -128,6 +128,8 @@ names(Summarized_cases) <- new_col_names
 
 ```
 
+**Map of CA colored by confirmed cases**
+
 ```{r}
 
 # Install and load the usmap package
@@ -187,6 +189,8 @@ svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_na
 head(svi_all_counties_cases)
 
 ```
+
+**Corelation matrix between confirmed cases and all variables**
 ```{r}
 # Plot the correlation matrix
 library(corrplot)
@@ -199,10 +203,46 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 
 ```
+```{r}
+
+# Which are the 10 most affected US counties?
+ca_cases_top_10 <- head(us_cases_all_counties, 10)
+print(ca_cases_top_10)
+
+# Preparing a list with the 10 most affected counties:
+top_10_cases_fips_list <- ca_cases_top_10$county_fips
+
+ca_cases_top_10_datetime <- subset(us_cases_ca, county_fips %in% top_10_cases_fips_list)
+head(ca_cases_top_10_datetime)
+
+
+
+```
+
+
+
 
 
 **Create timeline of covid**
 ```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Plot Timeline of cases
+ca_cases_top_10_datetime$datetime <- as.Date(ca_cases_top_10_datetime$datetime)  # Make sure datetime is in Date format
+head(ca_cases_top_10_datetime)
+
+f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, color = county_name)) +
+  geom_line() +
+  labs(x = 'Timeline', y = 'Confirmed Cases', title = 'Confirmed cases in CA counties') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_discrete(name = 'County Name')+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")   # Format the x-axis with month and year
+
+
+print(f)
 
 
 
