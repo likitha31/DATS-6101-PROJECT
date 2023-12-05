@@ -190,6 +190,30 @@ theme(legend.position = "right")
 
 ```
 
+
+**Map of CA colored by deaths**
+
+```{r}
+
+# Install and load the usmap package
+library(usmap)
+library(plotly)
+
+
+# Plot the choropleth map
+plot_usmap(
+  data = Summarized_deaths,
+  values = "deaths",
+  include = c("CA"),
+  labels = TRUE
+) + 
+scale_fill_gradient(
+  low = "lightblue", high = "darkblue", name = "Number of Deaths", label = scales::comma) + 
+labs(title = "COVID-19 Deaths in California Counties") +
+theme(legend.position = "right")
+
+```
+
 ```{r}
 us_cases_all_counties <- us_cases_ca %>%
   group_by(county_fips, county_name, state_name) %>%
