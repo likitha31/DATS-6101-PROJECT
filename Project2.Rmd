@@ -87,6 +87,7 @@ SVI2 <- na.omit(SVI2)
 
 
 us_cases[is.na(us_cases$confirmed_cases), ]
+us_deaths[is.na(us_deaths$deaths), ]
 
 # Display summary statistics for each column
 head(SVI)
@@ -111,20 +112,27 @@ format_str <- '%Y-%m-%d'
 
 # Convert the 'date' column to datetime and create a new 'datetime' column
 us_cases$datetime <- as.POSIXct(us_cases$date, format = format_str)
+us_deaths$datetime <- as.POSIXct(us_deaths$date, format = format_str)
+
 
 # Drop rows that do not refer to a specific county ('Statewide Unallocated')
 us_cases <- us_cases[us_cases$county_name != 'Statewide Unallocated', ]
+us_deaths <- us_deaths[us_deaths$county_name != 'Statewide Unallocated', ]
+
 
 us_cases_ca <- subset(us_cases, state_name == "CA")
+us_deaths_ca <- subset(us_deaths, state_name == "CA")
+
 
 # Display the first few rows of the resulting data frame
 head(us_cases_ca)
+head(us_deaths_ca)
 
 ```
 
 
 ```{r}
-# Install and load necessary packages
+# Calculate Sum of confirmed cases based on county fips and groupby county 
 us_cases_grouping_fips <- us_cases_ca %>%
   group_by(county_fips, state_name) %>%
   summarise(max_confirmed_cases = sum(confirmed_cases)) %>%
@@ -139,6 +147,23 @@ result <- bind_cols(us_cases_grouping_fips, us_cases_grouping_county)
 Summarized_cases<-result[, 1:4]
 new_col_names <- c("fips", "state", "confirmed", "county")
 names(Summarized_cases) <- new_col_names
+
+# Calculate Sum of deaths based on county fips and groupby county 
+
+us_deaths_grouping_fips <- us_deaths_ca %>%
+  group_by(county_fips, state_name) %>%
+  summarise(max_deaths = sum(deaths)) %>%
+  arrange(desc(max_deaths))
+
+us_deaths_grouping_county <- us_deaths_ca %>%
+  group_by(county_name, state_name) %>%
+  summarise(max_deaths = sum(deaths)) %>%
+  arrange(desc(max_deaths))
+
+result1 <- bind_cols(us_deaths_grouping_fips, us_deaths_grouping_county)
+Summarized_deaths<-result1[, 1:4]
+new_col_names1 <- c("fips", "state", "deaths", "county")
+names(Summarized_deaths) <- new_col_names1
 
 ```
 
