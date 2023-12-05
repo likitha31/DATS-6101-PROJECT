@@ -481,7 +481,6 @@ lm_model <- lm(y_train ~ ., data = cbind(y_train, X_train))
 # Predictions on the test set
 y_predict <- predict(lm_model, newdata = X_test)
 summary(lm_model)
-
 # Score (R-squared)
 print(summary(lm_model)$r.squared)
 
