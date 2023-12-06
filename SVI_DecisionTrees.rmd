@@ -297,3 +297,262 @@ fancyRpartPlot(tree_model)
 
 
 ```
+
+
+
+
+
+
+
+
+
+```{r Load the data file, echo=T, results='hide'}
+SVI_Data <- read.csv("SVI_2020_US.csv")
+head(SVI_Data)
+
+econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
+head(econ)
+
+```
+
+#subset to CA tracts
+
+```{r CA tracts, echo=T, results='hide'}
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
+) )
+
+CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
+
+CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME1!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME2!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
+CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
+```
+
+
+
+#remove first row of headers 
+
+```{r}
+#clean data for economic
+econ <- subset(econ, select = c(GEO_ID, NAME,B19013_001E))
+econ <- econ[-c(1, 2), ] 
+head(econ)
+```
+
+#rename columns
+
+```{r}
+names_to_change <- c("GEO_ID", "NAME", "B19013_001E")
+new_names <- c("GEO_ID", "tract", "income")
+
+econ <- setNames(econ, new_names)
+```
+
+# edit GEO_ID to isolate just the number after 1400000US06001400100
+
+```{r}
+# Assuming 'econ' is your data frame
+econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
+
+```
+
+#now join the datasets based on GEO_ID
+```{r}
+# Assuming 'econ' and 'CA_SVI' are your data frames
+svi_econ <- merge(econ, CA_SVI, by.x = "GEO_ID", by.y = "FIPS", all.x = TRUE, all.y = TRUE)
+
+```
+
+#count how many NA 
+```{r}
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+#remove NA
+
+svi_econ <- na.omit(svi_econ)
+svi_econ <- svi_econ[svi_econ$income != "-", , drop = FALSE]
+
+
+#leaves us with 9001 rows 
+str(svi_econ$income)
+svi_econ$income <- as.numeric(as.character(svi_econ$income))
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+svi_econ <- na.omit(svi_econ)
+#8956
+
+```
+
+
+
+```{r}
+library(dplyr)
+
+
+# Assuming svi_econ is your dataset
+svi_econ <- svi_econ %>%
+  rename(county_fips = STCNTY)
+
+
+# Assuming svi_econ is your first dataset and summary_data is your second dataset
+merged_data1 <- svi_econ %>%
+  left_join(summary_data, by = c("county_fips" = "county_fips"))
+
+
+
+head(merged_data1)
+
+```
+
+
+```{r}
+
+svi_econ_covid=merged_data1
+
+```
+
+
+
+```{r}
+#MLR using income covid and other variables
+# Creating model
+model <- lm(RPL_THEMES ~ total_cases + total_deaths + income + EP_AGE65 + EP_NOHSDP , data = svi_econ_covid)
+
+#summary of the regression model
+summary(model)
+
+
+
+
+
+```
+
+#Models to capture complex relations
+
+```{r}
+
+
+
+# Set a seed for reproducibility
+set.seed(123)
+
+# Split the data into a training set (80%) and a test set (20%)
+splitIndex <- createDataPartition(svi_econ_covid$RPL_THEMES, p = 0.8, list = FALSE)
+train_data <- svi_econ_covid[splitIndex, ]
+test_data <- svi_econ_covid[-splitIndex, ]
+
+library(randomForest)
+
+# Fit a Random Forest model
+rf_model <- randomForest(RPL_THEMES ~ total_cases + total_deaths + income + EP_AGE65 + EPL_UNEMP, data = train_data)
+
+# Make predictions on the test set
+rf_predictions <- predict(rf_model, newdata = test_data)
+
+# Calculate RMSE for Random Forest
+rf_rmse <- sqrt(mean((test_data$RPL_THEMES - rf_predictions)^2))
+print(rf_rmse)
+
+
+
+
+```
+
+
+
+```{r}
+# SVM
+
+library(e1071)
+
+#  SVM model
+svm_model <- svm(RPL_THEMES ~ total_cases + total_deaths + income + EP_AGE65 + EPL_UNEMP, data = train_data)
+
+# Make predictions on the test set
+svm_predictions <- predict(svm_model, newdata = test_data)
+
+# Calculate RMSE for SVM
+svm_rmse <- sqrt(mean((test_data$RPL_THEMES - svm_predictions)^2))
+print(svm_rmse)
+
+
+
+
+
+
+
+```
+
+
+
+
+```{r}
+# 
+# Xgboost
+
+library(xgboost)
+
+# Convert data to xgb.DMatrix format
+train_matrix <- xgb.DMatrix(as.matrix(train_data[, c("total_cases", "total_deaths", "income", "EP_AGE65", "EPL_UNEMP")]), label = train_data$RPL_THEMES)
+test_matrix <- xgb.DMatrix(as.matrix(test_data[, c("total_cases", "total_deaths", "income", "EP_AGE65", "EPL_UNEMP")]), label = test_data$RPL_THEMES)
+
+# Set parameters and fit the XGBoost model
+xgb_params <- list(objective = "reg:squarederror", max_depth = 6, eta = 0.3, nrounds = 100)
+xgb_model <- xgboost(data = train_matrix, params = xgb_params, nrounds = xgb_params$nrounds)
+
+# Make predictions on the test set
+xgb_predictions <- predict(xgb_model, newdata = test_matrix)
+
+# Calculate RMSE for XGBoost
+xgb_rmse <- sqrt(mean((test_data$RPL_THEMES - xgb_predictions)^2))
+print(xgb_rmse)
+
+
+
+
+
+```
+
+
+```{r}
+#Decision tree using income, covid and other variables
+
+library(rpart)
+library(rpart.plot)
+
+# Set a seed for reproducibility
+set.seed(123)
+
+# Split the data into a training set (80%) and a test set (20%)
+splitIndex <- createDataPartition(svi_econ_covid$RPL_THEMES, p = 0.8, list = FALSE)
+train_data <- svi_econ_covid[splitIndex, ]
+test_data <- svi_econ_covid[-splitIndex, ]
+
+
+
+#decision tree model
+tree_model <- rpart(RPL_THEMES ~ total_cases + total_deaths + income + EP_AGE65 + EPL_UNEMP, data = train_data)
+
+# Make predictions on the test set
+tree_predictions <- predict(tree_model, newdata = test_data)
+
+# RMSE for the decision tree
+tree_rmse <- sqrt(mean((test_data$RPL_THEMES - tree_predictions)^2))
+print(paste("Decision Tree RMSE:", tree_rmse))
+
+
+rpart.plot(tree_model)
+
+
+
+
+
+
+
+
+library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(tree_model)
+
+```
