@@ -251,3 +251,49 @@ cat("Accuracy:", accuracy, "\n")
 
 ```
 
+```{r}
+loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(tree_model)
+```
+
+
+
+
+
+```{r}
+# Install and load necessary packages
+install.packages("rpart")
+library(rpart)
+
+# Select relevant variables
+predictors <- c("EP_POV150", "EP_LIMENG", "EP_AGE65", "EP_UNEMP", "EP_NOHSDP", "total_cases", "total_deaths")
+
+# Create a data frame with selected variables
+data_selected <- svi_covid[, c(predictors, "RPL_THEMES")]
+
+# Split the data into training and testing sets (80% training, 20% testing)
+set.seed(123)  # For reproducibility
+sample_index <- sample(1:nrow(data_selected), 0.8 * nrow(data_selected))
+train_data <- data_selected[sample_index, ]
+test_data <- data_selected[-sample_index, ]
+
+# Build a decision tree model
+tree_model <- rpart(RPL_THEMES ~ ., data = train_data, method = "anova")
+
+# Plot the decision tree
+plot(tree_model)
+text(tree_model, cex = 0.8)
+
+# Make predictions on the testing set
+predictions <- predict(tree_model, newdata = test_data)
+
+# Evaluate the model performance (you can use different metrics based on your goal)
+# For example, mean squared error (MSE)
+mse <- mean((predictions - test_data$RPL_THEMES)^2)
+cat("Mean Squared Error:", mse, "\n")
+
+loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(tree_model)
+
+
+```
