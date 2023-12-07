@@ -531,7 +531,7 @@ head(ca_deaths_top_10_datetime)
 
 
 
-**Create timeline of covid**
+**Create timeline of covid confirmed cases**
 ```{r}
 # Load necessary libraries
 library(ggplot2)
@@ -544,6 +544,32 @@ head(ca_cases_top_10_datetime)
 f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, color = county_name)) +
   geom_line() +
   labs(x = 'Timeline', y = 'Confirmed Cases', title = 'Confirmed cases in CA counties') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_discrete(name = 'County Name')+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")   # Format the x-axis with month and year
+
+
+print(f)
+
+
+
+
+```
+
+**Create timeline of covid death**
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Plot Timeline of cases
+ca_deaths_top_10_datetime$datetime <- as.Date(ca_deaths_top_10_datetime$datetime)  # Make sure datetime is in Date format
+head(ca_deaths_top_10_datetime)
+
+f <- ggplot(ca_deaths_top_10_datetime, aes(x = datetime, y = deaths, color = county_name)) +
+  geom_line() +
+  labs(x = 'Timeline', y = 'deaths', title = 'deaths in CA counties') +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_color_discrete(name = 'County Name')+
