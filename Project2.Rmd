@@ -861,8 +861,8 @@ summary(lm_model)
 print(summary(lm_model)$r.squared)
 
 # Coefficients
-confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
-confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+deaths_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_coef$Coef), ]
 
 ```
 
@@ -926,8 +926,8 @@ summary(lm_model)
 print(summary(lm_model)$r.squared)
 
 # Coefficients
-confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
-confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+deaths_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_coef$Coef), ]
 
 ```
 
