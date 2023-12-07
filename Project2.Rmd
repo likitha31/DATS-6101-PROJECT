@@ -254,6 +254,66 @@ head(svi_all_counties_cases)
 ```
 
 
+```{r}
+
+us_deaths_all_counties <- us_deaths_ca %>%
+  group_by(county_fips, county_name, state_name) %>%
+  summarise(deaths = sum(deaths)) %>%
+  arrange(desc(deaths))
+
+# Group by Fips, County, and State, and calculate the mean of selected indicators
+svi1_all_counties <- SVI %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EP_POV150 = mean(EP_POV150),
+    EP_LIMENG = mean(EP_LIMENG),
+    EP_AGE65 = mean(EP_AGE65),
+    EP_MINRTY = mean(EP_MINRTY),
+    EP_UNEMP = mean(EP_UNEMP),
+    EP_NOHSDP = mean(EP_NOHSDP),
+    EP_AGE17 = mean(EP_AGE17),
+    EP_DISABL = mean(EP_DISABL),
+    EP_SNGPNT = mean(EP_SNGPNT),
+    EP_MUNIT = mean(EP_MUNIT),
+    EP_MOBILE = mean(EP_MOBILE),
+    EP_CROWD = mean(EP_CROWD),
+    EP_NOVEH = mean(EP_NOVEH),
+    EP_GROUPQ = mean(EP_GROUPQ),
+    RPL_THEMES = mean(RPL_THEMES)
+  )
+svi1_all_counties_ca <- subset(svi1_all_counties, STATE == "California")
+# Merge with us_cases_all_counties and sort by confirmed_cases
+svi_all_counties_deaths <- merge(svi1_all_counties_ca, us_deaths_all_counties, by = 'county_fips') %>%
+  arrange(desc(deaths))
+
+# Remove unnecessary columns
+svi_all_counties_deaths <- select(svi_all_counties_deaths, -county_name, -state_name)
+
+# Display the result
+head(svi_all_counties_deaths)
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 
@@ -305,6 +365,56 @@ head(SVI2_all_counties_cases)
 
 
 
+```{r}
+
+
+# Group by Fips, County, and State, and calculate the mean of selected indicators
+SVI3_all_counties <- SVI2 %>%
+  group_by(county_fips, COUNTY, STATE) %>%
+  summarise(
+    EPL_UNEMP = mean(EPL_UNEMP),
+    EPL_HBURD = mean(EPL_HBURD),
+    EPL_NOHSDP = mean(EPL_NOHSDP),
+    EPL_UNINSUR = mean(EPL_UNINSUR),
+    SPL_THEME1 = mean(SPL_THEME1),
+    RPL_THEME1 = mean(RPL_THEME1),
+    EPL_AGE65 = mean(EPL_AGE65),
+    EPL_AGE17 = mean(EPL_AGE17),
+    EPL_DISABL = mean(EPL_DISABL),
+    EPL_SNGPNT = mean(EPL_SNGPNT),
+    EPL_LIMENG = mean(EPL_LIMENG),
+    SPL_THEME2 = mean(SPL_THEME2),
+    RPL_THEME2 = mean(RPL_THEME2),
+    EPL_MINRTY = mean(EPL_MINRTY),
+    SPL_THEME3 = mean(SPL_THEME3),
+    RPL_THEME3 = mean(RPL_THEME3),
+    EPL_MUNIT = mean(EPL_MUNIT),
+    EPL_MOBILE = mean(EPL_MOBILE),
+    EPL_CROWD = mean(EPL_CROWD),
+    EPL_NOVEH = mean(EPL_NOVEH),
+    EPL_GROUPQ = mean(EPL_GROUPQ),
+    SPL_THEME4 = mean(SPL_THEME4),
+    RPL_THEME4 = mean(RPL_THEME4)
+  )
+
+SVI3_all_counties_ca <- subset(SVI3_all_counties, STATE == "California")
+
+# Merge with us_cases_all_counties and sort by confirmed_cases
+SVI2_all_counties_deaths <- merge(SVI3_all_counties_ca, us_deaths_all_counties, by = 'county_fips') %>%
+  arrange(desc(deaths))
+
+# Remove unnecessary columns
+SVI2_all_counties_deaths <- select(SVI2_all_counties_deaths, -county_name, -state_name)
+
+# Display the result
+head(SVI2_all_counties_deaths)
+
+
+```
+
+
+
+
 
 
 
@@ -326,6 +436,20 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 
 
+**Corelation matrix between deaths and all variables**
+```{r}
+# Plot the correlation matrix
+library(corrplot)
+# Select relevant columns
+svi_all_counties_deaths_corr <- svi_all_counties_deaths[c('deaths', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY', 'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT', 'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES')]
+
+# Calculate correlation matrix
+corr <- cor(svi_all_counties_deaths_corr)
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
+
+
+
+```
 
 **Correlation matrix with different themes **
 *Positive Correlations:*
@@ -354,7 +478,22 @@ xkabledply(corr)
 ```
 
 
+**Correlation matrix with different themes**
+```{r}
+# Plot the correlation matrix
+library(corrplot)
+# Select relevant columns
+SVI2_all_counties_deaths_corr <- SVI2_all_counties_deaths[c('deaths','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
 
+# Calculate correlation matrix
+corr <- cor(SVI2_all_counties_deaths_corr)
+corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.4,mar = c(0, 0, 2, 0), tl.cex = 0.4, tl.col = 'black', tl.srt = 45)
+
+xkabledply(corr)
+```
+
+
+**Confirmed cases**
 
 ```{r}
 
@@ -369,6 +508,22 @@ ca_cases_top_10_datetime <- subset(us_cases_ca, county_fips %in% top_10_cases_fi
 head(ca_cases_top_10_datetime)
 
 
+
+```
+
+
+**Deaths**
+```{r}
+
+# Which are the 10 most affected US counties?
+ca_deaths_top_10 <- head(us_deaths_all_counties, 10)
+print(ca_cases_top_10)
+
+# Preparing a list with the 10 most affected counties:
+top_10_deaths_fips_list <- ca_deaths_top_10$county_fips
+
+ca_deaths_top_10_datetime <- subset(us_deaths_ca, county_fips %in% top_10_deaths_fips_list)
+head(ca_deaths_top_10_datetime)
 
 ```
 
