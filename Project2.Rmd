@@ -56,7 +56,7 @@ head(us_deaths)
 SVI <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
 
 #SVI1 <- subset(SVI_Data , select=c(EPL_UNEMP,EPL_HBURD,EPL_NOHSDP,EPL_UNINSUR,SPL_THEME1,RPL_THEME1))
-SVI2 <- subset(SVI_Data , select=c(STATE,STCNTY,COUNTY,FIPS,EPL_UNEMP,EPL_HBURD,EPL_NOHSDP,EPL_UNINSUR,SPL_THEME1,RPL_THEME1,EPL_AGE65,EPL_AGE17,EPL_DISABL,EPL_SNGPNT,EPL_LIMENG,SPL_THEME2,RPL_THEME2,EPL_MINRTY,SPL_THEME3,RPL_THEME3,EPL_MUNIT,EPL_MOBILE,EPL_CROWD,EPL_NOVEH,EPL_GROUPQ,SPL_THEME4,RPL_THEME4))
+SVI2 <- subset(SVI_Data , select=c(STATE,STCNTY,COUNTY,FIPS,EPL_POV150,EPL_UNEMP,EPL_HBURD,EPL_NOHSDP,EPL_UNINSUR,SPL_THEME1,RPL_THEME1,EPL_AGE65,EPL_AGE17,EPL_DISABL,EPL_SNGPNT,EPL_LIMENG,SPL_THEME2,RPL_THEME2,EPL_MINRTY,SPL_THEME3,RPL_THEME3,EPL_MUNIT,EPL_MOBILE,EPL_CROWD,EPL_NOVEH,EPL_GROUPQ,SPL_THEME4,RPL_THEME4))
 #SVI3 <- subset(SVI_Data , select=c(EPL_MINRTY,SPL_THEME3,RPL_THEME3))
 #SVI4 <- subset(SVI_Data , select=c(EPL_MUNIT,EPL_MOBILE,EPL_CROWD,EPL_NOVEH,EPL_GROUPQ,SPL_THEME4,RPL_THEME4))
 
@@ -322,6 +322,7 @@ head(svi_all_counties_deaths)
 SVI2_all_counties <- SVI2 %>%
   group_by(county_fips, COUNTY, STATE) %>%
   summarise(
+    EPL_POV150 = mean(EPL_POV150),
     EPL_UNEMP = mean(EPL_UNEMP),
     EPL_HBURD = mean(EPL_HBURD),
     EPL_NOHSDP = mean(EPL_NOHSDP),
@@ -372,6 +373,7 @@ head(SVI2_all_counties_cases)
 SVI3_all_counties <- SVI2 %>%
   group_by(county_fips, COUNTY, STATE) %>%
   summarise(
+        EPL_POV150 = mean(EPL_POV150),
     EPL_UNEMP = mean(EPL_UNEMP),
     EPL_HBURD = mean(EPL_HBURD),
     EPL_NOHSDP = mean(EPL_NOHSDP),
@@ -468,7 +470,7 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 # Plot the correlation matrix
 library(corrplot)
 # Select relevant columns
-SVI2_all_counties_cases_corr <- SVI2_all_counties_cases[c('confirmed_cases','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
+SVI2_all_counties_cases_corr <- SVI2_all_counties_cases[c('confirmed_cases','EPL_POV150','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
 
 # Calculate correlation matrix
 corr <- cor(SVI2_all_counties_cases_corr)
@@ -483,7 +485,7 @@ xkabledply(corr)
 # Plot the correlation matrix
 library(corrplot)
 # Select relevant columns
-SVI2_all_counties_deaths_corr <- SVI2_all_counties_deaths[c('deaths','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
+SVI2_all_counties_deaths_corr <- SVI2_all_counties_deaths[c('deaths','EPL_POV150','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
 
 # Calculate correlation matrix
 corr <- cor(SVI2_all_counties_deaths_corr)
@@ -702,6 +704,7 @@ SVI2_top_10_counties_cases <- SVI2[SVI2$county_fips %in% top_10_cases_fips_list,
 SVI2_top_10_counties_cases <- SVI2_top_10_counties_cases %>%
   group_by(county_fips, COUNTY, STATE) %>%
   summarise(
+    EPL_POV150 = mean(EPL_POV150),
     EPL_UNEMP = mean(EPL_UNEMP),
     EPL_HBURD = mean(EPL_HBURD),
     EPL_NOHSDP = mean(EPL_NOHSDP),
@@ -734,7 +737,7 @@ SVI2_top_10_counties_cases <- merge(SVI2_top_10_counties_cases, ca_cases_top_10,
   select(-county_name, -state_name)
 
 # Select columns for correlation analysis
-SVI2_top_10_counties_cases_corr <- SVI2_top_10_counties_cases[c('confirmed_cases','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
+SVI2_top_10_counties_cases_corr <- SVI2_top_10_counties_cases[c('confirmed_cases','EPL_POV150','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
 
 # Calculate correlation matrix
 corr <- cor(SVI2_top_10_counties_cases_corr)
@@ -756,6 +759,7 @@ SVI2_top_10_counties_deaths <- SVI2[SVI2$county_fips %in% top_10_deaths_fips_lis
 SVI2_top_10_counties_deaths <- SVI2_top_10_counties_deaths %>%
   group_by(county_fips, COUNTY, STATE) %>%
   summarise(
+    EPL_POV150 = mean(EPL_POV150),
     EPL_UNEMP = mean(EPL_UNEMP),
     EPL_HBURD = mean(EPL_HBURD),
     EPL_NOHSDP = mean(EPL_NOHSDP),
@@ -788,7 +792,7 @@ SVI2_top_10_counties_deaths <- merge(SVI2_top_10_counties_deaths, ca_deaths_top_
   select(-county_name, -state_name)
 
 # Select columns for correlation analysis
-SVI2_top_10_counties_deaths_corr <- SVI2_top_10_counties_deaths[c('deaths','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
+SVI2_top_10_counties_deaths_corr <- SVI2_top_10_counties_deaths[c('deaths','EPL_POV150','EPL_UNEMP','EPL_HBURD','EPL_NOHSDP','EPL_UNINSUR','SPL_THEME1','RPL_THEME1','EPL_AGE65','EPL_AGE17','EPL_DISABL','EPL_SNGPNT','EPL_LIMENG','SPL_THEME2','RPL_THEME2','EPL_MINRTY','SPL_THEME3','RPL_THEME3','EPL_MUNIT','EPL_MOBILE','EPL_CROWD','EPL_NOVEH','EPL_GROUPQ','SPL_THEME4','RPL_THEME4')]
 
 # Calculate correlation matrix
 corr <- cor(SVI2_top_10_counties_deaths_corr)
@@ -807,9 +811,8 @@ xkabledply(corr)
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- svi_all_counties_cases$confirmed_cases
-#X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
-X <- svi_all_counties_cases[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
-
+X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
+#X <- svi_all_counties_cases[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
 
 # Splitting the data into train and test data
 set.seed(42)  # For reproducibility
@@ -820,19 +823,96 @@ y_train <- y[train_indices]
 y_test <- y[-train_indices]
 
 # Initiate the model
-lm_model <- lm(y_train ~ ., data = cbind(y_train, X_train))
+lm_model1 <- lm(y_train ~ ., data = cbind(y_train, X_train))
 
 # Predictions on the test set
-y_predict <- predict(lm_model, newdata = X_test)
-summary(lm_model)
+y_predict <- predict(lm_model1, newdata = X_test)
+summary(lm_model1)
 # Score (R-squared)
-print(summary(lm_model)$r.squared)
+print(summary(lm_model1)$r.squared)
 
 # Coefficients
-confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model1)[-1], Features = names(coef(lm_model1)[-1]))
 confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
 
 ```
+
+**Feature Selection**
+
+```{r}
+
+
+# Stepwise feature selection
+stepwise_model <- step(lm_model1, direction = "both")
+
+# Display the selected model
+summary(stepwise_model)
+
+# Get the selected features
+selected_features <- names(coef(stepwise_model)[-1])
+selected_features
+
+
+
+
+```
+**Model after feature selection**
+
+
+```{r}
+
+library(caret)
+# Preparing the independent variable (X) and the dependent variable (y)
+y <- svi_all_counties_cases$confirmed_cases
+X <- svi_all_counties_cases[, c('EP_NOHSDP','EP_AGE17','EP_MUNIT','EP_NOVEH','EP_GROUPQ')]
+# Splitting the data into train and test data
+set.seed(42)  # For reproducibility
+train_indices <- createDataPartition(y, p = 0.8, list = FALSE)
+X_train <- X[train_indices, ]
+X_test <- X[-train_indices, ]
+y_train <- y[train_indices]
+y_test <- y[-train_indices]
+
+# Initiate the model
+lm_model2 <- lm(y_train ~ ., data = cbind(y_train, X_train))
+
+# Predictions on the test set
+y_predict <- predict(lm_model2, newdata = X_test)
+summary(lm_model2)
+# Score (R-squared)
+print(summary(lm_model2)$r.squared)
+
+# Coefficients
+confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model2)[-1], Features = names(coef(lm_model2)[-1]))
+confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+
+
+```
+**Compare between models**
+```{r}
+# Predictions on the test set for lm_model2
+y_predict2 <- predict(lm_model2, newdata = X_test)
+
+# R-squared of lm_model
+r_squared_lm_model <- summary(lm_model1)$r.squared
+cat("R-squared (lm_model1):", r_squared_lm_model, "\n")
+
+# R-squared of lm_model2
+r_squared_lm_model2 <- summary(lm_model2)$r.squared
+cat("R-squared (lm_model2):", r_squared_lm_model2, "\n")
+
+# Mean Squared Error (MSE) of lm_model
+mse_lm_model <- mean((y_test - y_predict)^2)
+cat("MSE (lm_model1):", mse_lm_model, "\n")
+
+# Mean Squared Error (MSE) of lm_model2
+mse_lm_model2 <- mean((y_test - y_predict2)^2)
+cat("MSE (lm_model2):", mse_lm_model2, "\n")
+
+
+
+```
+
 
 **Initial MLR for deaths**
 ```{r}
@@ -840,7 +920,7 @@ library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- svi_all_counties_deaths$deaths
 X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
-#X <- svi_all_counties_deaths[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
+#X <- svi_all_counties_deaths[, c('EP_LIMENG','EP_NOHSDP', 'EP_AGE17','EP_MUNIT','EP_CROWD','EP_NOVEH','EP_GROUPQ','EP_DISABL')]
 
 
 # Splitting the data into train and test data
@@ -852,19 +932,110 @@ y_train <- y[train_indices]
 y_test <- y[-train_indices]
 
 # Initiate the model
-lm_model <- lm(y_train ~ ., data = cbind(y_train, X_train))
+lm_model3 <- lm(y_train ~ ., data = cbind(y_train, X_train))
 
 # Predictions on the test set
-y_predict <- predict(lm_model, newdata = X_test)
-summary(lm_model)
+y_predict <- predict(lm_model3, newdata = X_test)
+summary(lm_model3)
 # Score (R-squared)
-print(summary(lm_model)$r.squared)
+print(summary(lm_model3)$r.squared)
 
 # Coefficients
-deaths_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
+deaths_all_counties_coef <- data.frame(Coef = coef(lm_model3)[-1], Features = names(coef(lm_model3)[-1]))
 deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_coef$Coef), ]
 
 ```
+
+**Feature Selection for deaths MLR**
+
+```{r}
+
+# Stepwise feature selection
+stepwise_model2 <- step(lm_model3, direction = "both")
+
+# Display the selected model
+summary(stepwise_model2)
+
+# Get the selected features
+selected_features <- names(coef(stepwise_model2)[-1])
+selected_features
+
+
+
+```
+
+
+**Compare between models lmodel3 and stepwise_model2**
+```{r}
+# Predictions on the test set for stepwise_model2
+y_predict3 <- predict(stepwise_model2, newdata = X_test)
+
+# R-squared of lm_model
+r_squared_lm_model3 <- summary(lm_model3)$r.squared
+cat("R-squared (lm_model3):", r_squared_lm_model3, "\n")
+
+# R-squared of lm_model2
+r_squared_lm_model4 <- summary(stepwise_model2)$r.squared
+cat("R-squared (stepwise_model2):", r_squared_lm_model4, "\n")
+
+# Mean Squared Error (MSE) of lm_model
+mse_lm_model3 <- mean((y_test - y_predict)^2)
+cat("MSE (lm_model3):", mse_lm_model, "\n")
+
+# Mean Squared Error (MSE) of lm_model2
+mse_lm_model4 <- mean((y_test - y_predict3)^2)
+cat("MSE (stepwise_model2):", mse_lm_model2, "\n")
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 **MLR with SVI2**
@@ -930,5 +1101,81 @@ deaths_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = nam
 deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_coef$Coef), ]
 
 ```
+
+
+
+```{r}
+
+library(caret)
+
+# Define the control parameters for the rfe function
+ctrl <- rfeControl(functions=rfFuncs, method="cv", number=10)
+
+# Perform Recursive Feature Elimination
+result <- rfe(data[, -c("response_variable_column")], data$response_variable_column, sizes=c(1:10), rfeControl=ctrl)
+
+# Print the results
+print(result)
+
+# Selected features
+selected_features <- result$optVariables
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
