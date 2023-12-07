@@ -556,3 +556,29 @@ library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from bi
 fancyRpartPlot(tree_model)
 
 ```
+
+```{r}
+#What variables important in predicting SVI
+
+library(randomForest)
+
+# Model
+rf_model <- randomForest(RPL_THEMES ~ ., data = svi_econ_covid)
+
+# Print feature importance
+print(rf_model$importance)
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+
+
+```
