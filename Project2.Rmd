@@ -478,7 +478,7 @@ xkabledply(corr)
 ```
 
 
-**Correlation matrix with different themes**
+**Correlation matrix with different themes deaths**
 ```{r}
 # Plot the correlation matrix
 library(corrplot)
@@ -839,8 +839,8 @@ confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-co
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- svi_all_counties_deaths$deaths
-#X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
-X <- svi_all_counties_deaths[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
+X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
+#X <- svi_all_counties_deaths[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
 
 
 # Splitting the data into train and test data
@@ -872,7 +872,7 @@ deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- SVI2_all_counties_cases$confirmed_cases
-X <- SVI2_all_counties_cases[,c('RPL_THEME1','RPL_THEME2','RPL_THEME3','RPL_THEME4')]
+X <- SVI2_all_counties_cases[,c('SPL_THEME1','SPL_THEME2','SPL_THEME3','SPL_THEME4')]
 
 
 # Splitting the data into train and test data
