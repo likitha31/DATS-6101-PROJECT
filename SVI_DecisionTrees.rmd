@@ -318,7 +318,15 @@ head(econ)
 #subset to CA tracts
 
 ```{r CA tracts, echo=T, results='hide'}
-Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
+Clean_data <- subset(SVI_Data, select = c(ST, STATE, ST_ABBR, STCNTY, COUNTY, FIPS, LOCATION, AREA_SQMI, 
+  EPL_POV150, EPL_UNEMP, EPL_HBURD, EPL_NOHSDP, EPL_UNINSUR, 
+  SPL_THEME1, RPL_THEME1, EPL_AGE65, EPL_AGE17, EPL_DISABL, 
+  EPL_SNGPNT, EPL_LIMENG, SPL_THEME2, RPL_THEME2, EPL_MINRTY, 
+  SPL_THEME3, RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, 
+  EPL_MUNIT, EPL_MOBILE, EPL_CROWD, EPL_NOVEH, EPL_GROUPQ, 
+  SPL_THEME4, RPL_THEME4, SPL_THEMES, RPL_THEMES, E_AGE65, 
+  EP_POV150, EP_AGE65, EP_NOHSDP, EP_UNEMP, EP_NOHSDP, EP_AGE17, 
+  EP_DISABL, EP_SNGPNT, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH
 ) )
 
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
@@ -554,5 +562,34 @@ rpart.plot(tree_model)
 
 library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
 fancyRpartPlot(tree_model)
+
+```
+
+```{r}
+#What variables important in predicting SVI
+
+library(randomForest)
+
+# Model
+rf_model <- randomForest(RPL_THEMES ~ ., data = svi_econ_covid)
+
+# Print feature importance
+print(rf_model$importance)
+
+
+
+
+
+```
+
+
+```{r}
+
+
+
+
+
+
+
 
 ```
