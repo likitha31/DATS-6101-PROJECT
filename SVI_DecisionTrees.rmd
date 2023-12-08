@@ -441,7 +441,7 @@ summary(model)
 
 ```{r}
 
-
+#Random forest
 
 # Set a seed for reproducibility
 set.seed(123)
@@ -523,6 +523,23 @@ print(xgb_rmse)
 
 ```
 
+```{r}
+# Assuming 'svi_econ_covid' is your dataset and 'income' is the column you want to categorize
+# Replace 'svi_econ_covid' and 'income' with the actual names in your dataset
+
+# Create a new column 'income_r' based on specified income thresholds
+svi_econ_covid$income_r <- cut(svi_econ_covid$income, 
+                               breaks = c(-Inf, 50000, 100000, 200000, Inf),
+                               labels = c("income<50000", "50000<income<100000", "100000<income<200000", "income>200000"),
+                               include.lowest = TRUE)
+
+# View the updated dataset
+head(svi_econ_covid)
+
+
+
+```
+
 
 ```{r}
 #Decision tree using income, covid and other variables
@@ -541,7 +558,7 @@ test_data <- svi_econ_covid[-splitIndex, ]
 
 
 #decision tree model
-tree_model <- rpart(RPL_THEMES ~ total_cases + total_deaths + income + EP_AGE65 + EPL_UNEMP, data = train_data)
+tree_model <- rpart(RPL_THEMES ~ total_cases + total_deaths + income_r + EP_AGE65 + EPL_UNEMP+ EP_NOHSDP +EPL_POV150, data = train_data)
 
 # Make predictions on the test set
 tree_predictions <- predict(tree_model, newdata = test_data)
@@ -563,17 +580,18 @@ rpart.plot(tree_model)
 library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
 fancyRpartPlot(tree_model)
 
+
+
 ```
 
 ```{r}
-#What variables important in predicting SVI
 
 library(randomForest)
 
 # Model
 rf_model <- randomForest(RPL_THEMES ~ ., data = svi_econ_covid)
 
-# Print feature importance
+# feature importance
 print(rf_model$importance)
 
 
@@ -585,11 +603,39 @@ print(rf_model$importance)
 
 ```{r}
 
+# Assuming svi_econ_covid is your merged dataset with additional variables
+# Assuming you have a train_data and test_data
 
+# Install and load the required packages if not already installed
+# install.packages("randomForest")
 
+library(randomForest)
 
+# Separate the response variable and predictor variables for training set
+response_variable_train <- train_data$RPL_THEMES
+predictor_variables_train <- train_data[, !colnames(train_data) %in% c("RPL_THEMES")]
 
+# Calculate the square root of the number of predictor variables
+num_predictors <- ncol(predictor_variables_train)
+mtry_value <- round(sqrt(num_predictors))
 
+# Fit a Random Forest model
+rf_model <- randomForest(
+  x = predictor_variables_train,
+  y = response_variable_train,
+  ntree = 500,  # Number of trees in the forest
+  mtry = mtry_value,  # Set mtry to a numeric value
+  importance = TRUE  # Calculate variable importance
+)
 
+# Print the Random Forest model summary
+print(rf_model)
 
+# Predictions on the test set
+predictions <- predict(rf_model, newdata = test_data)
+
+# Evaluate model performance (you can use appropriate metrics for your task)
+# For example, if it's a regression task, you might use Mean Squared Error (MSE)
+# For classification, you might use confusion matrix, accuracy, etc.
 ```
+
