@@ -103,6 +103,7 @@ The economic data used in this project is **Median Income of Households in 2019*
 **Cleaning Economic Data**
 
 ```{r}
+
 econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
 econ <- subset(econ, select = c(GEO_ID, NAME,B19013_001E))
 econ <- econ[-c(1, 2), ] 
@@ -127,12 +128,20 @@ econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
 #### Data Processing & EDA {.tabset .tabset-fade .tabset-pills}
 
 ##### Data Cleaning & EDA 
+```{r}
+SVI_Data <- read.csv("SVI_2020_US.csv")
+
+```
 
 ```{r, warning=FALSE}
 #Import SVI
 SVI_Data <- read.csv("SVI_2020_US.csv")
-Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,EPL_POV150,	EPL_UNEMP,	EPL_HBURD,	EPL_NOHSDP,	EPL_UNINSUR,	SPL_THEME1,	RPL_THEME1,	EPL_AGE65,	EPL_AGE17,	EPL_DISABL,	EPL_SNGPNT,	EPL_LIMENG,	SPL_THEME2,	RPL_THEME2,	EPL_MINRTY,	SPL_THEME3,	RPL_THEME3, E_MINRTY, EP_HISP, EP_ASIAN, EP_AIAN, EPL_MUNIT,	EPL_MOBILE,	EPL_CROWD,	EPL_NOVEH,	EPL_GROUPQ,	SPL_THEME4,	RPL_THEME4,	SPL_THEMES,	RPL_THEMES, E_AGE65, EP_POV150, EP_AGE65, EP_NOHSDP
-) )
+
+#import all the EP
+Clean_data <- subset(SVI_Data, select = c(ST,STATE,ST_ABBR,STCNTY,COUNTY,FIPS,LOCATION,AREA_SQMI,RPL_THEMES, RPL_THEME1, RPL_THEME2, RPL_THEME3,  RPL_THEME4, EP_POV150, EP_UNEMP, EP_HBURD, EP_NOHSDP, EP_UNINSUR, EP_AGE65, EP_AGE17, 
+                                          EP_DISABL, EP_SNGPNT, EP_LIMENG, EP_MINRTY, EP_MUNIT, EP_MOBILE, EP_CROWD, EP_NOVEH,
+                                          EP_GROUPQ, EP_NOINT, EP_AFAM, EP_HISP, EP_ASIAN, EP_AIAN, EP_NHPI, EP_TWOMORE,
+                                          EP_OTHERRACE, F_POV150))
 
 CA_SVI <- subset(Clean_data, ST_ABBR == "CA")
 CA_SVI <- subset(CA_SVI,  RPL_THEMES!= -999 )
@@ -154,6 +163,21 @@ svi_econ <- svi_econ[svi_econ$income != "-", , drop = FALSE]
 svi_econ$income <- as.numeric(as.character(svi_econ$income))
 svi_econ <- na.omit(svi_econ)
 
+
+```
+
+```{r}
+# Assuming you have a dataframe named 'your_data' with columns 'F_POV150' and 'svi_econ'
+# Install and load the ggplot2 package if not already installed
+# install.packages("ggplot2")
+library(ggplot2)
+
+# Create a scatter plot
+ggplot(svi_econ, aes(x = svi_econ, y = F_POV150)) +
+  geom_point() +
+  labs(title = "Scatter Plot of F_POV150 vs svi_econ",
+       x = "svi_econ",
+       y = "F_POV150")
 
 ```
 
