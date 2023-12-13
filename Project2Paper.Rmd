@@ -15,6 +15,8 @@ output:
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning=FALSE)
+
 ```
 
 ```{r, include=FALSE}
@@ -704,54 +706,44 @@ cat("Recall for 'A':", recall_A, "\n")
 
 ##### Data Cleaning 
 
+*Data cleaning is an essential step in data analysis to ensure accuracy and reliability. The given R code snippets demonstrate key data cleaning procedures such as column subsetting and renaming, missing values removal, formatting, and row subsetting.*
+
 **Column Subsetting and Renaming**
+
+*This process involves selecting specific columns from a dataset and renaming them for clarity and consistency. In the provided code, the subset function is used to select relevant columns from the SVI_Data dataset, creating a new dataframe SVI. Further, the columns 'STCNTY' and 'us_cases' were renamed for clarity*
 
 ```{r}
 
 SVI <- subset(SVI_Data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
 
-#SVI1 <- subset(SVI_Data , select=c(EPL_UNEMP,EPL_HBURD,EPL_NOHSDP,EPL_UNINSUR,SPL_THEME1,RPL_THEME1))
-SVI2 <- subset(SVI_Data , select=c(STATE,STCNTY,COUNTY,FIPS,EPL_POV150,EPL_UNEMP,EPL_HBURD,EPL_NOHSDP,EPL_UNINSUR,SPL_THEME1,RPL_THEME1,EPL_AGE65,EPL_AGE17,EPL_DISABL,EPL_SNGPNT,EPL_LIMENG,SPL_THEME2,RPL_THEME2,EPL_MINRTY,SPL_THEME3,RPL_THEME3,EPL_MUNIT,EPL_MOBILE,EPL_CROWD,EPL_NOVEH,EPL_GROUPQ,SPL_THEME4,RPL_THEME4))
-#SVI3 <- subset(SVI_Data , select=c(EPL_MINRTY,SPL_THEME3,RPL_THEME3))
-#SVI4 <- subset(SVI_Data , select=c(EPL_MUNIT,EPL_MOBILE,EPL_CROWD,EPL_NOVEH,EPL_GROUPQ,SPL_THEME4,RPL_THEME4))
-
 # Renaming columns
 colnames(SVI)[colnames(SVI) == 'STCNTY'] <- 'county_fips'
-colnames(SVI2)[colnames(SVI2) == 'STCNTY'] <- 'county_fips'
 
 us_cases <- rename(us_cases, confirmed_cases = confirmed)
-head(SVI2)
 
 
 ```
 
 **Missing values removal**
 
+*Dealing with missing or invalid data is crucial. The code filters out rows in the SVI dataframe ensuring removal of placeholder or erroneous entries. Additionally, the na.omit function removes rows with any missing values (NA). This step is also applied to other datasets (us_cases and us_deaths) to identify rows with missing data in specific columns.*
+
 ```{r}
 # Filter out rows with any value equal to -999
 SVI <- SVI[rowSums(SVI == -999, na.rm = TRUE) == 0, ]
-SVI2 <- SVI2[rowSums(SVI2 == -999, na.rm = TRUE) == 0, ]
-
 
 # Drop rows with missing values
 SVI <- na.omit(SVI)
-
-SVI2 <- na.omit(SVI2)
-
-
 
 us_cases[is.na(us_cases$confirmed_cases), ]
 us_deaths[is.na(us_deaths$deaths), ]
 ```
 
-**Row Subsetting**
 
-```{r}
-CA_SVI <- subset(SVI, STATE == "California")
-
-```
 
 **Formatting**
+
+*Data often requires conversion into a usable format. In this step, the 'date' columns in us_cases and us_deaths datasets are converted to POSIXct datetime objects using the as.POSIXct function. This conversion, dictated by a predefined format string (format_str), is essential for time-series analysis or operations that require date-time formatted data.*
 
 ```{r}
 
@@ -762,6 +754,14 @@ us_cases$datetime <- as.POSIXct(us_cases$date, format = format_str)
 us_deaths$datetime <- as.POSIXct(us_deaths$date, format = format_str)
 
 
+```
+
+**Row Subsetting**
+
+*This step involves selecting specific rows based on certain conditions. For the SVI dataset, rows pertaining to the state of California are extracted into CA_SVI. In us_cases and us_deaths, rows labeled as 'Statewide Unallocated' are excluded to focus on specific counties. Additionally, subsets of the us_cases and us_deaths datasets are created for the state of California ('CA'), allowing for a more focused analysis on this region.*
+
+```{r}
+CA_SVI <- subset(SVI, STATE == "California")
 # Drop rows that do not refer to a specific county ('Statewide Unallocated')
 us_cases <- us_cases[us_cases$county_name != 'Statewide Unallocated', ]
 us_deaths <- us_deaths[us_deaths$county_name != 'Statewide Unallocated', ]
@@ -769,11 +769,6 @@ us_deaths <- us_deaths[us_deaths$county_name != 'Statewide Unallocated', ]
 
 us_cases_ca <- subset(us_cases, state_name == "CA")
 us_deaths_ca <- subset(us_deaths, state_name == "CA")
-
-
-# Display the first few rows of the resulting data frame
-head(us_cases_ca)
-head(us_deaths_ca)
 
 ```
 
@@ -937,9 +932,6 @@ svi_all_counties_deaths <- merge(svi1_all_counties_ca, us_deaths_all_counties, b
 
 # Remove unnecessary columns
 svi_all_counties_deaths <- select(svi_all_counties_deaths, -county_name, -state_name)
-
-# Display the result
-head(svi_all_counties_deaths)
 ```
 
 **Create timeline of covid confirmed cases**
@@ -1137,7 +1129,7 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 ```
 
 
-##### Feature selection and Logistic Regression for Confirmed cases
+##### Feature selection and Linear Regression for Confirmed cases
 
 **Initial MLR for confirmed cases**
 
