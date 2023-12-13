@@ -147,6 +147,7 @@ result <- bind_cols(us_cases_grouping_fips, us_cases_grouping_county)
 Summarized_cases<-result[, 1:4]
 new_col_names <- c("fips", "state", "confirmed", "county")
 names(Summarized_cases) <- new_col_names
+head(result)
 
 # Calculate Sum of deaths based on county fips and groupby county 
 
@@ -164,8 +165,13 @@ result1 <- bind_cols(us_deaths_grouping_fips, us_deaths_grouping_county)
 Summarized_deaths<-result1[, 1:4]
 new_col_names1 <- c("fips", "state", "deaths", "county")
 names(Summarized_deaths) <- new_col_names1
+head(result1)
 
 ```
+
+
+
+
 
 **Map of CA colored by confirmed cases**
 
@@ -631,7 +637,7 @@ corr <- cor(svi_top_10_counties_cases_corr)
 
 corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
 
-
+xkabledply(corr)
 
 ```
 
@@ -686,7 +692,7 @@ corr <- cor(svi_top_10_counties_deaths_corr)
 
 corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPalette(c("white", "darkblue"))(100), addCoef.col = 'black', number.cex = 0.5,mar = c(0, 0, 2, 0), tl.cex = 0.5, tl.col = 'black', tl.srt = 45)
 
-
+xkabledply(corr)
 
 ```
 
@@ -810,8 +816,8 @@ xkabledply(corr)
 ```{r}
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
-y <- svi_all_counties_cases$confirmed_cases
-X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
+y <- svi_all_counties_cases$RPL_THEMES
+X <- svi_all_counties_cases[, c('confirmed_cases','EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
 #X <- svi_all_counties_cases[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
 
 # Splitting the data into train and test data
@@ -854,7 +860,6 @@ selected_features
 
 
 
-
 ```
 **Model after feature selection**
 
@@ -863,21 +868,21 @@ selected_features
 
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
-y <- svi_all_counties_cases$confirmed_cases
-X <- svi_all_counties_cases[, c('EP_NOHSDP','EP_AGE17','EP_MUNIT','EP_NOVEH','EP_GROUPQ')]
+y <- svi_all_counties_cases$RPL_THEMES
+X <- svi_all_counties_cases[, c("confirmed_cases","EP_POV150","EP_LIMENG","EP_UNEMP", "EP_NOHSDP","EP_SNGPNT", "EP_MUNIT"  ,"EP_MOBILE", "EP_NOVEH")]
 # Splitting the data into train and test data
 set.seed(42)  # For reproducibility
 train_indices <- createDataPartition(y, p = 0.8, list = FALSE)
-X_train <- X[train_indices, ]
-X_test <- X[-train_indices, ]
-y_train <- y[train_indices]
-y_test <- y[-train_indices]
+X_train2 <- X[train_indices, ]
+X_test2 <- X[-train_indices, ]
+y_train2 <- y[train_indices]
+y_test2 <- y[-train_indices]
 
 # Initiate the model
-lm_model2 <- lm(y_train ~ ., data = cbind(y_train, X_train))
+lm_model2 <- lm(y_train2 ~ ., data = cbind(y_train2, X_train2))
 
 # Predictions on the test set
-y_predict <- predict(lm_model2, newdata = X_test)
+y_predict2 <- predict(lm_model2, newdata = X_test2)
 summary(lm_model2)
 # Score (R-squared)
 print(summary(lm_model2)$r.squared)
@@ -918,8 +923,8 @@ cat("MSE (lm_model2):", mse_lm_model2, "\n")
 ```{r}
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
-y <- svi_all_counties_deaths$deaths
-X <- svi_all_counties_cases[, c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
+y <- svi_all_counties_deaths$RPL_THEMES
+X <- svi_all_counties_deaths[, c('deaths','EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
 #X <- svi_all_counties_deaths[, c('EP_LIMENG','EP_NOHSDP', 'EP_AGE17','EP_MUNIT','EP_CROWD','EP_NOVEH','EP_GROUPQ','EP_DISABL')]
 
 
@@ -1042,8 +1047,8 @@ cat("MSE (stepwise_model2):", mse_lm_model2, "\n")
 ```{r}
 library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
-y <- SVI2_all_counties_cases$confirmed_cases
-X <- SVI2_all_counties_cases[,c('SPL_THEME1','SPL_THEME2','SPL_THEME3','SPL_THEME4')]
+y <- svi_all_counties_cases$confirmed_cases
+X <- svi_all_counties_cases[,c('EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ','RPL_THEMES')]
 
 
 # Splitting the data into train and test data
@@ -1067,6 +1072,21 @@ print(summary(lm_model)$r.squared)
 # Coefficients
 confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model)[-1], Features = names(coef(lm_model)[-1]))
 confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+
+```
+
+
+```{r}
+
+# Stepwise feature selection
+stepwise_model4 <- step(lm_model, direction = "both")
+
+# Display the selected model
+summary(stepwise_model4)
+
+# Get the selected features
+selected_features <- names(coef(stepwise_model4)[-1])
+selected_features
 
 ```
 
