@@ -101,6 +101,21 @@ covid19_deaths<-subset(covid19_deaths, state_name=='CA')
 
 ```
 
+```{r}
+merged_data <- merge(covid19_cases, covid19_deaths, by = "county_fips")
+
+# Load the dplyr package
+library(dplyr)
+
+# Calculate total cases and deaths for each county
+covid19 <- merged_data %>%
+  group_by(county_fips) %>%
+  mutate(total_cases = sum(confirmed_cases),
+         total_deaths = sum(deaths)) %>%
+  ungroup()
+
+
+```
 
 
 ```{r}
