@@ -1406,3 +1406,264 @@ selected_features
 ```
 
 
+### SVI, Economic and COVID-19
+
+*In our pursuit to comprehensively understand the determinants of Social Vulnerability Index (SVI), we merged three distinct datasets—SVI dataset, Economy dataset, and COVID dataset—leveraging a common linkage through 'county_fips' and 'Geo_ID.' This synergistic integration aimed to harness the collective insights encapsulated in socio-economic indicators, mean income statistics, and COVID-19-related metrics at the county level.*
+
+
+#### Variable Composition:
+
+**SVI Dataset:**
+
+*The SVI dataset contributes a plethora of socio-economic indicators (SVI variables) that encapsulate vulnerability dimensions such as education, income, housing, and health. These variables serve as crucial predictors for our modeling endeavor.*
+
+**Economy Dataset:**
+
+*The Economy dataset brings forth essential economic indicators, with a focal point on mean income. Mean income is a pivotal economic factor that intersects with the socio-economic fabric, influencing vulnerability levels in diverse communities.*
+
+**COVID Dataset:**
+
+*The COVID dataset enriches our amalgamation with pertinent health-related variables, namely 'total_cases' and 'total_deaths.' Inclusion of these COVID-19 metrics acknowledges the recent challenges and disruptions posed by the pandemic, providing a contemporary lens to our predictive modeling task.*
+
+*Our objective is to model and predict the total SVI (RPL_THEMES) based on SVI-related variables, mean income, and COVID-19 metrics. By integrating these multifaceted dimensions, we strive to uncover the intricate relationships that contribute to social vulnerability, taking into account both pre-existing disparities and the impact of the ongoing pandemic.*
+
+*This predictive modeling initiative holds significant implications for strategic interventions, policy formulation, and community resilience efforts. By unraveling the intricate interplay of socio-economic and health factors, our models aim to provide actionable insights that can inform targeted interventions and support the development of resilient communities.*
+
+*In the subsequent sections, we delve into the application of Random Forest and Decision Tree models to further dissect these relationships, offering interpretability and predictive accuracy to our intricate dataset.*
+
+
+
+
+#### Data Cleaning
+
+*Before Merging the three datasets we will first clean each dataset and change respective column's names if needed*
+
+```{r}
+SVI_Data <- read.csv("SVI_2020_US.csv")
+head(SVI_Data)
+
+econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
+head(econ)
+
+
+us_cases <- read.csv('USAFacts/confirmed-covid-19-cases-in-us-by-state-and-county.csv')
+head(us_cases)
+us_deaths <- read.csv('USAFacts/confirmed-covid-19-deaths-in-us-by-state-and-county.csv')
+tail(us_deaths)
+
+
+```
+
+**Subsetting and renaming column names**
+
+
+```{r}
+
+Clean_data <- subset(SVI_Data, ST_ABBR == "CA")
+CA_SVI <- subset(Clean_data, select = c(STATE,STCNTY,COUNTY,FIPS,EP_POV150,EP_LIMENG,EP_AGE65, EP_MINRTY,	EP_UNEMP,	EP_NOHSDP,EP_AGE17,EP_DISABL,EP_SNGPNT,EP_MUNIT,EP_MOBILE,EP_CROWD,EP_NOVEH,EP_GROUPQ,RPL_THEMES) )
+
+# Renaming columns
+colnames(CA_SVI)[colnames(CA_SVI) == 'STCNTY'] <- 'county_fips'
+us_cases <- rename(us_cases, confirmed_cases = confirmed)
+
+
+# Filter out rows with any value equal to -999
+CA_SVI <- CA_SVI[rowSums(CA_SVI == -999, na.rm = TRUE) == 0, ]
+
+# Drop rows with missing values
+CA_SVI <- na.omit(CA_SVI)
+
+
+covid19_cases<-us_cases
+covid19_deaths<-us_deaths
+
+covid19_cases<-subset(covid19_cases, state_name=='CA')
+covid19_deaths<-subset(covid19_deaths, state_name=='CA')
+
+
+
+
+```
+
+
+**Merging covid-19 cases and deaths**
+
+```{r}
+merged_data <- merge(covid19_cases, covid19_deaths, by = "county_fips")
+
+# Load the dplyr package
+library(dplyr)
+
+# Calculate total cases and deaths for each county
+covid19 <- merged_data %>%
+  group_by(county_fips) %>%
+  mutate(total_cases = sum(confirmed_cases),
+         total_deaths = sum(deaths)) %>%
+  ungroup()
+
+
+```
+
+**Calculating total deaths and cases for each county **
+
+```{r}
+
+
+# Calculate total cases and deaths for each county
+covid19 <- covid19 %>%
+  group_by(county_fips) %>%
+  mutate(total_cases = sum(confirmed_cases),
+         total_deaths = sum(deaths)) %>%
+  ungroup()
+
+
+```
+
+
+
+**Creating a new dataframe with total cases and deaths for each county**
+
+
+```{r}
+# Create a new dataframe with total cases and deaths for each county
+summary_data <- covid19 %>%
+  group_by(county_fips) %>%
+  summarize(total_cases = sum(confirmed_cases),
+            total_deaths = sum(deaths))
+
+# Display the new dataframe
+print(summary_data)
+
+
+```
+
+
+**Merging SVI data and covid-19 data using county_fips**
+
+
+```{r}
+#merging svi and summary_data
+svi_covid <- merge(CA_SVI, summary_data, by = "county_fips", all.x = TRUE)
+head(svi_covid)
+
+
+
+```
+
+**cleaning econimc data**
+
+
+```{r}
+#clean data for economic
+econ <- subset(econ, select = c(GEO_ID, NAME,B19013_001E))
+econ <- econ[-c(1, 2), ] 
+
+
+names_to_change <- c("GEO_ID", "NAME", "B19013_001E")
+new_names <- c("GEO_ID", "tract", "income")
+
+econ <- setNames(econ, new_names)
+
+
+econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
+
+svi_econ <- merge(econ, CA_SVI, by.x = "GEO_ID", by.y = "FIPS", all.x = TRUE, all.y = TRUE)
+
+
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+#remove NA
+
+svi_econ <- na.omit(svi_econ)
+svi_econ <- svi_econ[svi_econ$income != "-", , drop = FALSE]
+
+
+#leaves us with 9001 rows 
+str(svi_econ$income)
+svi_econ$income <- as.numeric(as.character(svi_econ$income))
+total_na_count <- sum(is.na(svi_econ))
+print(total_na_count)
+svi_econ <- na.omit(svi_econ)
+#8956
+```
+
+
+```{r}
+# Assuming svi_econ is your first dataset and summary_data is your second dataset
+merged_data1 <- svi_econ %>%
+  left_join(summary_data, by = c("county_fips" = "county_fips"))
+
+
+
+head(merged_data1)
+svi_econ_covid=merged_data1
+
+```
+
+**Creating a new column that has income range**
+```{r}
+# Create a new column 'income_r' based on specified income thresholds
+svi_econ_covid$income_r <- cut(svi_econ_covid$income, 
+                               breaks = c(-Inf, 50000, 100000, 200000, Inf),
+                               labels = c("income<50000", "50000<income<100000", "100000<income<200000", "income>200000"),
+                               include.lowest = TRUE)
+
+# View the updated dataset
+head(svi_econ_covid)
+
+
+```
+
+
+**Decision tree using SVI, Economy and Covid-19 datasets**
+```{r}
+#Decision tree using income, covid and other variables
+
+library(rpart)
+library(rpart.plot)
+
+# Set a seed for reproducibility
+set.seed(123)
+
+# Split the data into a training set (80%) and a test set (20%)
+splitIndex <- createDataPartition(svi_econ_covid$RPL_THEMES, p = 0.8, list = FALSE)
+train_data <- svi_econ_covid[splitIndex, ]
+test_data <- svi_econ_covid[-splitIndex, ]
+
+
+
+#decision tree model
+tree_model <- rpart(RPL_THEMES ~ total_cases + total_deaths + income_r + EP_AGE65 + EP_UNEMP+ EP_NOHSDP +EP_POV150, data = train_data)
+
+# Make predictions on the test set
+tree_predictions <- predict(tree_model, newdata = test_data)
+
+# RMSE for the decision tree
+tree_rmse <- sqrt(mean((test_data$RPL_THEMES - tree_predictions)^2))
+print(paste("Decision Tree RMSE:", tree_rmse))
+
+
+
+
+library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+fancyRpartPlot(tree_model)
+
+```
+
+
+
+**Random Forest Model**
+```{r}
+#significant variables for predicting Total SVI (RPL_THEMES
+
+library(randomForest)
+
+# Model
+rf_model <- randomForest(RPL_THEMES ~ ., data = svi_econ_covid)
+
+# feature importance
+print(rf_model$importance)
+
+
+
+```
