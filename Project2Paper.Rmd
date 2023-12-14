@@ -39,8 +39,9 @@ library(plotly)
 library(corrplot)
 library(caret)
 library(car)
-# Load the glmnet package
 library(glmnet)
+library(rpart)
+loadPkg("rattle") 
 
 #font_import(pattern = "Avenir")
 loadfonts()
@@ -243,7 +244,7 @@ model_econ <- lm(RPL_THEMES ~ income_scaled, data = svi_econ)
 # Tidy up the results using broom
 tidy_results <- tidy(model_econ)
 
-summary(model_econ)
+#summary(model_econ)
 # Print the formatted table
 kable(tidy_results, format = "markdown")
 
@@ -256,14 +257,16 @@ kable(tidy_results, format = "markdown")
 
 **P-value (< 2.2e-16):** The p-value associated with the F-statistic is very close to zero, indicating that the overall model is statistically significant.
 
-**Conclusion:** The results indicate that income (measured by median income of census tracts) is likely a good predictor of SVI risk scores, as it is statistically significant. 
+**Conclusion:** The results indicate that income (measured by median income of census tracts) is likely a good predictor of SVI risk scores, as it is statistically significant. This answers the SMART question regarding if median income is a statistically significant variable and if it has any significant impact on SVI scores. 
+
 
 ##### Feature Selection
 
-Numerous methodologies were used to select relevant and significant features for the linear regression and classification model. This part of the project will walk through this selection process. 
+To answer the SMART question regarding which features are significant in predicting and modeling SVI, feature selection algorithms were used. Numerous methodologies were used to select relevant and significant features for the linear regression and classification model. This part of the project will walk through this selection process. 
 
 **Correlation Matrix**
 
+**Highly correlated variables**: 
 ```{r corr matrix}
 # Convert selected columns to numeric
 svi_select <- mutate_all(svi_econ, as.numeric)
@@ -430,7 +433,11 @@ Out of all of the variables, it appears `EPL_AGE65` (0.09326387), `EPL_AGE17` (0
 
 Therefore, it appears that **LASSO** and **Stepwise** both selected the full model as the best model. In the next steps, a comparison of the simpler linear regression model and the full regression model will be carried out. 
 
-##### Linear Regression
+This answers the SMART question regarding which variables are significant in modeling and predictign SVI. 
+
+##### Linear Regression 
+
+We begin the classification process by examining the relationships of these variables in a linear regression to identify which model is best to use out of the two identified models from feature selection. This is done by examining model preformance and characteristics. 
 
 **The simple model represents the linear regression modeled by: RPL_THEMES ~ income_scaled + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, as identified by the correlation matrix.**
 
@@ -519,13 +526,18 @@ cat("VIF for full_model:", vif_full_model, "\n")
 
 **Full Model VIF:** 5.02, 3.78, 2.14, 2.23, 1.80,  1.77, 1.71, 2.73, 3.34, 1.25, 3.95, 4.23
 
-Both simple and full models have VIF values under 10, and only one value (income) in the full model is slightly above 5. This is still within the range of acceptable values. 
+Both simple and full models have VIF values under 10, and only one value (income) in the full model is slightly above 5. This is still within the range of acceptable values, therefore it is appropriate to use the full model. 
 
 
 ##### Predictive Modeling
 
-As a re
+As a result of the feature selection process, it was determined that the full model is appropriate and the best fitting model to use. Therefore, the variables from this full model will be used to analyze the question of it is possible to classifify census tracts into levels of SVI risk. 
+
+From the CDC website, the recommended levels of risk to model are: 
+
 "In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable."
+
+The initial data processing required to classify the census tracts is to assign each tract a level of **low**, **medium-low**, **medium-high**, and **high** based on the quartile breaks. Below is a plot of the census tracts broken into quartiles. 
 
 ```{r}
 # Create quartiles and labels
@@ -546,50 +558,60 @@ ggplot(trim_svi, aes(x = risk, fill = risk)) +
 
 ```
 
-```{r}
-library(rpart)
+From this plot, it is seen that in California there are more medium-high and high risk census tracts than low and medium-low risk counties. This may cause issues in classifying the data due to the fact that there is an imbalance of data in each target class, with a bias towards more high risk tracts. 
 
+**Classification Trees**
+
+Classification trees with a max-depth of **4** were used to classify the census tracts into the quartile rankings. While this may not be the best fitting size of the tree, anything beyond 4 levels may become difficult to interpret, while the aim of the project is to create an easily interpret-able figure for first responders or government officials. Interpret-ability of decision trees is a plus, but it may not be the most effective or comprehensive algorithm. 
+
+```{r}
 set.seed(1)
 svi_econ_tree <- rpart(risk ~ income_scaled + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = 4) )
-printcp(svi_econ_tree) # display the results 
-plotcp(svi_econ_tree) # visualize cross-validation results 
 
-#summary(svi_econ_tree) # detailed summary of splits
-
-# plot tree 
+#summary(svi_econ_tree)
 #plot(svi_econ_tree, uniform=TRUE, main="Classification Tree for svi_econ_tree")
 #text(svi_econ_tree, use.n=TRUE, all=TRUE, cex=.8)
 ```
 
+This figure depicts the decision tree used to classify census tracts into the rankings. From this tree, it is possible to see which variables are used to determine the classification of the tract and at what value. 
+
 ```{r}
-library(ezids)
+fancyRpartPlot(svi_econ_tree)
+```
+
+Below is a plot of the Cross-Validation Relative Error of the tree. Relative error is a metric used to assess the predictive performance of a model, which measures the difference between predicted values and actual values relative to the actual values. The x-axis labeled "cp" refers to the complexity parameter. A smaller value of "cp" indicates more aggressive pruning, resulting in a smaller and simpler tree, which is a trade-off with higher predictive accuracy. The second x-axis is the size of the tree, referring to how many splits there are. 
+
+This is an important graph to analyze, as when a decision tree is grown, it may become too overfit, capturing noise instead of real relationships. The goal is to find a "cp" that results in a well-balanced tree, providing good predictive performance on both the training and validation data. This tree's relative error ranks from 0.4 to 1, which implies even the biggest tree still has a relative error of 40%. 
+
+```{r}
+#printcp(svi_econ_tree) 
+plotcp(svi_econ_tree) 
+```
+
+
+**Confusion Matrix**:
+Below is a confusion matrix using the above classification tree. From initial observations, it is clear that this model is not accurately classifying the census tracts into quartile risk classes. 
+
+```{r}
 # Generate predictions on the training data
 train_predictions <- predict(svi_econ_tree, trim_svi, type = "class")
 
 # Create a confusion matrix
 conf_matrix_train <- table(train_predictions, trim_svi$risk)
 
-# Display the confusion matrix
-conf_matrix_train
-
 
 xkabledply(conf_matrix_train, "confusion matrix")
 
 ```
 
+From the confusion matrix, it is possible to gain information about the accuracies of this classification model. For this analysis, the algorithm is classifying a categorical variable into 4 levels. Therefore, the table below depicts the overall accuracy, and then the precision and recall by class. 
+
 ```{r}
-# Confusion matrix
-conf_matrix <- matrix(c(1004, 377, 38, 3,
-                        403, 1104, 503, 23,
-                        46, 420, 1153, 393,
-                        2, 32, 537, 2918), nrow = 4, byrow = TRUE)
 
 # Convert to confusion matrix object
-conf_matrix <- as.table(conf_matrix)
+conf_matrix <- as.table(conf_matrix_train)
 
 # Print the confusion matrix
-print(conf_matrix)
-
 # Calculate metrics
 accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 precision <- diag(conf_matrix) / rowSums(conf_matrix)
@@ -600,9 +622,12 @@ f1_score <- 2 * (precision * recall) / (precision + recall)
 cat("Accuracy:", accuracy, "\n")
 cat("Precision (by class):", precision, "\n")
 cat("Recall (by class):", recall, "\n")
-cat("F1 Score (by class):", f1_score, "\n")
+#cat("F1 Score (by class):", f1_score, "\n")
 
 ```
+As seen in the results, the overall accuracy is fairly low, at 68.9%. The decision tree is better at classifying levels of high risk. This is likely due to the fact that there are more census tracts that are higher risk, due to imbalanced data. Additionally, the model might not be as accurate in picking up the differences between low and low-medium and medium and medium-high, as these might be small variations in scores and variable values. 
+
+Below is a table of the evaluation statistics for the model.   
 
 ```{r}
 loadPkg("rpart")
@@ -626,24 +651,18 @@ for (deep in 2:6) {
 }
 
 unloadPkg("caret")
-```
 
-
-```{r}
 xkabledply(confusionMatrixResultDf, title="SVI econ Classification Trees summary with varying MaxDepth")
 ```
 
-```{r}
-loadPkg("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
-fancyRpartPlot(svi_econ_tree)
-```
+##### Final Model 
 
+Instead of classifying into 4 levels of risk, splitting the census tracts into low versus high risk could potentially increase accuracy. Therefore, the final model that could be provided to emergency responders or government officials would provide a high level overview of what sort of variables and values would cause a census tracts to have high risk or low risk. 
+
+While the data is still imbalanced, the model might have a better accuracy by telling apart this coarser distinction rather than the small differences in values. 
 ```{r}
 # Create binary classification (low vs high) based on the provided breaks
 trim_svi$risk_binary <- cut(trim_svi$RPL_THEMES, breaks = c(0, 0.5, 1), labels = c("low", "high"))
-
-# Plot the data with binary labels
-library(ggplot2)
 
 ggplot(trim_svi, aes(x = risk_binary, fill = risk_binary)) +
   geom_bar() +
@@ -654,48 +673,80 @@ ggplot(trim_svi, aes(x = risk_binary, fill = risk_binary)) +
   theme(legend.position = "none", text = element_text(family = "Avenir"))
 
 # Decision Tree Modeling
-library(rpart)
-
 set.seed(1)
 svi_econ_tree <- rpart(risk_binary ~ income_scaled + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = trim_svi, method = "class", control = list(maxdepth = 4))
 printcp(svi_econ_tree)  # display the results 
 
+```
+
+Below is a confusion matrix of the values. 
+
+```{r}
 # Confusion Matrix
 train_predictions <- predict(svi_econ_tree, trim_svi, type = "class")
 conf_matrix_train <- table(train_predictions, trim_svi$risk_binary)
 
 # Display the confusion matrix
-conf_matrix_train
 xkabledply(conf_matrix_train, "confusion matrix")
 
-```
-```{r}
-# Confusion matrix
-conf_matrix <- matrix(c(2920, 495, 468, 5073), nrow = 2, byrow = TRUE)
 
 # Convert to confusion matrix object
-conf_matrix <- as.table(conf_matrix)
-
-# Display the confusion matrix
-print(conf_matrix)
-
-# Calculate metrics
-accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-precision_A <- conf_matrix[1, 1] / sum(conf_matrix[, 1])  # Precision for class 'A'
-recall_A <- conf_matrix[1, 1] / sum(conf_matrix[1, ])   # Recall for class 'A'
-
-# Print metrics
-cat("Overall Accuracy:", accuracy, "\n")
-cat("Precision for 'A':", precision_A, "\n")
-cat("Recall for 'A':", recall_A, "\n")
+conf_matrix <- as.table(conf_matrix_train)
 
 ```
 
+From the confusion matrix, the overall accuracy, precision for each class, and recall for each class are shown below. 
 
+```{r}
+# Assuming conf_matrix_train is your confusion matrix
 
+# True Positives, False Positives, False Negatives, True Negatives
+tp <- conf_matrix_train["high", "high"]
+fp <- conf_matrix_train["low", "high"]
+fn <- conf_matrix_train["high", "low"]
+tn <- conf_matrix_train["low", "low"]
 
+# Accuracy
+accuracy <- (tp + tn) / sum(conf_matrix_train)
+cat("Overall Accuracy:", accuracy, "\n")
 
+# Precision for "high"
+precision_high <- tp / (tp + fp)
+cat("Precision for 'high':", precision_high, "\n")
 
+# Recall for "high"
+recall_high <- tp / (tp + fn)
+cat("Recall for 'high':", recall_high, "\n")
+
+# Precision for "low"
+precision_low <- tn / (tn + fn)
+cat("Precision for 'low':", precision_low, "\n")
+
+# Recall for "low"
+recall_low <- tn / (tn + fp)
+cat("Recall for 'low':", recall_low, "\n")
+
+```
+
+From this analysis, it is seen that this model with the binary classification has an overall accuracy of **89.24%**. This is a higher overall accuracy compared to the previous model scoring 68.9%. The individual precision and recall values for this model are below:
+
+* Precision for 'high': **0.911**
+* Recall for 'high': **0.9155**
+
+* Precision for 'low': **0.8619**
+* Recall for 'low': **0.8550**
+
+These individual measures of accuracies are higher overall compared to the other classification. This algorithm does a better job at accurately predicting census tract risk scores, and avoids FP and FN more effectively. Overall, this model is still more effective at classifying high risk, probably still due to the imbalanced data. 
+
+Using this binary classification, a classification tree can be provided to identify low versus high risk tracts, with clearly identifiable variables and values that determine the classification decisions. This deliverable, or an example of one, can be seen below.
+
+```{r}
+set.seed(1)
+svi_econ_tree <- rpart(risk_binary ~ income_scaled + EPL_POV150 + EPL_UNINSUR + EPL_AGE65 + EPL_AGE17 + EPL_DISABL + EPL_SNGPNT + EPL_LIMENG + EPL_MINRTY + EPL_UNEMP + EPL_HBURD + EPL_NOHSDP , data=trim_svi, method="class", control = list(maxdepth = 4) )
+
+fancyRpartPlot(svi_econ_tree)
+```
+From this decision tree, it can be sugested that the variables planners/officials could look at to determine high versus low risk are `EPL_POV150` (poverty rate above 150%), `EPL_NOHSDP` (no high school diploma), and `income_scaled` (median income). This is an interesting finding that provides further insights as to which variables are significant or meaningful in modeling the SVI risk of census tracts, building off of the correlations identified project 1 and contributing the other findings and models analyzed in this project.   
 
 ### COVID-19
 
