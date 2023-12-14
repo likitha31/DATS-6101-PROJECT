@@ -1,5 +1,5 @@
 ---
-title: "Project 2:Write Up"
+title: "Project 2: Write Up"
 author: "Likhitha, Paulina, Shrihan"
 date: "`r Sys.Date()`"
 output:
@@ -38,6 +38,10 @@ library(usmap)
 library(plotly)
 library(corrplot)
 library(caret)
+library(car)
+# Load the glmnet package
+library(glmnet)
+
 #font_import(pattern = "Avenir")
 loadfonts()
 # Set the default font for ggplot2
@@ -61,6 +65,9 @@ Thus, this project brings in two additional datasets to examine new correlations
 
 During the project's initial phase, limited novel correlations between demographic variables and SVI themes were identified at the census tract level. There were no demographic variables that were left out of SVI themed groupings, thus indicating that the CDC compiled SVI is a well represented and holistic representation of vulnerability assessment. In the second phase of the project, the goal is to utilize the themed and overall SVI scores in combination with additional datasets to see if predictions can be made about census tract or county vulnerability scores. Specifically, correlations between COVID-19 data, median income, and the SVI dataset will be examined. The objective extends to the development of predictive models designed to pinpoint vulnerable communities in events of external stressors (such as a disease outbreak). The temporal scale of the dataset examines SVI scores prior to and after the COVID-19 pandemic. 
 
+### Research Topic 
+
+**SMART Questions:**
 
 **1**: Can we explore the presence of correlations between COVID-19 mortality and elevated Social Vulnerability Index (SVI) scores across SVI themes?
 
@@ -72,11 +79,10 @@ During the project's initial phase, limited novel correlations between demograph
 
 **5**: Which features are imporant/significant in predicting SVI? 
 
-The focus of the economic variable dataset use will be to add in another variable reported by the census as a metric of economic status. Then, it will be combined with other variables selected through feature selection to create a logistic regression model. This model will then be used to create a classification tree algorithm that will predict if a tract is Low risk, Medium-Low risk, Medium-High risk, or High risk. By breaking it down into a category with 4 levels, it can help officials, planners, and responders focus attention to those classified as the highest risk, as well as see the demographic breakdown at a quick glance from the nodes on the tree. 
+The focus of the economic variable dataset use will be to add in another variable reported by the census as a metric of economic status. Then, it will be combined with other variables selected through feature selection to create a logistic regression model. This model will then be used to create a classification tree algorithm that will predict if a tract is Low risk, Medium-Low risk, Medium-High risk, or High risk. By breaking it down into a category with 4 levels, it can help officials, planners, and first responders focus attention to those classified as the highest risk, as well as see the demographic breakdown at a quick glance from the nodes on the tree. 
 
 The primary objective of utilizing the COVID dataset is to incorporate supplementary variables associated with COVID-19, encompassing metrics such as cases and deaths, into the Social Vulnerability Index (SVI) dataset. These additional variables are crucial indicators of the pandemic's extent and impact. Through meticulous feature selection on the merged dataset, significant factors will be identified. Subsequently, these selected features will be employed to construct a robust logistic regression model capable of predicting the SVI score. This analysis holds the potential to assist policymakers, healthcare professionals, and emergency responders in efficiently allocating resources by precisely identifying areas at the highest risk of COVID-19 transmission and its associated challenges.
 
-### Research Topic 
 
 ## Data Set and Variables 
 
@@ -101,11 +107,9 @@ The economic data used in this project is **Median Income of Households in 2019*
 
 The COVID-19 data used in this project is acquired from the [Roche Data Science Coalition (RDSC)](https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/) for all 50 states. 
 
-## Cleaning the Data
+### Cleaning the Data
 
 **Information on cleaning the SVI dataset can be found in Project 1 write-up**
-
-**Cleaning Economic Data**
 
 ```{r}
 econ <- read.csv("ACSDT5Y2020.B19013-Data.csv")
@@ -119,7 +123,6 @@ econ <- setNames(econ, new_names)
 econ$GEO_ID <- sub(".*US0*(\\d+)", "\\1", econ$GEO_ID)
 ```
 
-**Cleaning COVID Data**
 
 ```{r}
 
@@ -133,9 +136,9 @@ us_deaths <- read.csv('USAFacts/confirmed-covid-19-deaths-in-us-by-state-and-cou
 
 ### Economic 
 
-#### Data Processing & EDA {.tabset .tabset-fade .tabset-pills}
+#### Economic Data EDA and Modeling {.tabset .tabset-fade .tabset-pills}
 
-##### Data Cleaning & EDA 
+##### EDA 
 
 ```{r, warning=FALSE}
 #Import SVI
@@ -151,7 +154,6 @@ CA_SVI <- subset(CA_SVI,  RPL_THEME3!= -999 )
 CA_SVI <- subset(CA_SVI,  RPL_THEME4!= -999 )
 
 #Join SVI to econ based on GEO_ID
-# Assuming 'econ' and 'CA_SVI' are your data frames
 svi_econ <- merge(econ, CA_SVI, by.x = "GEO_ID", by.y = "FIPS", all.x = TRUE, all.y = TRUE)
 
 #count outliers 
@@ -173,7 +175,7 @@ ggplot(svi_econ, aes(x = income)) +
   labs(title = "Histogram of Median Income of Census Tracts in 2019", x = "Meidan Income", y = "Frequency")
 ```
 
-From this plot, we can see that the `income` data is skewed right, there are more lower median incomes.
+From this plot, we can see that the `income` data is skewed right, there are more lower median incomes. For the purposes of classifying data, this distribution does not necessarily need to be normally distributed, as long as there are enough variables to represent each target class.
 
 Looking back at our `RPL_THEMES`, we can observe its distribution as well.
 
@@ -189,7 +191,7 @@ ggplot(svi_econ, aes(x = RPL_THEMES)) +
 
 It is seen that the distribution is skewed left. 
 
-In the original project variables were mapped by county. Examining the Income distribution by county:
+In the original project variables were mapped by county. It is possible to map the the income distribution by county to get a visual understanding of its distribution. 
 
 ```{r maps, include=FALSE}
 #for mapping, convert CA_SVI to a Simple Features (map object)
@@ -201,7 +203,6 @@ library(viridis)
 #Load 2020 Census Tract shapefile for California
 ca_tracts <- tracts(state = "CA", year = 2020)
 
-# Assuming svi_econ is your data frame
 ca_tracts$GEOID <- sub("^\\d", "", ca_tracts$GEOID)
 
 #Join CA_SVI and ca_tracts based on FIPS and GEOID
@@ -212,11 +213,6 @@ econmap <- st_as_sf(svi_econ_map)
 ```
 
 ```{r mapping}
-
-# Print the first few rows of the updated dataset
-head(econmap)
-
-
 map1 <- ggplot(data = econmap) +
   geom_sf(aes(fill = income)) +
   labs(title = "Median Income by Census Tract: 2019",
@@ -232,11 +228,10 @@ map1
 
 It is seen that the majority of census tracts fall in a lower range, with a clustering of higher incomes in the coastal region in the middle of the state. 
 
+##### SVI & Income
 Examining income's effect on the SVI score can be done using linear regression to interpret these effects.
 
 ```{r}
-
-# Install and load required packages
 library(broom)
 library(knitr)
 
@@ -254,11 +249,14 @@ kable(tidy_results, format = "markdown")
 
 
 ```
-Income_scaled (-0.568704): The estimated change in RPL_THEMES for a one-unit increase in income_scaled. Here, it's negative, suggesting a negative relationship between income_scaled and RPL_THEMES.
 
-F-statistic (15250): A test of the overall significance of the model. It compares the fit of the intercept-only model with the fit of the given model. A higher F-statistic and a lower p-value (< 0.05) suggest that at least one variable is significantly related to the dependent variable.
+**Income_scaled (-0.568704):** The estimated change in RPL_THEMES for a one-unit increase in income_scaled (a one unit increase is an increase in $100,000). The coefficient is negative, suggesting a negative relationship between income_scaled and RPL_THEMES.
 
-p-value (< 2.2e-16): The p-value associated with the F-statistic is very close to zero, indicating that the overall model is statistically significant.
+**F-statistic (15250):** A test of the overall significance of the model. It compares the fit of the intercept-only model with the fit of the given model. A higher F-statistic and a lower p-value (< 0.05) suggest that at least one variable is significantly related to the dependent variable.
+
+**P-value (< 2.2e-16):** The p-value associated with the F-statistic is very close to zero, indicating that the overall model is statistically significant.
+
+**Conclusion:** The results indicate that income (measured by median income of census tracts) is likely a good predictor of SVI risk scores, as it is statistically significant. 
 
 ##### Feature Selection
 
@@ -282,25 +280,18 @@ colnames(svi_select)[colnames(svi_select) == 'EPL_POV150'] <- 'Poverty'
 colnames(svi_select)[colnames(svi_select) == 'EPL_HBURD'] <- 'Housing_Cost_Burdened'
 colnames(svi_select)[colnames(svi_select) == 'EPL_NOHSDP'] <- 'No_Diploma'
 
-
-
 # Create the correlation matrix
 cor_matrix <- cor(svi_select, use = "complete.obs")
-
-
 
 # Variable of interest
 target_variable <- "SVI"
 # Extract the correlations with the target variable
 cor_with_target <- cor_matrix[target_variable, ]
-# Select variables with high correlation (you can adjust the threshold)
+# Select variables with high correlation 
 high_correlation_vars <- names(cor_with_target[abs(cor_with_target) > 0.65])
-
-
 
 # Print the variables with high correlation
 print(high_correlation_vars)
-
 
 # Select the relevant columns for correlation
 correlation_matrix1 <- svi_select %>%
@@ -311,16 +302,16 @@ correlation_matrix <- cor(correlation_matrix1)
 
 loadPkg("corrplot")
 
-
-# Assuming you have already created your correlation plot
 corrplot(correlation_matrix, method = "square", type = "lower", col = colorRampPalette((c("#2166AC","#FDDBC7","#B2182B")))(100))
 
 
 ```
 
-**ADD IN RESULTS DISUCSSION**
+This assessment utilized a correlation matrix to identify which variables have a strong relationship with the target variable `SVI`. The threshold for what counted as a significant relationship was set to 0.65. 
 
-From assessing correlation of variables, only 4 variables: `income`, `EPL_POV150`, `EPL_HBURD`, `EPL_NOHSDP` had a correlation of 0.70  or higher with the `RPL_THEMES` variable. This might suggest that these variables are likely predictors of the outcome SVI score, but later on it will be important to assess multicolinearity. 
+From assessing correlation of variables, only 4 variables: `income_scaled`, `EPL_POV150`, `EPL_HBURD`, `EPL_NOHSDP` had a correlation of 0.65  or higher with the `RPL_THEMES` variable. This might suggest that these variables are likely predictors of the outcome SVI score, but it is important to assess multicolinearity. 
+
+**Residual plots:**
 
 ```{r}
 predict_svi <- svi_econ %>%
@@ -340,7 +331,7 @@ residuals <- residuals(model)
 
 # Residual Plot
 par(mfrow = c(2, 2))
-plot(model)
+#plot(model)
 
 # Q-Q Plot
 qqnorm(residuals)
@@ -351,13 +342,11 @@ qqline(residuals)
 plot(density(residuals))
 ```
 
-The residuals appear to be normally distributed. 
+The residuals appear to have a normal distribution, so now it is possible to assess them using VIF assessment to address multicolinearity. 
 
-VIF assessment:
+ **VIF assessment:**
 
 ```{r}
-library(car)
-
 model_test <- glm(SVI ~ ., data = predict_svi)
 summary(model_test)
 
@@ -365,30 +354,33 @@ data.frame(vif(model_test))
 
 ```
 
-VIF values all below 5
+A high VIF value could indicate that there is multicolinearity present. VIF values above 5 are considered moderately high, and values above 10 are recommended to not be used. From this analysis, it is seen that VIF values all below 5. All 4 variables were selected from this process.
 
-From this assessment of correlation 4 variables were selected.
+**Stepwise:** 
 
-Next stepwise in both directions was assessed. 
+The stepwise feature selection was ran on the datatset in both directions. 
 
+**Initial Model**:
 ```{r}
-
 # Create the initial model
 initial_model <- lm(RPL_THEMES ~ income_scaled + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
 
 # Perform stepwise selection (both directions)
 stepwise_model <- step(initial_model, direction = "both")
 
-# Display the summary of the selected model
-summary(stepwise_model)
-
-summary(initial_model)
-
 ```
 
-All of them are significant 
+**Stepwise Results**:
+```{r}
+# Display the summary of the selected model
+summary(stepwise_model)
+```
 
-LASSO technique: 
+All of the coefficients are determined to be significant. The output suggests that the best model, according to AIC, includes all the features. Removing any single feature did not lead to a significant improvement in AIC. The model seems to be highly significant, and the included variables all have statistically significant coefficients. The model also explains a substantial portion of the variability in the dependent variable (RPL_THEMES), as indicated by the high R-squared value of **0.9067**.
+
+ **LASSO**: 
+[Lasso analysis] (https://www.statisticshowto.com/lasso-regression/) is used for variable selection and it introduces a penalty term to the traditional linear regression objective function. It does this by giving a penalty to the less important features, making their influence smaller or even zero to filter out the noise and focus on the most crucial things that affect the target variable. 
+
 
 ```{r LASSO}
 # Assuming svi_econ is your data frame
@@ -400,9 +392,6 @@ selected_columns <- c("RPL_THEMES", "income_scaled", "EPL_POV150", "EPL_UNINSUR"
 # Filter the data frame
 trim_svi <- svi_econ %>%
   select(all_of(selected_columns))
-
-# Load the glmnet package
-library(glmnet)
 
 # Prepare data
 x <- model.matrix(RPL_THEMES ~ . - 1, data = trim_svi)
@@ -422,62 +411,53 @@ print(coef_lasso)
 #coef_ridge <- coef(fit_ridge, s = fit_ridge$lambda.min)
 #print(coef_ridge)
 
-
-# Assuming fit_lasso is your cv.glmnet object
 #optimal_lambda <- fit_lasso$lambda.min
 #coefficients_at_optimal_lambda <- coef(fit_lasso, s = optimal_lambda)
 #print(coefficients_at_optimal_lambda)
 
 ```
 
-Income: The coefficient is -0.217. This suggests that a one-unit increase in income is associated with a decrease of approximately 3.103e-07 units in the response variable, holding other variables constant.
+**Results**: All of the coefficients turn out to be non zero, but some are slightly lower than the others. However, due to the nature of this analysis, the coefficients are deemed meaningful if they are non-zero values. 
+Interpretation of the coefficients can be understood as:
 
-EPL_POV150: The coefficient is 0.1949. This suggests that a one-unit increase in EPL_POV150 is associated with an increase of approximately 0.1949 units in the response variable, holding other variables constant.
+**Income**: The coefficient is -0.217, suggesting a one-unit increase in income is associated with a decrease of approximately -0.217 units in the response variable, holding other variables constant.
 
-EPL_UNINSUR: The coefficient is 0.1209. This suggests that a one-unit increase in EPL_UNINSUR is associated with an increase of approximately 0.1209 units in the response variable, holding other variables constant.
+**EPL_POV150**: The coefficient is 0.1949, suggesting a one-unit increase in EPL_POV150 is associated with an increase of approximately 0.1949 units in the response variable, holding other variables constant.
 
-EPL_AGE65: The coefficient is 0.0933. This suggests that a one-unit increase in EPL_AGE65 is associated with an increase of approximately 0.0933 units in the response variable, holding other variables constant.
 
-EPL_AGE17: The coefficient is 0.0216. This suggests that a one-unit increase in EPL_AGE17 is associated with an increase of approximately 0.0216 units in the response variable, holding other variables constant.
+Out of all of the variables, it appears `EPL_AGE65` (0.09326387), `EPL_AGE17` (0.02160010), and `EPL_UNEMP` (0.09555821) all have the smallest impact on overall SVI, but are still significant in the model. 
 
-EPL_DISABL: The coefficient is 0.1503. This suggests that a one-unit increase in EPL_DISABL is associated with an increase of approximately 0.1503 units in the response variable, holding other variables constant.
 
-EPL_SNGPNT: The coefficient is 0.1396. This suggests that a one-unit increase in EPL_SNGPNT is associated with an increase of approximately 0.1396 units in the response variable, holding other variables constant.
-
-EPL_LIMENG: The coefficient is 0.1879. This suggests that a one-unit increase in EPL_LIMENG is associated with an increase of approximately 0.1879 units in the response variable, holding other variables constant.
-
-EPL_MINRTY: The coefficient is 0.1249. This suggests that a one-unit increase in EPL_MINRTY is associated with an increase of approximately 0.1249 units in the response variable, holding other variables constant.
-
-EPL_UNEMP: The coefficient is 0.0956. This suggests that a one-unit increase in EPL_UNEMP is associated with an increase of approximately 0.0956 units in the response variable, holding other variables constant.
-
-EPL_HBURD: The coefficient is 0.1938. This suggests that a one-unit increase in EPL_HBURD is associated with an increase of approximately 0.1938 units in the response variable, holding other variables constant.
-
-EPL_NOHSDP: The coefficient is 0.1919. This suggests that a one-unit increase in EPL_NOHSDP is associated with an increase of approximately 0.1919 units in the response variable, holding other variables constant.
-
-all of them are non zero...
-
-It appears that LASSO and Stepwise both selected the full model as the best model. It will be necessary to compare the simpler model and the full model. 
+Therefore, it appears that **LASSO** and **Stepwise** both selected the full model as the best model. In the next steps, a comparison of the simpler linear regression model and the full regression model will be carried out. 
 
 ##### Linear Regression
 
+**The simple model represents the linear regression modeled by: RPL_THEMES ~ income_scaled + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, as identified by the correlation matrix.**
 
 ```{r}
 simple_model <- lm(RPL_THEMES ~ income_scaled + EPL_POV150 + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
 summary(simple_model)
 full_model <- lm(RPL_THEMES ~ income_scaled + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
 
+```
+
+**The full model represents the model utilizing all of the variables.**
+
+```{r}
 summary(full_model)
 
 ```
 
-```{r}
+**Assessing AIC**: 
+
+```{r, results='hide'}
 # Assessment for initial_model
-summary(simple_model)
-plot(simple_model)
+#summary(simple_model)
+#plot(simple_model)
 
 # Assessment for initial_model2
-summary(full_model)
-plot(full_model)
+#summary(full_model)
+#plot(full_model)
 
 # Calculate AIC for initial_model
 aic_simple_model <- AIC(simple_model)
@@ -486,22 +466,21 @@ aic_simple_model <- AIC(simple_model)
 aic_full_model <- AIC(full_model)
 
 # Compare AIC values
-cat("AIC for simple_model:", aic_simple_model, "\n")
-cat("AIC for full_model:", aic_full_model, "\n")
+#cat("AIC for simple_model:", aic_simple_model, "\n")
+#cat("AIC for full_model:", aic_full_model, "\n")
 
 # Choose the model with the lower AIC
-if (aic_simple_model < aic_full_model) {
-  cat("Choose aic_simple_model\n")
-} else {
-  cat("Choose aic_full_model\n")
-}
+#if (aic_simple_model < aic_full_model) {
+ # cat("Choose aic_simple_model\n")
+#} else {
+#  cat("Choose aic_full_model\n")
+#}
 
 ```
 
-Choose aic_full_model
+Assessing the AIC values of both models, it is seen that the AIC for the simple model is -13891.99 while the AIC for the full model is-18331.04. Therefore, the lower AIC is the full model. 
 
-
-R-Squared
+**R-Squared**
 
 ```{r}
 # Calculate Adjusted R-squared for initial_model
@@ -515,9 +494,13 @@ cat("Adjusted R-squared for simple:", adj_rsq_simple_model, "\n")
 cat("Adjusted R-squared for full:", adj_rsq_full_model2, "\n")
 ```
 
+**Adjusted R-squared for simple model**: 0.8465219
 
-VIFS:
+**Adjusted R-squared for full model**: 0.9065885
 
+The full model is more effective at explaining the variation in the SVI scores, and thus may have a higher predictive capability. 
+
+**VIFS:**
 
 ```{r}
 # Calculate VIF for initial_model
@@ -532,12 +515,17 @@ cat("VIF for full_model:", vif_full_model, "\n")
 
 ```
 
-Use the model 2
+**Simple Model VIF: ** 4.30, 3.51, 3.64, 1.98
+
+**Full Model VIF:** 5.02, 3.78, 2.14, 2.23, 1.80,  1.77, 1.71, 2.73, 3.34, 1.25, 3.95, 4.23
+
+Both simple and full models have VIF values under 10, and only one value (income) in the full model is slightly above 5. This is still within the range of acceptable values. 
 
 
 ##### Predictive Modeling
 
-"In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable. While we do not have required cutoffs for working with CDC/ATSDR SVI data, categorizing CDC/ATSDR SVI values using a quantile classification (i.e., tertiles, quartiles, quintiles, etc.) is a common approach. If you choose to categorize CDC/ATSDR SVI values, we recommend you do so appropriately based on your question of interest."
+As a re
+"In the CDC/ATSDR SVI Interactive Map, we classify data using quartiles (0 to .2500, .2501 to .5000, .5001 to .7500, .7501 to 1.0) and indicate that the classification goes from least vulnerable to most vulnerable."
 
 ```{r}
 # Create quartiles and labels
@@ -703,6 +691,12 @@ cat("Recall for 'A':", recall_A, "\n")
 
 ```
 
+
+
+
+
+
+
 ### COVID-19
 
 #### Data Cleaning {.tabset .tabset-fade .tabset-pills}
@@ -775,7 +769,8 @@ us_deaths_ca <- subset(us_deaths, state_name == "CA")
 
 ---
 
-#### EDA {.tabset .tabset-fade .tabset-pills}
+##### EDA 
+
 
 *The below EDA techniques focuses on creating maps and timeline for COVID-19 in California.*
 
