@@ -1480,6 +1480,10 @@ covid19_deaths<-us_deaths
 covid19_cases<-subset(covid19_cases, state_name=='CA')
 covid19_deaths<-subset(covid19_deaths, state_name=='CA')
 
+head(covid19_cases)
+
+head(covid19_deaths)
+
 
 
 
@@ -1501,6 +1505,8 @@ covid19 <- merged_data %>%
          total_deaths = sum(deaths)) %>%
   ungroup()
 
+head(covid19)
+
 
 ```
 
@@ -1516,7 +1522,7 @@ covid19 <- covid19 %>%
          total_deaths = sum(deaths)) %>%
   ungroup()
 
-
+head(covid19)
 ```
 
 
@@ -1650,9 +1656,19 @@ fancyRpartPlot(tree_model)
 
 ```
 
+*The regression tree model tries to delve into the intricate relationships between various factors and the Social Vulnerability Index (SVI), represented by the 'RPL_THEMES.' and other variables from covid and Economic datasets. The decision tree, rooted in the EP_NOHSDP variable, provides valuable insights into the nuanced predictors of SVI. *
+
+*The tree distinctly identifies EP_NOHSDP as a pivotal factor in the initial split, emphasizing the critical role of educational attainment in predicting SVI. Further branching into EP_POV150 and income_r delineates the socio-economic dimension of vulnerability. Notably, individuals with lower EP_NOHSDP scores and lower EP_POV150 scores are predicted to have lower SVI values, indicating a correlation between educational attainment, poverty levels, and social vulnerability*
 
 
-**Random Forest Model**
+*Interestingly, the COVID-19-related variables, total_cases and total_deaths, do not prominently feature in the decision tree. This may suggest that, within the scope of our model, these variables may not be the primary drivers of social vulnerability when considered alongside educational attainment, poverty, and income. The prominence of income_r in the tree underscores the multifaceted nature of vulnerability, where refined income measures contribute significantly to the prediction of SVI.*
+
+
+*This decision tree provides a visually interpretable framework for understanding the complex interplay of factors influencing social vulnerability. As we present these findings, the nuanced relationships highlighted by the tree offer actionable insights for targeted interventions and policy measures, particularly focusing on education, income, and poverty alleviation in the context of social vulnerability.*
+
+
+
+**Random Forest Model to identify significance of variables 3 datasets**
 ```{r}
 #significant variables for predicting Total SVI (RPL_THEMES
 
@@ -1667,3 +1683,16 @@ print(rf_model$importance)
 
 
 ```
+
+
+
+
+*The Random Forest model tries to discern the crucial features influencing the Social Vulnerability Index (SVI). The model identified key predictors by evaluating their impact on the prediction accuracy and purity of decision tree nodes. Notably, the most influential features include 'EP_NOHSDP,' representing the percentage of individuals without a high school diploma, and 'EP_POV150,' indicating the percentage of individuals living below 150% of the poverty line. These socio-economic factors prominently contribute to SVI, underscoring the importance of educational attainment and economic well-being in vulnerability assessment.*
+
+
+
+*Additionally, 'income_r,' a refined measure of income, emerged as a significant predictor, highlighting the nuanced role of income levels in shaping social vulnerability. The 'EP_CROWD' feature, capturing the percentage of households with crowded living conditions, signifies the impact of housing density on vulnerability. Furthermore, 'EP_LIMENG,' representing the percentage of individuals with limited English proficiency, and 'EP_UNEMP,' indicating the percentage of unemployed individuals, underscore the importance of language and employment status in vulnerability modeling*
+
+
+*Our analysis extends beyond traditional demographic factors, incorporating 'total_cases' and 'total_deaths' as indicators of the COVID-19 impact. These variables dosen't have much significance in predicting the total SVI. As we present our findings, these identified features provide actionable insights for policymakers and practitioners seeking to address and mitigate social vulnerability in diverse communities*
+
