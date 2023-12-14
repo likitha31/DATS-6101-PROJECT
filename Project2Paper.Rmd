@@ -34,6 +34,10 @@ library(stargazer)
 library(maps)
 library(ggplot2)
 library(extrafont)
+library(usmap)
+library(plotly)
+library(corrplot)
+library(caret)
 #font_import(pattern = "Avenir")
 loadfonts()
 # Set the default font for ggplot2
@@ -701,7 +705,7 @@ cat("Recall for 'A':", recall_A, "\n")
 
 ### COVID-19
 
-#### Data Cleaning 
+#### Data Cleaning {.tabset .tabset-fade .tabset-pills}
 
 *Data cleaning is an essential step in data analysis to ensure accuracy and reliability. The given R code snippets demonstrate key data cleaning procedures such as column subsetting and renaming, missing values removal, formatting, and row subsetting.*
 
@@ -771,7 +775,7 @@ us_deaths_ca <- subset(us_deaths, state_name == "CA")
 
 ---
 
-#### EDA  {.tabset .tabset-fade .tabset-pills}
+#### EDA {.tabset .tabset-fade .tabset-pills}
 
 *The below EDA techniques focuses on creating maps and timeline for COVID-19 in California.*
 
@@ -798,7 +802,7 @@ xkabledplyhead(us_deaths_ca)
 **Data Aggregation and Summarization:**
 
 *We start with aggregating and summarizing confirmed cases and deaths by county. The data is then grouped by county_fips and county_name within the state of California (us_cases_ca and us_deaths_ca). Summations of confirmed cases and deaths are calculated using the summarise function. The arrange function sorts these summaries in descending order, highlighting areas with the highest impact. This step is crucial for understanding the distribution and impact of COVID-19 at the county level.*
-```{r}
+```{r, include=FALSE}
 # Calculate Sum of confirmed cases based on county fips and groupby county 
 us_cases_grouping_fips <- us_cases_ca %>%
   group_by(county_fips, state_name) %>%
@@ -834,18 +838,12 @@ names(Summarized_deaths) <- new_col_names1
 
 ```
 
-
 ##### Map #1
 
 **Map of CA colored by confirmed cases**
 
 *For confirmed cases, a choropleth map of California (plot_usmap) is generated, where each county is colored based on the number of confirmed COVID-19 cases (Summarized_cases). The map is enhanced with a color gradient (white to dark blue), making it easy to identify areas with higher numbers of cases. *
 ```{r}
-
-# Install and load the usmap package
-library(usmap)
-library(plotly)
-
 
 # Plot the choropleth map
 plot_usmap(
@@ -869,18 +867,14 @@ theme(legend.position = "right")
 
 *Most counties appear to have a much lower number of cases, as indicated by the light blue or white color, showing a significant disparity in case distribution across the state.*
 
-##### Map #2
 
+
+##### Map #2
 **Map of CA colored by deaths**
 
 *For number of deaths, a choropleth map of California (plot_usmap) is generated, where each county is colored based on the number of COVID-19 deaths (Summarized_deaths). The map is enhanced with a color gradient (white to dark blue), making it easy to identify areas with higher numbers of deaths. *
 
 ```{r}
-
-# Install and load the usmap package
-library(usmap)
-library(plotly)
-
 
 # Plot the choropleth map
 plot_usmap(
@@ -913,7 +907,7 @@ theme(legend.position = "right")
 *For the SVI data, the code similarly groups the data by geographical identifiers but goes on to calculate the average for a range of vulnerability indicators within each county. These indicators include measures of poverty, linguistic isolation, the proportion of the elderly population, minority status, unemployment rates, education levels, and others that together create a profile of each county's social vulnerability.*
 
 
-```{r}
+```{r, include=FALSE}
 us_cases_all_counties <- us_cases_ca %>%
   group_by(county_fips, county_name, state_name) %>%
   summarise(confirmed_cases = sum(confirmed_cases)) %>%
@@ -946,6 +940,9 @@ svi_all_counties_cases <- merge(svi_all_counties_ca, us_cases_all_counties, by =
 
 # Remove unnecessary columns
 svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_name)
+```
+
+```{r}
 head(svi_all_counties_cases)
 ```
 *Above table shows the top counties with the highest COVID-19 cases and their mean SVI*
@@ -956,8 +953,6 @@ head(svi_all_counties_cases)
 *The aggreagated data created before is used to visualize the timeline of COVID-19 cases in different counties in CA*
 
 ```{r}
-library(ggplot2)
-library(dplyr)
 
 # Which are the 10 most affected US counties?
 ca_cases_top_10 <- head(us_cases_all_counties, 10)
@@ -982,8 +977,9 @@ f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, col
 print(f)
 
 ```
+**Observation**
 
-*Again, Los Angeles County stands out with a pronounced exponential growth curve, indicating a rapid increase in confirmed cases, surpassing 150,000 by August 2020. Other counties such as San Diego, Orange, and Riverside also show a rise in cases, but none as dramatic as Los Angeles County. This graph emphasizes the wide variation in case numbers between counties, with some experiencing relatively moderate increases while one, in particular, sees a far more aggressive spread of the virus.*
+*Los Angeles County stands out with a pronounced exponential growth curve, indicating a rapid increase in confirmed cases, surpassing 150,000 by August 2020. Other counties such as San Diego, Orange, and Riverside also show a rise in cases, but none as dramatic as Los Angeles County. This graph emphasizes the wide variation in case numbers between counties, with some experiencing relatively moderate increases while one, in particular, sees a far more aggressive spread of the virus.*
 
 
 ##### Timeline for  Number of Deaths
@@ -994,7 +990,7 @@ print(f)
 
 *For the SVI data, the code similarly groups the data by geographical identifiers but goes on to calculate the average for a range of vulnerability indicators within each county. These indicators include measures of poverty, linguistic isolation, the proportion of the elderly population, minority status, unemployment rates, education levels, and others that together create a profile of each county's social vulnerability.*
 
-```{r}
+```{r, include=FALSE}
 
 us_deaths_all_counties <- us_deaths_ca %>%
   group_by(county_fips, county_name, state_name) %>%
@@ -1028,6 +1024,10 @@ svi_all_counties_deaths <- merge(svi1_all_counties_ca, us_deaths_all_counties, b
 
 # Remove unnecessary columns
 svi_all_counties_deaths <- select(svi_all_counties_deaths, -county_name, -state_name)
+```
+
+```{r}
+
 head(svi_all_counties_deaths)
 
 ```
@@ -1040,9 +1040,6 @@ head(svi_all_counties_deaths)
 
 ```{r}
 
-# Load necessary libraries
-library(ggplot2)
-library(dplyr)
 
 # Which are the 10 most affected US counties?
 ca_deaths_top_10 <- head(us_deaths_all_counties, 10)
@@ -1066,12 +1063,13 @@ f <- ggplot(ca_deaths_top_10_datetime, aes(x = datetime, y = deaths, color = cou
 print(f)
 
 ```
+**Observation**
 
 *The graph shows a timeline of COVID-19 cases, where the number of deaths in Los Angeles County appears to exceed 4,000. In contrast, other counties represented on the graph, such as Alameda, Orange, Riverside, and others, show a much flatter curve with far fewer deaths over the same period. This visualization starkly illustrates the disparate impact of the pandemic across different regions within the state, with Los Angeles County being the most severely affected in terms of mortality. Both graphs provide a clear visual comparison of the pandemic’s impact at the county level and underline the importance of localized data in understanding and responding to the spread of COVID-19.*
 
 ---
 
-#### correlation matrix 
+#### correlation matrix {.tabset .tabset-fade .tabset-pills}
 
 
 ##### correlation matrix #1
@@ -1080,7 +1078,6 @@ print(f)
 
 ```{r}
 # Plot the correlation matrix
-library(corrplot)
 # Select relevant columns
 svi_all_counties_cases_corr <- svi_all_counties_cases[c('confirmed_cases', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY', 'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT', 'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES')]
 
@@ -1108,7 +1105,6 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```{r}
 # Plot the correlation matrix
-library(corrplot)
 # Select relevant columns
 svi_all_counties_deaths_corr <- svi_all_counties_deaths[c('deaths', 'EP_POV150', 'EP_LIMENG', 'EP_AGE65', 'EP_MINRTY', 'EP_UNEMP', 'EP_NOHSDP', 'EP_AGE17', 'EP_DISABL', 'EP_SNGPNT', 'EP_MUNIT', 'EP_MOBILE', 'EP_CROWD', 'EP_NOVEH', 'EP_GROUPQ', 'RPL_THEMES')]
 
@@ -1266,7 +1262,7 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ---
 
-#### Modeling 
+#### Modeling {.tabset .tabset-fade .tabset-pills}
 
 ##### Multiple Linear Regression for confirmed cases #1
 
@@ -1277,7 +1273,6 @@ library(caret)
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- svi_all_counties_cases$RPL_THEMES
 X <- svi_all_counties_cases[, c('confirmed_cases','EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
-#X <- svi_all_counties_cases[, c('RPL_THEMES','EP_NOHSDP', 'EP_AGE17', 'EP_MUNIT','EP_CROWD','EP_GROUPQ')]
 
 # Splitting the data into train and test data
 set.seed(42)  # For reproducibility
@@ -1302,62 +1297,58 @@ confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-co
 
 ```
 
+*The comprehensive model incorporates all variables under consideration, including confirmed COVID-19 cases. It demonstrates a robust multiple R-squared value of 0.86, elucidating that approximately 86% of the variance in the Social Vulnerability Index (SVI) score, denoted as RPL_THEMES, is accounted for by this model. This high degree of explained variability signifies the model's strong predictive capacity.*
+
+*Upon examining the individual contributions of each predictor, we observe a spectrum of significance levels. Notably, the variable EP_MUNIT, representing the prevalence of multi-unit housing, emerges as a statistically significant predictor at the 0.05 level, indicative of a substantial correlation with the SVI score. Additionally, variables such as EP_POV150 (poverty indicator), EP_SNGPNT (single-parent households), and EP_MOBILE (mobile home residency) exhibit potential significance with p-values close to 0.1, suggesting their probable but less definitive influence on the SVI score.*
+
+*Conversely, the coefficient pertaining to confirmed COVID-19 cases does not reach a level of statistical significance. This absence of a clear linear association within the context of the model implies that while confirmed cases are an integral aspect of the public health landscape, they do not necessarily predict the SVI score directly when other variables are considered. This insight underscores the multifaceted nature of social vulnerability and the intricate interplay of various determinants.*
+
 **Feature Selection**
+
+*A stepwise feature selection process based on the Akaike information criterion (AIC) is applied to refine the model. The goal is to identify a subset of variables that provides a parsimonious model without compromising the explanatory power. The feature selection process sequentially removes variables that contribute the least to the model (e.g., EP_CROWD is removed first). The final model is more streamlined and focuses on predictors that contribute more significantly to the variation in confirmed cases.*
 
 ```{r}
 
 
 # Stepwise feature selection
-stepwise_model <- step(lm_model1, direction = "both")
+lm_model2 <- step(lm_model1, direction = "both")
 
+```
+
+**Model after feature selection**
+
+```{r}
 # Display the selected model
-summary(stepwise_model)
+summary(lm_model2)
 
 # Get the selected features
-selected_features <- names(coef(stepwise_model)[-1])
+selected_features <- names(coef(lm_model2)[-1])
 selected_features
 
 
 
 ```
-**Model after feature selection**
 
 
-```{r}
+**Observation:**
 
-library(caret)
-# Preparing the independent variable (X) and the dependent variable (y)
-y <- svi_all_counties_cases$RPL_THEMES
-X <- svi_all_counties_cases[, c("confirmed_cases","EP_POV150","EP_LIMENG","EP_UNEMP", "EP_NOHSDP","EP_SNGPNT", "EP_MUNIT"  ,"EP_MOBILE", "EP_NOVEH")]
-# Splitting the data into train and test data
-set.seed(42)  # For reproducibility
-train_indices <- createDataPartition(y, p = 0.8, list = FALSE)
-X_train2 <- X[train_indices, ]
-X_test2 <- X[-train_indices, ]
-y_train2 <- y[train_indices]
-y_test2 <- y[-train_indices]
+*The refined model, referred to as lm_model2, retains a robust explanatory capacity with a Multiple R-squared of 0.8506, mirroring the initial model's explanatory power. This is particularly noteworthy as it was achieved with a reduced set of predictors, indicating that the retained variables are indeed pivotal in explaining the variance in the social vulnerability index.*
 
-# Initiate the model
-lm_model2 <- lm(y_train2 ~ ., data = cbind(y_train2, X_train2))
+*The Adjusted R-squared value of our refined model saw a marginal increase from the original model, suggesting that the model's efficiency has been enhanced when adjusting for the number of predictors. This underscores the effectiveness of the feature selection process in isolating the most influential variables while eschewing redundant or less informative ones.*
 
-# Predictions on the test set
-y_predict2 <- predict(lm_model2, newdata = X_test2)
-summary(lm_model2)
-# Score (R-squared)
-print(summary(lm_model2)$r.squared)
+*Statistical analysis of lm_model2 reveals that variables such as unemployment rates, lack of high school diploma attainment, and multi-unit housing remain statistically significant, reinforcing their roles as critical indicators of social vulnerability in the context of the pandemic.*
 
-# Coefficients
-confirmed_cases_all_counties_coef <- data.frame(Coef = coef(lm_model2)[-1], Features = names(coef(lm_model2)[-1]))
-confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-confirmed_cases_all_counties_coef$Coef), ]
+*A decrease in the residual standard error in lm_model2 compared to the initial model suggests a tighter fit to the data, enhancing the predictive accuracy of the model.*
 
+*The refined model presents an optimal balance between model complexity and explanatory power, facilitating a nuanced understanding of the factors contributing to social vulnerability during the COVID-19 pandemic. This balance is crucial in the scientific pursuit of parsimony, ensuring that the model is not overly complex while still capturing the essential dynamics at play.*
 
-```
 
 ##### Multiple Linear Regression for number of deaths #2
 
 **Initial MLR for deaths**
 ```{r}
 library(caret)
+
 # Preparing the independent variable (X) and the dependent variable (y)
 y <- svi_all_counties_deaths$RPL_THEMES
 X <- svi_all_counties_deaths[, c('deaths','EP_POV150','EP_LIMENG','EP_AGE65', 'EP_MINRTY',	'EP_UNEMP',	'EP_NOHSDP','EP_AGE17','EP_DISABL','EP_SNGPNT','EP_MUNIT','EP_MOBILE','EP_CROWD','EP_NOVEH','EP_GROUPQ')]
@@ -1387,23 +1378,41 @@ deaths_all_counties_coef <- deaths_all_counties_coef[order(-deaths_all_counties_
 
 ```
 
+*The model's summary reveals that while the Multiple R-squared value is 0.8377 indicating that approximately 83.77% of the variance in the SVI score is captured by the model, the individual predictors' contributions vary in statistical significance. Notably, `EP_POV150` (poverty) shows a p-value close to the traditional threshold of statistical significance, suggesting a meaningful association with the SVI score. `EP_MUNIT` (multi-unit housing) also approaches significance, potentially reflecting the impact of housing conditions on social vulnerability.*
+
+*However, the variable `deaths` does not exhibit a significant association with the SVI score within the context of this model, suggesting that the number of deaths alone is not a direct predictor of social vulnerability as encapsulated by the `RPL_THEMES` score when considering the influence of the other variables.*
+
+*The model yields a residual standard error of 0.06291, and despite a substantial F-statistic, we need to take caution in the interpretation of non-significant variables. The Adjusted R-squared of 0.7616 reflects the model's explanatory power after accounting for the number of predictors, indicating a good fit to the data while acknowledging the reduced number of variables.*
+
 **Feature Selection for deaths MLR**
 
 ```{r}
 
 # Stepwise feature selection
-stepwise_model2 <- step(lm_model3, direction = "both")
+lm_model4 <- step(lm_model3, direction = "both")
+```
 
+**Model after feature selection**
+```{r}
 # Display the selected model
-summary(stepwise_model2)
+summary(lm_model4)
 
 # Get the selected features
-selected_features <- names(coef(stepwise_model2)[-1])
+selected_features <- names(coef(lm_model4)[-1])
 selected_features
 
-
-
 ```
+
+*The lm_model4 model after feature selection includes the predictors "EP_POV150," "EP_AGE65," "EP_NOHSDP," "EP_AGE17," "EP_SNGPNT," "EP_MUNIT," and "EP_MOBILE," which have been identified as the most influential on the Social Vulnerability Index (SVI) score in the context of COVID-19 related deaths.* 
+
+*The lm_model4 (model after feature selection) displays a Multiple R-squared value of 0.8231. This suggests that the model explains over 82% of the variance in the SVI score, a slight decrement from the 0.8377 observed in the full model `lm_model3`. However, the Adjusted R-squared value has improved to 0.7921, reinforcing the model's robustness when adjusted for the number of predictors included.*
+
+*Each variable within the lm_model4 has been evaluated for its statistical significance. Variables such as "EP_POV150" and "EP_AGE65" have shown strong significance, implying a robust relationship with the SVI score.*
+
+*It is noteworthy that the residual standard error of the lm_model4 remains comparable to that of the full model, reinforcing the accuracy of this more focused model. The F-statistic's substantial value corroborates the overall statistical validity of the lm_model4 model.*
+
+*In summation, the model after feature selection represents an optimized model that balances complexity with interpretability, achieving a notable degree of explanatory power with a reduced set of variables.*
+
 
 
 ### SVI, Economic and COVID-19
