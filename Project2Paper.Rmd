@@ -699,12 +699,9 @@ cat("Recall for 'A':", recall_A, "\n")
 
 ```
 
-### Covid
+### COVID-19
 
-
-#### Data Analysis {.tabset .tabset-fade .tabset-pills}
-
-##### Data Cleaning 
+#### Data Cleaning 
 
 *Data cleaning is an essential step in data analysis to ensure accuracy and reliability. The given R code snippets demonstrate key data cleaning procedures such as column subsetting and renaming, missing values removal, formatting, and row subsetting.*
 
@@ -772,8 +769,35 @@ us_deaths_ca <- subset(us_deaths, state_name == "CA")
 
 ```
 
-##### EDA
+---
 
+#### EDA  {.tabset .tabset-fade .tabset-pills}
+
+*The below EDA techniques focuses on creating maps and timeline for COVID-19 in California.*
+
+**Look at the Data**
+
+*Before we procede to the EDA lets look at our data*
+
+**The COVID-19 confirmed cases dataset:**
+
+```{r}
+
+xkabledplyhead(us_cases_ca)
+
+```
+
+**The COVID-19 deaths dataset:**
+```{r}
+
+xkabledplyhead(us_deaths_ca)
+
+```
+
+
+**Data Aggregation and Summarization:**
+
+*We start with aggregating and summarizing confirmed cases and deaths by county. The data is then grouped by county_fips and county_name within the state of California (us_cases_ca and us_deaths_ca). Summations of confirmed cases and deaths are calculated using the summarise function. The arrange function sorts these summaries in descending order, highlighting areas with the highest impact. This step is crucial for understanding the distribution and impact of COVID-19 at the county level.*
 ```{r}
 # Calculate Sum of confirmed cases based on county fips and groupby county 
 us_cases_grouping_fips <- us_cases_ca %>%
@@ -810,8 +834,12 @@ names(Summarized_deaths) <- new_col_names1
 
 ```
 
+
+##### Map #1
+
 **Map of CA colored by confirmed cases**
 
+*For confirmed cases, a choropleth map of California (plot_usmap) is generated, where each county is colored based on the number of confirmed COVID-19 cases (Summarized_cases). The map is enhanced with a color gradient (white to dark blue), making it easy to identify areas with higher numbers of cases. *
 ```{r}
 
 # Install and load the usmap package
@@ -827,14 +855,25 @@ plot_usmap(
   labels = TRUE
 ) + 
 scale_fill_gradient(
-  low = "lightblue", high = "darkblue", name = "Confirmed Cases", label = scales::comma) + 
+  low = "white", high = "darkblue", name = "Confirmed Cases", label = scales::comma) + 
 labs(title = "COVID-19 Confirmed Cases in California Counties") +
 theme(legend.position = "right")
 
 ```
 
+**Observation:**
+
+*The darkest shade of blue, which suggests the highest number of confirmed cases, appears concentrated in one specific area (Los Angeles). This suggests that there is a significant outbreak or a larger population in this county, which could potentially be one of the more urban areas with higher population density.*
+
+*The gradient scale on the right indicates that the highest number of confirmed cases in a single county goes up to 6,000,000, which is a substantial figure. This suggests a high transmission rate or a prolonged presence of the virus in the most affected areas.*
+
+*Most counties appear to have a much lower number of cases, as indicated by the light blue or white color, showing a significant disparity in case distribution across the state.*
+
+##### Map #2
 
 **Map of CA colored by deaths**
+
+*For number of deaths, a choropleth map of California (plot_usmap) is generated, where each county is colored based on the number of COVID-19 deaths (Summarized_deaths). The map is enhanced with a color gradient (white to dark blue), making it easy to identify areas with higher numbers of deaths. *
 
 ```{r}
 
@@ -851,12 +890,27 @@ plot_usmap(
   labels = TRUE
 ) + 
 scale_fill_gradient(
-  low = "lightblue", high = "darkblue", name = "Number of Deaths", label = scales::comma) + 
+  low = "white", high = "darkblue", name = "Number of Deaths", label = scales::comma) + 
 labs(title = "COVID-19 Deaths in California Counties") +
 theme(legend.position = "right")
 
 ```
+**Observation:**
 
+*The second map represents the number of deaths attributed to COVID-19. Again, the same county (LA) that had the highest number of confirmed cases also has the highest number of deaths, which is consistent with expectations.*
+
+*The scale for deaths is significantly lower than that for confirmed cases, topping out at 250,000 deaths in the most affected county. This disparity between the number of cases and deaths may be due to various factors, including the healthcare system's capacity, the demographic profile of the affected population, and the measures taken to treat and prevent the spread of the virus.*
+
+*Similar to the confirmed cases, the rest of the counties show fewer deaths, indicating a lesser impact or effective management and response to the pandemic in these regions.*
+
+
+##### Timeline for Confirmed cases
+
+*Here we perform data aggregation and summarization tasks on two separate datasets: one containing COVID-19 data(confirmed cases) and the other containing  vulnerability indicators (referred to as SVI).*
+
+*For the COVID-19 data, the code groups the data by county FIPS code, county name, and state name to organize the cases geographically. It then calculates the total number of confirmed COVID-19 cases for each county and sorts these totals in descending order, so that counties with the most cases and deaths appear first.*
+
+*For the SVI data, the code similarly groups the data by geographical identifiers but goes on to calculate the average for a range of vulnerability indicators within each county. These indicators include measures of poverty, linguistic isolation, the proportion of the elderly population, minority status, unemployment rates, education levels, and others that together create a profile of each county's social vulnerability.*
 
 
 ```{r}
@@ -892,11 +946,53 @@ svi_all_counties_cases <- merge(svi_all_counties_ca, us_cases_all_counties, by =
 
 # Remove unnecessary columns
 svi_all_counties_cases <- select(svi_all_counties_cases, -county_name, -state_name)
+head(svi_all_counties_cases)
+```
+*Above table shows the top counties with the highest COVID-19 cases and their mean SVI*
+
+
+**Create timeline of covid confirmed cases**
+
+*The aggreagated data created before is used to visualize the timeline of COVID-19 cases in different counties in CA*
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Which are the 10 most affected US counties?
+ca_cases_top_10 <- head(us_cases_all_counties, 10)
+
+# Preparing a list with the 10 most affected counties:
+top_10_cases_fips_list <- ca_cases_top_10$county_fips
+
+ca_cases_top_10_datetime <- subset(us_cases_ca, county_fips %in% top_10_cases_fips_list)
+
+# Plot Timeline of cases
+ca_cases_top_10_datetime$datetime <- as.Date(ca_cases_top_10_datetime$datetime)  # Make sure datetime is in Date format
+
+f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, color = county_name)) +
+  geom_line() +
+  labs(x = 'Timeline', y = 'Confirmed Cases', title = 'Confirmed cases in CA counties') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_discrete(name = 'County Name')+
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")   # Format the x-axis with month and year
+
+
+print(f)
 
 ```
 
+*Again, Los Angeles County stands out with a pronounced exponential growth curve, indicating a rapid increase in confirmed cases, surpassing 150,000 by August 2020. Other counties such as San Diego, Orange, and Riverside also show a rise in cases, but none as dramatic as Los Angeles County. This graph emphasizes the wide variation in case numbers between counties, with some experiencing relatively moderate increases while one, in particular, sees a far more aggressive spread of the virus.*
 
 
+##### Timeline for  Number of Deaths
+
+*Here we perform data aggregation and summarization tasks on two separate datasets: one containing COVID-19 data(confirmed cases) and the other containing  vulnerability indicators (referred to as SVI).*
+
+*For the COVID-19 data, the code groups the data by county FIPS code, county name, and state name to organize the cases geographically. It then calculates the total number of confirmed COVID-19 cases for each county and sorts these totals in descending order, so that counties with the most cases and deaths appear first.*
+
+*For the SVI data, the code similarly groups the data by geographical identifiers but goes on to calculate the average for a range of vulnerability indicators within each county. These indicators include measures of poverty, linguistic isolation, the proportion of the elderly population, minority status, unemployment rates, education levels, and others that together create a profile of each county's social vulnerability.*
 
 ```{r}
 
@@ -932,40 +1028,15 @@ svi_all_counties_deaths <- merge(svi1_all_counties_ca, us_deaths_all_counties, b
 
 # Remove unnecessary columns
 svi_all_counties_deaths <- select(svi_all_counties_deaths, -county_name, -state_name)
-```
-
-**Create timeline of covid confirmed cases**
-
-```{r}
-library(ggplot2)
-library(dplyr)
-
-# Which are the 10 most affected US counties?
-ca_cases_top_10 <- head(us_cases_all_counties, 10)
-
-# Preparing a list with the 10 most affected counties:
-top_10_cases_fips_list <- ca_cases_top_10$county_fips
-
-ca_cases_top_10_datetime <- subset(us_cases_ca, county_fips %in% top_10_cases_fips_list)
-
-# Plot Timeline of cases
-ca_cases_top_10_datetime$datetime <- as.Date(ca_cases_top_10_datetime$datetime)  # Make sure datetime is in Date format
-
-f <- ggplot(ca_cases_top_10_datetime, aes(x = datetime, y = confirmed_cases, color = county_name)) +
-  geom_line() +
-  labs(x = 'Timeline', y = 'Confirmed Cases', title = 'Confirmed cases in CA counties') +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_color_discrete(name = 'County Name')+
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y")   # Format the x-axis with month and year
-
-
-print(f)
-
+head(svi_all_counties_deaths)
 
 ```
+*Above table shows the top counties with the highest COVID-19 deaths and their mean SVI*
+
 
 **Create timeline of covid death**
+
+*The aggreagated data created before is used to visualize the timeline of COVID-19 cases in different counties in CA*
 
 ```{r}
 
@@ -996,9 +1067,16 @@ print(f)
 
 ```
 
-##### Correlation Matrix
+*The graph shows a timeline of COVID-19 cases, where the number of deaths in Los Angeles County appears to exceed 4,000. In contrast, other counties represented on the graph, such as Alameda, Orange, Riverside, and others, show a much flatter curve with far fewer deaths over the same period. This visualization starkly illustrates the disparate impact of the pandemic across different regions within the state, with Los Angeles County being the most severely affected in terms of mortality. Both graphs provide a clear visual comparison of the pandemic’s impact at the county level and underline the importance of localized data in understanding and responding to the spread of COVID-19.*
 
-**Corelation matrix between confirmed cases and all variables**
+---
+
+#### correlation matrix 
+
+
+##### correlation matrix #1
+
+**Corelation matrix between confirmed cases and SVI variables**
 
 ```{r}
 # Plot the correlation matrix
@@ -1014,7 +1092,19 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```
 
-**Corelation matrix between deaths and all variables**
+**Observation:**
+
+*The matrix correlates various social vulnerability indices (like poverty, linguistic isolation, age, minority status, unemployment, etc.) with confirmed COVID-19 cases.*
+
+*There's a strong positive correlation between confirmed cases and EP_POV150 (representing poverty), EP_MINRTY (minority status), and EP_NOHSDP (individuals without a high school diploma). These strong positive correlations suggest that counties with higher poverty rates, larger minority populations, and more individuals without a high school diploma tend to have more confirmed COVID-19 cases.*
+
+*EP_LIMENG (limited English proficiency) and EP_AGE65 (seniors over 65) have strong negative correlations with confirmed cases, which might indicate that areas with higher numbers of non-English speakers or senior citizens have fewer confirmed cases. However, this could also be due to under reporting or less testing in these communities.*
+
+*The correlation with RPL_THEMES is also moderately strong, suggesting that higher overall vulnerability is associated with more confirmed cases.*
+
+##### correlation matrix #2
+
+**Corelation matrix between deaths and SVI variables**
 
 ```{r}
 # Plot the correlation matrix
@@ -1030,8 +1120,20 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```
 
+**Observation:**
 
-**Create correlation matrix for just the most affected counties**
+*This matrix analyzes the same set of variables but correlates them with COVID-19 deaths instead of cases.*
+
+*EP_POV150, EP_MINRTY, and EP_NOHSDP again show moderate to strong positive correlations with COVID-19 deaths, indicating that higher poverty, higher minority populations, and lower education levels are associated with higher death counts.*
+
+*Similar to the confirmed cases, EP_LIMENG and EP_AGE65 show negative correlations with deaths, which could suggest lower mortality in communities with these characteristics, although the reasons for this would require further investigation.*
+
+
+##### correlation matrix #3
+
+
+**correlation matrix for SVI variables vs confirmed cases for just the most affected counties**
+
 
 ```{r}
 
@@ -1080,7 +1182,20 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```
 
-**Create correlation matrix for just the most affected counties for deaths**
+**Observation:**
+
+*There is a notable negative correlation between confirmed cases and EP_DISABL (presumably representing disabled individuals), EP_SNGPNT (single-parent households), and EP_MOBILE (mobile home residency). These negative values suggest that as the proportion of disabled individuals, single-parent households, or mobile home residencies increases, the number of confirmed cases tends to decrease, which could be due to various factors such as isolation or reduced social contact.*
+
+*The variable EP_UNEMP (unemployment) has a strong positive correlation with EP_NOHSDP (no high school diploma) and EP_POV150 (poverty), which might indicate that socioeconomic factors are interconnected and potentially contribute to vulnerability to COVID-19.*
+
+*EP_CROWD (crowded housing) shows a substantial positive correlation with confirmed cases, hinting that living conditions with limited space might contribute to the spread of the virus.*
+
+*The variable RPL_THEMES, with moderate positive correlations across the board, might be an aggregate indicator of risk, showing that overall vulnerability is linked to the number of confirmed cases.*
+
+##### correlation matrix #4
+
+
+**Create correlation matrix for SVI vs number of deaths for just the most affected counties**
 
 ```{r}
 
@@ -1128,8 +1243,32 @@ corrplot(corr, is.corr = TRUE, method = 'color', na.label='NA',col = colorRampPa
 
 ```
 
+**Observation:**
 
-##### Feature selection and Linear Regression for Confirmed cases
+*EP_LIMENG (limited English proficiency) and EP_MINRTY (minority status) show moderate positive correlations with deaths, suggesting that these communities may experience higher mortality rates from COVID-19.*
+
+*Interestingly, the negative correlations observed in the confirmed cases matrix are not as pronounced here. EP_DISABL, EP_SNGPNT, and EP_MOBILE do not exhibit strong negative correlations with deaths, which could imply that while these factors are associated with fewer cases, they do not necessarily predict a lower number of deaths.*
+
+*The EP_CROWD variable also shows a positive correlation with deaths, which supports the idea that crowded living conditions may not only facilitate the spread of the virus but also contribute to higher mortality.*
+
+*RPL_THEMES again shows a moderate positive correlation with deaths, consistent with the notion that overall social vulnerability is related to worse outcomes in the pandemic.*
+
+
+**Conclusion from correlation matrix:**
+
+*The matrices indicate that social vulnerability factors are significantly correlated with both the spread of COVID-19 and its mortality impact.*
+
+*There are strong inter-correlations between several vulnerability indicators, suggesting that these factors are often co-occurring in the affected communities.*
+
+*While both matrices show that higher vulnerability correlates with negative COVID-19 outcomes, the patterns are not identical for confirmed cases and deaths, indicating that different factors may play a role in infection rates versus mortality rates.*
+
+*Correlation does not always imply causation hence  these relationships should be interpreted with caution.*
+
+---
+
+#### Modeling 
+
+##### Multiple Linear Regression for confirmed cases #1
 
 **Initial MLR for confirmed cases**
 
@@ -1214,7 +1353,7 @@ confirmed_cases_all_counties_coef <- confirmed_cases_all_counties_coef[order(-co
 
 ```
 
-##### Feature selection and Logistic Regression for deaths
+##### Multiple Linear Regression for number of deaths #2
 
 **Initial MLR for deaths**
 ```{r}
