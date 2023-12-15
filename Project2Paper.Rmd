@@ -45,7 +45,6 @@ loadPkg("rattle")
 
 #font_import(pattern = "Avenir")
 loadfonts()
-# Set the default font for ggplot2
 theme_set(theme_minimal(base_family = "Avenir"))
 
 ```
@@ -141,6 +140,8 @@ us_deaths <- read.csv('USAFacts/confirmed-covid-19-deaths-in-us-by-state-and-cou
 
 ##### EDA 
 
+Data was cleaned and formatted prior to analysis. 
+
 ```{r, warning=FALSE}
 #Import SVI
 SVI_Data <- read.csv("SVI_2020_US.csv")
@@ -185,8 +186,6 @@ Looking back at our `RPL_THEMES`, we can observe its distribution as well.
 ggplot(svi_econ, aes(x = RPL_THEMES)) +
   geom_histogram(binwidth = 0.01, fill = "tomato1", color = "tomato4", alpha = 0.7) +
   labs(title = "Histogram of SVI Score of Census Tracts in 2020", x = "SVI Score", y = "Frequency")
-
-
 
 ```
 
@@ -280,7 +279,6 @@ svi_select <- mutate_all(svi_econ, as.numeric)
 svi_select <- svi_select %>%
   select(everything(), -where(~any(is.na(.))))
 
-# Assuming your data frame is named 'svi_econ'
 # Rename multiple columns simultaneously
 
 colnames(svi_select)[colnames(svi_select) == 'RPL_THEMES'] <- 'SVI'
@@ -321,6 +319,8 @@ From assessing correlation of variables, only 4 variables: `income_scaled`, `EPL
 
 **Residual plots:**
 
+The residuals plots appear to have a normal distribution. It is also important to assess the variables using VIF assessment to address multicolinearity. 
+
 ```{r}
 predict_svi <- svi_econ %>%
   select(RPL_THEMES, income_scaled, EPL_POV150, EPL_HBURD, EPL_NOHSDP)
@@ -350,9 +350,8 @@ qqline(residuals)
 plot(density(residuals))
 ```
 
-The residuals appear to have a normal distribution, so now it is possible to assess them using VIF assessment to address multicolinearity. 
 
-###### VIF Assessment
+**VIF Assessment**
 
 ```{r}
 model_test <- glm(SVI ~ ., data = predict_svi)
@@ -392,7 +391,6 @@ All of the coefficients are determined to be significant. The output suggests th
 [Lasso analysis] (https://www.statisticshowto.com/lasso-regression/) is used for variable selection and it introduces a penalty term to the traditional linear regression objective function. It does this by giving a penalty to the less important features, making their influence smaller or even zero to filter out the noise and focus on the most crucial things that affect the target variable. 
 
 ```{r LASSO}
-# Assuming svi_econ is your data frame
 selected_columns <- c("RPL_THEMES", "income_scaled", "EPL_POV150", "EPL_UNINSUR", 
                        "EPL_AGE65", "EPL_AGE17", "EPL_DISABL", 
                        "EPL_SNGPNT", "EPL_LIMENG", "EPL_MINRTY", 
@@ -454,6 +452,8 @@ summary(simple_model)
 full_model <- lm(RPL_THEMES ~ income_scaled + EPL_POV150 +EPL_UNINSUR +EPL_AGE65 +EPL_AGE17+ EPL_DISABL+ EPL_SNGPNT +EPL_LIMENG + EPL_MINRTY +EPL_UNEMP + EPL_HBURD + EPL_NOHSDP, data = svi_econ)
 
 ```
+In this model, all of the variables are significant with low p-values. This model has an R-squared of **0.846**, suggesting a moderate fit. 
+
 ###### Full Model 
 **The full model represents the model utilizing all of the variables.**
 
@@ -461,6 +461,9 @@ full_model <- lm(RPL_THEMES ~ income_scaled + EPL_POV150 +EPL_UNINSUR +EPL_AGE65
 summary(full_model)
 
 ```
+
+In this model, all of the variables are significant with low p-values. This model has an R-squared of **0.9067**, suggesting a better fit than the simple model, with a good fit. 
+
 
 ###### Assessing AIC  
 
@@ -482,21 +485,13 @@ aic_full_model <- AIC(full_model)
 # Compare AIC values
 #cat("AIC for simple_model:", aic_simple_model, "\n")
 #cat("AIC for full_model:", aic_full_model, "\n")
-
-# Choose the model with the lower AIC
-#if (aic_simple_model < aic_full_model) {
- # cat("Choose aic_simple_model\n")
-#} else {
-#  cat("Choose aic_full_model\n")
-#}
-
 ```
 
-Assessing the AIC values of both models, it is seen that the AIC for the simple model is -13891.99 while the AIC for the full model is-18331.04. Therefore, the lower AIC is the full model. 
+Assessing the AIC values of both models, it is seen that the AIC for the simple model is **-13891.99** while the AIC for the full model is **-18331.04**. Therefore, it is recommended to use the model with the lower AIC, as it is the better model. 
 
 ###### R-Squared 
 
-```{r}
+```{r, results='hide'}
 # Calculate Adjusted R-squared for initial_model
 adj_rsq_simple_model <- summary(simple_model)$adj.r.squared
 
@@ -516,7 +511,7 @@ The full model is more effective at explaining the variation in the SVI scores, 
 
 ###### VIFS
 
-```{r}
+```{r, results='hide'}
 # Calculate VIF for initial_model
 vif_simple_model <- car::vif(simple_model)
 
@@ -634,7 +629,7 @@ cat("Recall (by class):", recall, "\n")
 #cat("F1 Score (by class):", f1_score, "\n")
 
 ```
-As seen in the results, the overall accuracy is fairly low, at 68.9%. The decision tree is better at classifying levels of high risk. This is likely due to the fact that there are more census tracts that are higher risk, due to imbalanced data. Additionally, the model might not be as accurate in picking up the differences between low and low-medium and medium and medium-high, as these might be small variations in scores and variable values. 
+As seen in the results, the overall accuracy is fairly low, at **68.9%**. The decision tree is better at classifying levels of high risk. This is likely due to the fact that there are more census tracts that are higher risk, due to imbalanced data. Additionally, the model might not be as accurate in picking up the differences between low and low-medium and medium and medium-high, as these might be small variations in scores and variable values. 
 
 Below is a table of the evaluation statistics for the model.   
 
@@ -706,9 +701,7 @@ conf_matrix <- as.table(conf_matrix_train)
 
 From the confusion matrix, the overall accuracy, precision for each class, and recall for each class are shown below. 
 
-```{r}
-# Assuming conf_matrix_train is your confusion matrix
-
+```{r,  results='hide' }
 # True Positives, False Positives, False Negatives, True Negatives
 tp <- conf_matrix_train["high", "high"]
 fp <- conf_matrix_train["low", "high"]
@@ -756,7 +749,7 @@ svi_econ_tree <- rpart(risk_binary ~ income_scaled + EPL_POV150 + EPL_UNINSUR + 
 fancyRpartPlot(svi_econ_tree)
 ```
 
-From this decision tree, it can be sugested that the variables planners/officials could look at to determine high versus low risk are `EPL_POV150` (poverty rate above 150%), `EPL_NOHSDP` (no high school diploma), and `income_scaled` (median income). This is an interesting finding that provides further insights as to which variables are significant or meaningful in modeling the SVI risk of census tracts, building off of the correlations identified project 1 and contributing the other findings and models analyzed in this project.   
+**Conclusion**: From this decision tree, it can be sugested that the variables planners/officials could look at to determine high versus low risk are `EPL_POV150` (poverty rate above 150%), `EPL_NOHSDP` (no high school diploma), and `income_scaled` (median income). This is an interesting finding that provides further insights as to which variables are significant or meaningful in modeling the SVI risk of census tracts, building off of the correlations identified project 1 and contributing the other findings and models analyzed in this project. It can also be concluded that the full model is the more representative model, and it does a better job at classifying census tract risk. Additionally, the model does a better job at classifying high vs low risk, rather than the four level risk classification. This suggests that to examine more fine scale risk, it would be necessary to introduce more data, either in bootstrapping and resampling, or fine tuning parameters of the models to create a better and more accurate model. 
 
 ### COVID-19 
 
@@ -1657,7 +1650,6 @@ svi_econ <- na.omit(svi_econ)
 
 
 ```{r}
-# Assuming svi_econ is your first dataset and summary_data is your second dataset
 merged_data1 <- svi_econ %>%
   left_join(summary_data, by = c("county_fips" = "county_fips"))
 
