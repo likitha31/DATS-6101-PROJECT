@@ -44,6 +44,9 @@ library(rpart)
 loadPkg("rattle") 
 
 library(randomForest)
+library("rattle")
+library(rpart)
+library(rpart.plot)
 
 
 #font_import(pattern = "Avenir")
@@ -1553,8 +1556,7 @@ head(covid19_deaths)
 ```{r}
 merged_data <- merge(covid19_cases, covid19_deaths, by = "county_fips")
 
-# Load the dplyr package
-library(dplyr)
+
 
 # Calculate total cases and deaths for each county
 covid19 <- merged_data %>%
@@ -1682,8 +1684,7 @@ head(svi_econ_covid)
 ```{r}
 #Decision tree using income, covid and other variables
 
-library(rpart)
-library(rpart.plot)
+
 
 # Set a seed for reproducibility
 set.seed(123)
@@ -1708,7 +1709,7 @@ print(paste("Decision Tree RMSE:", tree_rmse))
 
 
 
-library("rattle") # For fancyRpartPlot (Trees) Answer "no" on installing from binary source
+# For fancyRpartPlot (Trees) Answer "no" on installing from binary source
 fancyRpartPlot(tree_model)
 
 ```
