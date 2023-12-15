@@ -577,7 +577,7 @@ svi_econ_tree <- rpart(risk ~ income_scaled + EPL_POV150 + EPL_UNINSUR + EPL_AGE
 #text(svi_econ_tree, use.n=TRUE, all=TRUE, cex=.8)
 ```
 
-This figure depicts the decision tree used to classify census tracts into the rankings. From this tree, it is possible to see which variables are used to determine the classification of the tract and at what value. 
+This figure depicts the decision tree used to classify census tracts into the rankings. From this tree, it is possible to see which variables are used to determine the classification of the tract and at what value. These variables are: `EPL_POV150` (Population in poverty over 150%), `EPL_NOHSDP` (No high school diploma), `income_scaled` (Median income), `EPL_HBURD` (Housing burdened). 
 
 ```{r}
 fancyRpartPlot(svi_econ_tree)
