@@ -42,6 +42,9 @@ library(car)
 # Load the glmnet package
 library(glmnet)
 
+library(randomForest)
+
+
 #font_import(pattern = "Avenir")
 loadfonts()
 # Set the default font for ggplot2
@@ -1678,8 +1681,6 @@ fancyRpartPlot(tree_model)
 **Random Forest Model to identify significance of variables 3 datasets**
 ```{r}
 #significant variables for predicting Total SVI (RPL_THEMES
-
-library(randomForest)
 
 # Model
 rf_model <- randomForest(RPL_THEMES ~ ., data = svi_econ_covid)
